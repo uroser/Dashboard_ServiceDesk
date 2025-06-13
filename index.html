@@ -1,0 +1,1927 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard: Análisis de Tickets Service Desk</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.1/src/wordcloud2.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos base del cuerpo */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8FAFC; /* Un blanco muy suave */
+            color: #334155; /* Texto principal más oscuro */
+        }
+
+        /* Contenedor principal del dashboard */
+        .container {
+            max-width: 1500px; /* Un poco más ancho */
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem; /* Más padding para aire */
+        }
+
+        /* Header de la aplicación */
+        header {
+            background-color: #FFFFFF;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            margin-bottom: 2rem; /* Más espacio */
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem; /* Espacio entre los elementos del header */
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap; /* Para responsividad */
+            gap: 1rem;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            flex-grow: 1; /* Permite que crezca */
+        }
+
+        .logo-section img {
+            height: 3.5rem; /* Logo un poco más grande */
+            margin-right: 1rem;
+        }
+
+        .header-text h1 {
+            font-family: 'Montserrat', sans-serif; /* Fuente diferente para el título */
+            font-size: 2.25rem; /* Más grande */
+            font-weight: 700;
+            color: #1A202C; /* Color más profundo */
+        }
+
+        .header-text p {
+            font-size: 1rem;
+            color: #64748B;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem; /* Espacio entre botones */
+        }
+
+        /* Estilos de botones */
+        .btn-primary {
+            background-color: #4F46E5; /* Indigo */
+            color: white;
+            padding: 0.65rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -2px rgba(79, 70, 229, 0.1);
+        }
+        .btn-primary:hover {
+            background-color: #4338CA;
+            transform: translateY(-1px);
+        }
+        .btn-secondary {
+            background-color: #FFFFFF;
+            color: #4B5563;
+            border: 1px solid #D1D5DB;
+            padding: 0.65rem 1.25rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .btn-secondary:hover {
+            background-color: #F9FAFB;
+            border-color: #9CA3AF;
+            transform: translateY(-1px);
+        }
+        .btn-primary:focus, .btn-secondary:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3); /* Anillo de foco */
+        }
+
+        /* Estilos para la sección de filtros */
+        .filter-section {
+            background-color: #F8FAFC;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            border: 1px dashed #CBD5E1; /* Borde más sutil */
+        }
+        .filter-section p {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #4B5563;
+            margin-bottom: 1rem;
+        }
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* Columnas más flexibles y pequeñas */
+            gap: 1rem; /* Espacio entre filtros */
+        }
+        .filter-select {
+            display: block;
+            width: 100%;
+            padding: 0.65rem 1.15rem; /* Padding ajustado */
+            font-size: 0.875rem; /* Fuente un poco más pequeña */
+            border: 1px solid #D1D5DB;
+            border-radius: 0.5rem;
+            background-color: white;
+            appearance: none; /* Quita el estilo nativo del select */
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236B7280'%3E%3Cpath d='M7 7l3 3 3-3m0 6l-3 3-3-3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 0.8em 0.8em;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            white-space: nowrap; /* Evita que el texto se rompa */
+            overflow: hidden; /* Oculta el texto que se desborda */
+            text-overflow: ellipsis; /* Añade puntos suspensivos si el texto es muy largo */
+            max-width: 100%; /* Asegura que no desborde su contenedor */
+        }
+        .filter-select:focus {
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+            outline: none;
+        }
+
+        /* Mensajes de inicio/carga */
+        #initial-message {
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            padding: 3rem 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.025);
+            text-align: center;
+            margin-top: 2rem;
+            border: 1px solid #E2E8F0;
+        }
+        #initial-message svg {
+            color: #94A3B8;
+        }
+        #initial-message h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1E293B;
+            margin-top: 0.75rem;
+        }
+        #initial-message p {
+            color: #64748B;
+            margin-top: 0.25rem;
+        }
+        #loading-message {
+            color: #4F46E5;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        /* KPI Cards */
+        .kpi-card {
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.025);
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid #E2E8F0;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer; /* AÑADIDO: Indica que la tarjeta es clickeable */
+        }
+        .kpi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+        }
+        .kpi-value {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.5rem; /* Más grande y audaz */
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+        .kpi-label {
+            font-size: 0.9rem;
+            color: #64748B;
+            font-weight: 500;
+        }
+
+        /* Chart Cards (arrastrables) */
+        .chart-card {
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.025);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            border: 1px solid #E2E8F0;
+            cursor: grab;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .chart-card:active {
+            cursor: grabbing;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            transform: scale(1.01); /* Un poco más grande al arrastrar */
+        }
+        .chart-card h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.25rem; /* Títulos de gráficos más grandes */
+            font-weight: 600;
+            color: #1E293B;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .chart-card h3 svg {
+            margin-right: 0.75rem;
+            color: #4F46E5; /* Color del icono por defecto */
+        }
+        .chart-container-inner {
+            position: relative;
+            height: 20rem; /* Altura fija para gráficos */
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6); /* Fondo más oscuro */
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: #FFFFFF;
+            margin: auto;
+            padding: 2rem;
+            border-radius: 1rem; /* Más redondeado */
+            width: 95%;
+            max-width: 1600px; /* Más ancho */
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            animation: fadeIn 0.3s ease-out; /* Animación de entrada */
+        }
+        .close-button {
+            color: #9CA3AF;
+            float: right;
+            font-size: 2.25rem; /* Más grande */
+            font-weight: bold;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #1F2937;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1E293B;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Tabla dentro del modal */
+        #modal-table {
+            min-width: 100%; /* Asegura que la tabla ocupe todo el ancho */
+            border-collapse: separate; /* Permite border-radius en celdas */
+            border-spacing: 0; /* Elimina espacio entre celdas */
+        }
+        #modal-table thead th {
+            background-color: #F1F5F9; /* Fondo de cabecera más elegante */
+            color: #475569;
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 1rem 1.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid #E2E8F0;
+        }
+        #modal-table tbody td {
+            background-color: #FFFFFF;
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+            color: #4B5563;
+            border-bottom: 1px solid #F1F5F9;
+        }
+        #modal-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        #modal-table tbody tr:hover {
+            background-color: #F8FAFC;
+        }
+
+        /* Animación para el modal */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Placeholder y ghost class para Sortable.js */
+        .sortable-ghost {
+            opacity: 0.4;
+            background: #EFF6FF; /* Fondo suave para el elemento arrastrado */
+            border: 2px dashed #93C5FD;
+        }
+
+        /* Word Cloud Specifics */
+        #word-cloud-container {
+            min-height: 320px;
+            width: 100%;
+            height: 100%; /* Asegura que ocupe el espacio */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.025);
+            padding: 1.5rem;
+            border: 1px solid #E2E8F0;
+        }
+
+        /* Heatmap Specifics */
+        #heatmap-wrapper {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            grid-template-rows: auto 1fr;
+            gap: 2px; /* Reducir el gap para un aspecto más denso */
+            height: 100%;
+            overflow: auto;
+            padding: 5px;
+            background-color: #E2E8F0; /* Fondo del wrapper */
+            border-radius: 0.75rem;
+        }
+        #heatmap-corner {
+            grid-column: 1;
+            grid-row: 1;
+            background-color: #CBD5E1; /* Un gris más oscuro */
+            border-radius: 0.25rem;
+        }
+        #heatmap-hour-labels {
+            grid-column: 2;
+            grid-row: 1;
+            display: grid;
+            grid-template-columns: repeat(24, 1fr);
+            gap: 2px;
+            background-color: #E2E8F0;
+            border-radius: 0.25rem;
+        }
+        .heatmap-hour-label {
+            background-color: #CBD5E1;
+            font-weight: 600;
+            color: #334155;
+            padding: 5px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem; /* Más pequeño para que quepa */
+            text-align: center;
+            border-radius: 0.25rem;
+        }
+        #heatmap-day-labels {
+            grid-column: 1;
+            grid-row: 2;
+            display: grid;
+            grid-template-rows: repeat(7, 1fr);
+            gap: 2px;
+            background-color: #E2E8F0;
+            border-radius: 0.25rem;
+        }
+        .heatmap-day-label {
+            background-color: #CBD5E1;
+            font-weight: 600;
+            color: #334155;
+            padding: 5px 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            writing-mode: vertical-lr; /* Texto vertical */
+            text-orientation: mixed;
+            font-size: 0.65rem;
+            text-align: center;
+            border-radius: 0.25rem;
+        }
+        #heatmap-grid {
+            grid-column: 2;
+            grid-row: 2;
+            display: grid;
+            grid-template-columns: repeat(24, 1fr);
+            grid-template-rows: repeat(7, 1fr);
+            gap: 2px;
+            background-color: #E2E8F0;
+            border-radius: 0.5rem;
+        }
+        .heatmap-cell {
+            background-color: #F8FAFC; /* Fondo muy claro por defecto */
+            width: auto;
+            height: 30px; /* Altura fija para celdas */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: #64748B;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+            border-radius: 0.25rem;
+            cursor: pointer;
+        }
+        .heatmap-cell:hover {
+            transform: scale(1.05); /* Ligeramente más grande al pasar el ratón */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            z-index: 10; /* Para que no se corte por otras celdas */
+        }
+
+        /* AI Analysis Box Styles */
+        #ai-analysis-section ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem; /* Aumentar espacio entre puntos */
+        }
+        #ai-analysis-section h4 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            color: #4F46E5;
+            margin-bottom: 0.75rem;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div class="container">
+        
+        <header class="mb-8">
+            <div class="header-content">
+                 <div class="logo-section">
+                    <img src="https://cardinal-systems.com/wp-content/uploads/2021/08/cardinalSystems-logo.webp" alt="Cardinal Systems Logo" class="h-14 mr-4">
+                    <div class="header-text">
+                        <h1 class="text-gray-900">Dashboard de Analítica Avanzada de Soporte</h1>
+                        <p class="text-gray-600">Carga tu archivo CSV para un análisis profundo del rendimiento.</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                     <button id="clear-filters-btn" class="btn-secondary">
+                        Limpiar Filtros
+                    </button>
+                    <label for="csv-file-input" class="btn-primary cursor-pointer flex items-center justify-center">
+                        <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        Cargar Archivo CSV
+                    </label>
+                    <input type="file" id="csv-file-input" class="hidden" accept=".csv">
+                </div>
+            </div>
+           
+            <div class="filter-section">
+                <p class="text-sm font-semibold mb-3">Filtros Avanzados</p>
+                <div class="filter-grid">
+                    <div>
+                        <label for="month-filter" class="sr-only">Filtrar por Mes:</label>
+                        <select id="month-filter" class="filter-select">
+                            <option value="all">Filtro por Mes</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="assignee-filter" class="sr-only">Filtrar por Asignado:</label>
+                        <select id="assignee-filter" class="filter-select">
+                            <option value="all">Todos los Asignados</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="client-filter" class="sr-only">Filtrar por Cliente:</label>
+                        <select id="client-filter" class="filter-select">
+                            <option value="all">Todos los Clientes</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="priority-filter" class="sr-only">Filtrar por Prioridad:</label>
+                        <select id="priority-filter" class="filter-select">
+                            <option value="all">Todas las Prioridades</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="status-filter" class="sr-only">Filtrar por Estado:</label>
+                        <select id="status-filter" class="filter-select">
+                            <option value="all">Todos los Estados</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="request-type-filter" class="sr-only">Filtrar por Tipo de Solicitud:</label>
+                        <select id="request-type-filter" class="filter-select">
+                            <option value="all">Todos los Tipos de Solicitud</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="diagnosis-filter" class="sr-only">Filtrar por Diagnóstico:</label>
+                        <select id="diagnosis-filter" class="filter-select">
+                            <option value="all">Todos los Diagnósticos</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="problem-type-filter" class="sr-only">Filtrar por Tipo de Problema:</label>
+                        <select id="problem-type-filter" class="filter-select">
+                            <option value="all">Todos los Tipos de Problema</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main id="dashboard-container">
+            <div id="initial-message" class="text-center">
+                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" />
+                </svg>
+                <h2 class="mt-4 text-2xl font-bold text-gray-900">Bienvenido a tu Dashboard Interactivo</h2>
+                <p class="mt-2 text-md text-gray-600">Por favor, carga un archivo CSV para comenzar el análisis.</p>
+                <div id="loading-message" class="hidden mt-6 text-blue-600 flex items-center justify-center">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p>Analizando sentimientos del cliente, por favor espera...</p>
+                </div>
+            </div>
+            
+            <div id="dashboard-content" class="hidden">
+                <section id="ai-analysis-section" class="mb-8 hidden">
+                    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500">
+                        <h2 class="text-xl font-bold text-gray-800 mb-3 flex items-center font-montserrat">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-3 text-purple-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 01-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 013.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 013.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 01-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.562L16.25 21.75l-.648-1.188a2.25 2.25 0 01-1.423-1.423L13.5 18.75l1.188-.648a2.25 2.25 0 011.423-1.423L16.25 15l.648 1.188a2.25 2.25 0 011.423 1.423L18.5 18.75l-1.188.648a2.25 2.25 0 01-1.423 1.423z" />
+                            </svg>
+                            Análisis por IA
+                        </h2>
+                        <div id="ai-analysis-loading" class="text-center py-4" style="display: none;">
+                             <p class="text-gray-600 flex items-center justify-center">
+                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Generando análisis para el período seleccionado...
+                            </p>
+                        </div>
+                        <div id="ai-analysis-content" class="text-gray-700 leading-relaxed"></div>
+                    </div>
+                </section>
+
+                <section id="kpi-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-5 mb-8">
+                    <div class="kpi-card">
+                        <p class="kpi-value text-indigo-600" id="kpi-total-tickets">0</p>
+                        <p class="kpi-label">Tickets Totales</p>
+                    </div>
+                    <div class="kpi-card">
+                        <p class="kpi-value text-green-600" id="kpi-resolved-tickets">0%</p>
+                        <p class="kpi-label">Tickets Resueltos</p>
+                    </div>
+                    <div class="kpi-card">
+                        <p class="kpi-value text-cyan-600" id="kpi-open-tickets">0</p>
+                        <p class="kpi-label">Tickets Abiertos</p>
+                    </div>
+                    <div class="kpi-card">
+                        <p class="kpi-value text-yellow-600" id="kpi-avg-resolution">0 hrs</p>
+                        <p class="kpi-label">T.P. Resolución</p>
+                    </div>
+                    <div class="kpi-card">
+                        <p class="kpi-value text-amber-600" id="kpi-avg-first-response">0 hrs</p>
+                        <p class="kpi-label">T.P. 1ra Respuesta</p>
+                    </div>
+                    <div class="kpi-card">
+                        <p class="kpi-value text-red-600" id="kpi-unassigned-tickets">0</p>
+                        <p class="kpi-label">Tickets sin Asignar</p>
+                    </div>
+                    <div class="kpi-card">
+                        <p class="kpi-value text-teal-600" id="kpi-avg-day">0</p>
+                        <p class="kpi-label">Promedio Tickets/Día</p>
+                    </div>
+                    <div class="kpi-card">
+                        <p class="kpi-value text-sky-600" id="kpi-avg-month">0</p>
+                        <p class="kpi-label">Promedio Tickets/Mes</p>
+                    </div>
+                </section>
+
+                <section id="dashboard-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div id="status-card" class="chart-card" data-chart="statusChart">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-indigo-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v2.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Tickets por Estado
+                        </h3>
+                        <div class="chart-container-inner">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div id="priority-card" class="chart-card" data-chart="priorityChart">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-yellow-600">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.102 3.377 1.912 3.377H19.94c1.81 0 2.773-1.876 1.913-3.377L13.94 2.887c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                            Tickets por Prioridad
+                        </h3>
+                        <div class="chart-container-inner">
+                            <canvas id="priorityChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div id="request-type-card" class="chart-card" data-chart="requestTypeChart">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-green-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
+                            </svg>
+                            Tickets por Tipo de Solicitud
+                        </h3>
+                        <div class="chart-container-inner">
+                            <canvas id="requestTypeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div id="diagnosis-card" class="chart-card" data-chart="diagnosisChart">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-blue-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712L12 16.5l-2.121-2.121m4.242 0a2.25 2.25 0 00.75-1.659V7.5m-6.118 4.215a2.25 2.25 0 01-.75-1.659V7.5M12 2.25a.75.75 0 00-.75.75v6.75m-4.5 0a2.25 2.25 0 00-1.659.75L2.25 12l2.121 2.121a2.25 2.25 0 00.75 1.659m0 0V21a.75.75 0 00.75.75h4.5a.75.75 0 00.75-.75V15m-1.5 0l-3.033.033A1.5 1.5 0 019.03 13.5H7.5" />
+                            </svg>
+                            Tickets por Diagnóstico
+                        </h3>
+                        <div class="chart-container-inner">
+                            <canvas id="diagnosisChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div id="problem-type-card" class="chart-card" data-chart="problemTypeChart">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-orange-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
+                            </svg>
+                            Tickets por Tipo de Problema
+                        </h3>
+                        <div class="chart-container-inner">
+                            <canvas id="problemTypeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div id="sentiment-card" class="chart-card" data-chart="sentimentChart">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-2 text-lime-600">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c.414 0 .75.336.75.75s-.336.75-.75.75-.75-.336-.75-.75.336-.75.75-.75zm0 0H9.563c-.324 0-.472.402-.18.68l1.72 1.72c.594.594 1.536.657 2.187.119l5.05-4.42" />
+                            </svg>
+                            Análisis de Sentimiento del Cliente
+                        </h3>
+                        <div class="chart-container-inner">
+                            <canvas id="sentimentChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div id="word-cloud-card" class="chart-card lg:col-span-3">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-2 text-purple-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.458 3.024 2.625 6.75 2.625s6.75-1.167 6.75-2.625V6.75c0-1.458-3.024-2.625-6.75-2.625S3.75 5.292 3.75 6.75v6.009z" />
+                            </svg>
+                            Voz del Cliente: Palabras Clave
+                        </h3>
+                        <div id="word-cloud-container"></div>
+                    </div>
+                    
+                    <div id="clients-card" class="chart-card lg:col-span-3" data-chart="topClientsChart">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-2 text-blue-800">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                            </svg>
+                            Top 10 Clientes por Volumen de Tickets
+                        </h3>
+                        <div class="chart-container-inner h-96">
+                            <canvas id="topClientsChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div id="assignees-card" class="chart-card lg:col-span-3" data-chart="assigneeChart">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-2 text-sky-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM18 20.25v2.25m-1.5-3.75h3m-12-1.5H5.625c-.621 0-1.125.504-1.125 1.125v9.75c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18" />
+                            </svg>
+                            Top 10 Asignados por Carga de Trabajo
+                        </h3>
+                        <div class="chart-container-inner h-96">
+                            <canvas id="assigneeChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div id="trend-card" class="chart-card lg:col-span-3" data-chart="trendChart">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-2 text-amber-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9m1.5 1.5L7.5 7.5M4.5 19.5v-4.5m0 4.5h4.5m-4.5 0L9 15m1.5 1.5L7.5 18M19.5 4.5v4.5m0-4.5h-4.5m4.5 0L15 9m1.5 1.5L19.5 7.5M19.5 19.5v-4.5m0 4.5h-4.5m4.5 0L15 15m1.5 1.5L19.5 18" />
+                            </svg>
+                            Tendencia de Creación de Tickets
+                        </h3>
+                        <div class="chart-container-inner h-96">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div id="heatmap-card" class="chart-card lg:col-span-3">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-2 text-indigo-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12v-.008z" />
+                            </svg>
+                            Actividad por Hora y Día de la Semana
+                        </h3>
+                        <div id="heatmap-wrapper" class="h-full">
+                            <div id="heatmap-corner"></div>
+                            <div id="heatmap-hour-labels">
+                                <div class="heatmap-hour-label">0</div><div class="heatmap-hour-label">1</div><div class="heatmap-hour-label">2</div><div class="heatmap-hour-label">3</div><div class="heatmap-hour-label">4</div><div class="heatmap-hour-label">5</div><div class="heatmap-hour-label">6</div><div class="heatmap-hour-label">7</div><div class="heatmap-hour-label">8</div><div class="heatmap-hour-label">9</div><div class="heatmap-hour-label">10</div><div class="heatmap-hour-label">11</div><div class="heatmap-hour-label">12</div><div class="heatmap-hour-label">13</div><div class="heatmap-hour-label">14</div><div class="heatmap-hour-label">15</div><div class="heatmap-hour-label">16</div><div class="heatmap-hour-label">17</div><div class="heatmap-hour-label">18</div><div class="heatmap-hour-label">19</div><div class="heatmap-hour-label">20</div><div class="heatmap-hour-label">21</div><div class="heatmap-hour-label">22</div><div class="heatmap-hour-label">23</div>
+                            </div>
+                            <div id="heatmap-day-labels">
+                                </div>
+                            <div id="heatmap-grid">
+                                </div>
+                        </div>
+                    </div>
+
+                    <div id="client-request-type-card" class="chart-card lg:col-span-3" data-chart="clientRequestTypeChart">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-2 text-teal-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21.75c-3.75 0-7.5-1.385-9.375-3.66c-.163-.207-.152-.465.009-.672.317-.4.67-.783 1.054-1.133L12 18.75l7.92-.72c.384.35.737.733 1.054 1.133.161.207.172.465.009.672C19.5 20.365 15.75 21.75 12 21.75zm0 0a9.75 9.75 0 007.472-3.242M12 21.75a9.75 9.75 0 01-7.472-3.242m7.472 3.242V21.75" />
+                            </svg>
+                            Top 10 Clientes por Tipo de Solicitud
+                        </h3>
+                        <div class="chart-container-inner h-96">
+                            <canvas id="clientRequestTypeChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div id="monthly-comparison-card" class="chart-card lg:col-span-3" data-chart="monthlyComparisonChart">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-2 text-fuchsia-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 20.25h12m-7.5-3.75v3.75m3.75-3.75v3.75M3 13.5l3 3m0 0l3-3m-3 3v-6m1.5 6H12m6-13.5l-3 3m0 0l-3-3m3 3V12" />
+                            </svg>
+                            Comparación Mensual por Tipo de Solicitud
+                        </h3>
+                        <div class="chart-container-inner h-96">
+                            <canvas id="monthlyComparisonChart"></canvas>
+                        </div>
+                    </div>
+
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div id="data-modal" class="modal">
+        <div class="modal-content">
+            <span id="close-modal-button" class="close-button">&times;</span>
+            <h2 id="modal-title" class="modal-title">Datos de Origen</h2>
+            <div id="modal-body-container">
+                <div class="overflow-x-auto">
+                    <table id="modal-table" class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50" id="modal-table-head">
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200" id="modal-table-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allData = [];
+        let charts = {};
+
+        // Paleta de colores más sofisticada y coherente
+        const FONT_COLOR = '#475569'; /* slate-600 */
+        const GRID_COLOR = '#E2E8F0'; /* slate-200 */
+        const PALETTE = {
+            indigo: '#4F46E5', /* Indigo-600 */
+            blue: '#2563EB',   /* Blue-600 */
+            cyan: '#0891B2',   /* Cyan-600 */
+            teal: '#0D9488',   /* Teal-600 */
+            emerald: '#059669',/* Emerald-600 */
+            green: '#16A34A',  /* Green-600 */
+            lime: '#65A30D',   /* Lime-600 */
+            yellow: '#CA8A04', /* Yellow-600 */
+            amber: '#D97706',  /* Amber-600 */
+            orange: '#EA580C', /* Orange-600 */
+            red: '#DC2626',    /* Red-600 */
+            purple: '#7C3AED', /* Purple-600 */
+            rose: '#E11D48',   /* Rose-600 */
+            fuchsia: '#C026D3',/* Fuchsia-600 */
+            slate: '#64748B',  /* Slate-500 */
+            gray: '#6B7280'    /* Gray-500 */
+        };
+
+        const MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+        const COMMON_TABLE_HEADERS = [
+            {key: 'issue', displayName: 'Issue Key'}, {key: 'summary', displayName: 'Título'},
+            {key: 'priority', displayName: 'Prioridad'}, {key: 'status', displayName: 'Estado'},
+            {key: 'assignee', displayName: 'Asignado'}, {key: 'client', displayName: 'Cliente'},
+            {key: 'requestType', displayName: 'Tipo Solicitud'},
+            {key: 'created', displayName: 'Fecha Creación'}
+        ];
+
+
+        Chart.register(ChartDataLabels, ChartZoom);
+
+        document.getElementById('csv-file-input').addEventListener('change', handleFileSelect, false);
+        document.getElementById('clear-filters-btn').addEventListener('click', clearAllFilters);
+
+
+        async function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                console.log("No file selected.");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const csvData = e.target.result;
+                console.log("CSV file loaded. Initiating dashboard.");
+                await initializeDashboard(csvData);
+            };
+            reader.onerror = (e) => {
+                console.error("Error reading file:", e);
+                alert("Error al leer el archivo. Asegúrate de que sea un archivo CSV válido.");
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        async function initializeDashboard(csvData) {
+            const loadingMessage = document.getElementById('loading-message');
+            document.getElementById('initial-message').classList.remove('hidden');
+            loadingMessage.classList.remove('hidden');
+
+            console.log("Parsing CSV data...");
+            const rawData = parseCSV(csvData);
+            if (rawData.length === 0 || Object.keys(rawData[0]).length === 0) {
+                alert("El archivo CSV está vacío o no se pudo parsear correctamente. Por favor, revisa el formato y asegúrate que no esté vacío.");
+                loadingMessage.classList.add('hidden');
+                document.getElementById('initial-message').classList.remove('hidden');
+                document.getElementById('dashboard-content').classList.add('hidden');
+                return;
+            }
+            
+            allData = rawData.map(d => {
+                let createdDate;
+                const parseCustomDate = (dateStr) => {
+                    if (!dateStr || typeof dateStr !== 'string') return null;
+                    let match = dateStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s(\d{1,2}):(\d{1,2})/);
+                    if (match) return new Date(match[3], match[2] - 1, match[1], match[4], match[5]);
+                    match = dateStr.match(/(\d{4})-(\d{1,2})-(\d{1,2})\s(\d{1,2}):(\d{1,2}):(\d{1,2})/);
+                    if (match) return new Date(match[1], match[2] - 1, match[3], match[4], match[5], match[6]);
+                    try {
+                        const parsedDate = new Date(dateStr);
+                        if (!isNaN(parsedDate.getTime())) return parsedDate;
+                    } catch (e) {}
+                    return null;
+                };
+                createdDate = parseCustomDate(d['Created']);
+                if (!createdDate || isNaN(createdDate.getTime())) return null;
+                
+                return {
+                    issue: d['Issue key'] || 'N/A',
+                    priority: d['Priority'] || 'N/A',
+                    status: d['Status'] || 'N/A',
+                    assignee: d['Assignee'] || 'Unassigned',
+                    client: d['Custom field (OU Grupo (MDA))'] || 'No Asignado',
+                    diagnosis: d['Custom field (Diagnosis (MDA))'] || 'No especificado',
+                    requestType: d['Custom field (Request Type)'] || 'No especificado',
+                    problemType: d['Custom field (Problem Type (MDA))'] || 'N/A',
+                    taskType: d['Custom field (Task Type (MDA))'] || 'N/A',
+                    summary: d['Summary'] || '',
+                    created: createdDate,
+                    resolutionTime: hmsToHours(d['Custom field (Time to resolution)']),
+                    firstResponseTime: hmsToHours(d['Custom field (Time to first response)'])
+                };
+            }).filter(d => d !== null);
+            
+            if (allData.length === 0) {
+                alert("Después de procesar, no se encontraron datos válidos. Revisa las cabeceras de columna y el formato de las fechas ('Created' en particular).");
+                loadingMessage.classList.add('hidden');
+                document.getElementById('initial-message').classList.remove('hidden');
+                document.getElementById('dashboard-content').classList.add('hidden');
+                return;
+            }
+            await simulateSentimentAnalysis(allData);
+            loadingMessage.classList.add('hidden');
+            document.getElementById('initial-message').classList.add('hidden');
+            document.getElementById('dashboard-content').classList.remove('hidden');
+            
+            populateFilters(); 
+            updateDashboard(getFilteredData());
+            setupDrilldown();
+            setupKpiCardClickHandlers();
+            await triggerAIAnalysis(); 
+        }
+        
+		async function simulateSentimentAnalysis(data) {
+			const positives = ["modificación", "asignación", "creación", "descarga", "firma exitosa", "instrucciones", "actualización", "configuración", "cambio exitoso", "habilitación", "presentación", "visualización correcta"];
+			const negatives = ["error", "urgente", "inconveniente", "no se visualiza", "no carga", "no puedo", "problema", "incidente", "no aparece", "vencido", "duplicado", "incompleto", "no se firma", "no llega", "expirada", "cancelar", "fallo", "traba", "demora", "subio mal", "no avanza", "token", "invalido", "falla", "no se ven", "no se pueden", "no se visualiza"];
+			const neutrals = ["cambio", "solicitud", "documentación", "formulario", "liquidación", "notificación", "candidato", "empleado", "certificado", "proceso", "revisión", "ingreso", "actualización", "configurar"];
+
+			for (let i = 0; i < data.length; i++) {
+				const text = (data[i].summary || "").toLowerCase();
+
+				const match = (arr) => arr.some(palabra => text.includes(palabra));
+
+				if (match(negatives)) data[i].sentiment = "Negativo";
+				else if (match(positives)) data[i].sentiment = "Positivo";
+				else if (match(neutrals)) data[i].sentiment = "Neutral";
+				else data[i].sentiment = "Neutral"; // por defecto
+			}
+		}
+
+
+        function updateDashboard(data) {
+            renderKPIs(data);
+            renderCharts(data);
+        }
+        
+        function parseCSV(data) {
+            const lines = data.trim().split('\n');
+            if (lines.length === 0) return [];
+            let delimiter = (lines[0].match(/;/g) || []).length > (lines[0].match(/,/g) || []).length ? ';' : ',';
+            const parseLine = (line) => {
+                const values = [];
+                let inQuote = false;
+                let currentVal = '';
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') inQuote = !inQuote;
+                    else if (char === delimiter && !inQuote) {
+                        values.push(currentVal.trim());
+                        currentVal = '';
+                    } else currentVal += char;
+                }
+                values.push(currentVal.trim());
+                return values.map(val => val.replace(/^"|"$/g, ''));
+            };
+            const header = parseLine(lines[0]);
+            return lines.slice(1).map(line => {
+                const values = parseLine(line);
+                let rowData = {};
+                header.forEach((key, i) => { rowData[key] = values[i] !== undefined ? values[i] : ''; });
+                return rowData;
+            });
+        }
+
+        function hmsToHours(hms) {
+            if (!hms || typeof hms !== 'string') return 0;
+            hms = hms.trim().toLowerCase();
+            const dayMatch = hms.match(/(\d+)d/);
+            const hourMatch = hms.match(/(\d+)h/);
+            const minuteMatch = hms.match(/(\d+)m/);
+            let totalHours = 0;
+            if (dayMatch) totalHours += parseInt(dayMatch[1]) * 24;
+            if (hourMatch) totalHours += parseInt(hourMatch[1]);
+            if (minuteMatch) totalHours += parseInt(minuteMatch[1]) / 60;
+            if (totalHours > 0) return parseFloat(totalHours.toFixed(2));
+            const timeParts = hms.split(':');
+            if (timeParts.length >= 2) {
+                const hours = parseInt(timeParts[0], 10) || 0;
+                const minutes = parseInt(timeParts[1], 10) || 0;
+                return parseFloat((hours + minutes / 60).toFixed(2));
+            }
+            return 0;
+        }
+
+        function populateFilters() {
+            populateMonthFilter();
+            populateUniqueFilter('assignee-filter', 'assignee', 'Todos los Asignados');
+            populateUniqueFilter('client-filter', 'client', 'Todos los Clientes');
+            populateUniqueFilter('priority-filter', 'priority', 'Todas las Prioridades');
+            populateUniqueFilter('status-filter', 'status', 'Todos los Estados');
+            populateUniqueFilter('request-type-filter', 'requestType', 'Todos los Tipos de Solicitud');
+            populateUniqueFilter('diagnosis-filter', 'diagnosis', 'Todos los Diagnósticos');
+            populateUniqueFilter('problem-type-filter', 'problemType', 'Todos los Tipos de Problema');
+            
+            document.getElementById('month-filter').addEventListener('change', handleMonthFilterChange);
+            document.querySelectorAll('.filter-select:not(#month-filter)').forEach(selectElement => {
+                selectElement.addEventListener('change', () => updateDashboard(getFilteredData()));
+            });
+        }
+        
+        async function handleMonthFilterChange() {
+            updateDashboard(getFilteredData());
+            await triggerAIAnalysis();
+        }
+
+        async function clearAllFilters() {
+            if (allData.length === 0) return;
+            document.querySelectorAll('.filter-select').forEach(select => { select.value = 'all'; });
+            updateDashboard(getFilteredData());
+            await triggerAIAnalysis();
+        }
+
+        function populateMonthFilter() {
+            const monthFilter = document.getElementById('month-filter');
+            if (!allData || allData.length === 0) {
+                monthFilter.innerHTML = '<option value="all">Filtro por Mes</option>';
+                return;
+            }
+            const months = new Set(allData.map(d => `${d.created.getFullYear()}-${d.created.getMonth()}`));
+            monthFilter.innerHTML = '<option value="all">Análisis General</option>';
+            Array.from(months).sort((a,b) => {
+                const [yearA, monthA] = a.split('-').map(Number);
+                const [yearB, monthB] = b.split('-').map(Number);
+                return yearA !== yearB ? yearA - yearB : monthA - monthB;
+            }).reverse().forEach(monthStr => {
+                const [year, monthIndex] = monthStr.split('-');
+                const option = document.createElement('option');
+                option.value = monthIndex;
+                option.textContent = `${MONTH_NAMES[parseInt(monthIndex)]} ${year}`;
+                monthFilter.appendChild(option);
+            });
+        }
+
+        function populateUniqueFilter(selectId, dataKey, defaultOptionText) {
+            const selectElement = document.getElementById(selectId);
+            if (!selectElement) return;
+            selectElement.innerHTML = `<option value="all">${defaultOptionText}</option>`;
+            if (!allData || allData.length === 0) return;
+            const uniqueValues = new Set(allData.map(d => d[dataKey]).filter(val => val && val !== 'N/A' && val !== 'No Asignado' && val !== 'No especificado'));
+            Array.from(uniqueValues).sort().forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                selectElement.appendChild(option);
+            });
+        }
+
+        function getFilteredData() {
+            let filtered = allData;
+            const filters = {
+                month: document.getElementById('month-filter').value,
+                assignee: document.getElementById('assignee-filter').value,
+                client: document.getElementById('client-filter').value,
+                priority: document.getElementById('priority-filter').value,
+                status: document.getElementById('status-filter').value,
+                requestType: document.getElementById('request-type-filter').value,
+                diagnosis: document.getElementById('diagnosis-filter').value,
+                problemType: document.getElementById('problem-type-filter').value
+            };
+            if (filters.month !== 'all') filtered = filtered.filter(d => d.created.getMonth() == parseInt(filters.month));
+            if (filters.assignee !== 'all') filtered = filtered.filter(d => d.assignee === filters.assignee);
+            if (filters.client !== 'all') filtered = filtered.filter(d => d.client === filters.client);
+            if (filters.priority !== 'all') filtered = filtered.filter(d => d.priority === filters.priority);
+            if (filters.status !== 'all') filtered = filtered.filter(d => d.status === filters.status);
+            if (filters.requestType !== 'all') filtered = filtered.filter(d => d.requestType === filters.requestType);
+            if (filters.diagnosis !== 'all') filtered = filtered.filter(d => d.diagnosis === filters.diagnosis);
+            if (filters.problemType !== 'all') filtered = filtered.filter(d => d.problemType === filters.problemType);
+            return filtered;
+        }
+        
+        async function triggerAIAnalysis() {
+            const analysisSection = document.getElementById('ai-analysis-section');
+            const loadingDiv = document.getElementById('ai-analysis-loading');
+            const contentP = document.getElementById('ai-analysis-content');
+            const monthFilter = document.getElementById('month-filter');
+
+            analysisSection.classList.remove('hidden');
+            loadingDiv.style.display = 'block';
+            contentP.innerHTML = '';
+
+            const selectedMonthValue = monthFilter.value;
+            const selectedPeriodText = monthFilter.options[monthFilter.selectedIndex].text;
+
+            let dataForAnalysis;
+            if (selectedMonthValue === 'all') {
+                dataForAnalysis = allData;
+            } else {
+                dataForAnalysis = allData.filter(d => d.created.getMonth() == parseInt(selectedMonthValue));
+            }
+
+            const analysisText = await generateAIAnalysis(dataForAnalysis, selectedPeriodText);
+
+            contentP.innerHTML = analysisText;
+            loadingDiv.style.display = 'none';
+        }
+        
+        async function generateAIAnalysis(data, periodText) {
+            await new Promise(resolve => setTimeout(resolve, 800));
+
+            if (!data || data.length === 0) {
+                return "<p>No se encontraron datos para el período seleccionado. No es posible generar un análisis.</p>";
+            }
+
+            const totalTickets = data.length;
+            const resolvedTickets = data.filter(d => ['Closed', 'Resolved', 'Done', 'Cerrado', 'Resuelto'].includes(d.status)).length;
+            const resolutionRate = totalTickets > 0 ? (resolvedTickets / totalTickets * 100).toFixed(0) : 0;
+            const validResolutionTimes = data.filter(d => d.resolutionTime > 0);
+            const avgResolution = validResolutionTimes.length > 0 ? (validResolutionTimes.reduce((sum, d) => sum + d.resolutionTime, 0) / validResolutionTimes.length).toFixed(1) : 0;
+            const sentimentCounts = data.reduce((acc, curr) => { acc[curr.sentiment] = (acc[curr.sentiment] || 0) + 1; return acc; }, {});
+            const positiveSentiment = sentimentCounts['Positivo'] || 0;
+            const negativeSentiment = sentimentCounts['Negativo'] || 0;
+            const neutralSentiment = sentimentCounts['Neutral'] || 0;
+            const totalSentiment = positiveSentiment + negativeSentiment + neutralSentiment;
+
+            const getTopN = (key, n) => {
+                const counts = data.reduce((acc, curr) => {
+                    const item = curr[key] || 'N/A';
+                    if (item !== 'N/A' && item !== 'No Asignado' && item !== 'No especificado') {
+                       acc[item] = (acc[item] || 0) + 1;
+                    }
+                    return acc;
+                }, {});
+                return Object.entries(counts).sort(([, a], [, b]) => b - a).slice(0, n);
+            };
+
+            const topRequestTypes = getTopN('requestType', 1);
+            const topClients = getTopN('client', 1);
+
+            const heatmapData = {};
+            DAY_NAMES.forEach(day => { heatmapData[day] = Array(24).fill(0); });
+            data.forEach(d => {
+                const dayIndex = d.created.getDay();
+                const hour = d.created.getHours();
+                heatmapData[DAY_NAMES[dayIndex]][hour]++;
+            });
+
+            let peakDay = '';
+            let peakHour = -1;
+            let maxTicketsInPeak = -1;
+            Object.entries(heatmapData).forEach(([day, hourCounts]) => {
+                hourCounts.forEach((count, hour) => {
+                    if (count > maxTicketsInPeak) {
+                        maxTicketsInPeak = count;
+                        peakDay = day;
+                        peakHour = hour;
+                    }
+                });
+            });
+
+            const wordCloudData = data.map(d => d.summary.split(/\s+/)).flat()
+                .map(word => word.toLowerCase().replace(/[^a-záéíóúñü]/g, ''))
+                .filter(word => word.length > 4 && !['para', 'como', 'desde', 'sobre', 'este', 'esta', 'con', 'del', 'que', 'los', 'las', 'por', 'una', 'un', 'el', 'la', 'se', 'es', 'en', 'y', 'o', 'a', 'de', 'su', 'sus', 'mi', 'mis', 'tu', 'tus', 'mas', 'más', 'pero', 'ni', 'sin', 'al', 'lo', 'le', 'les', 'me', 'te', 'nos', 'os', 'si', 'no', 'para que', 'de la', 'en el', 'un de', 'y el', 'ticket', 'error', 'cliente', 'sistema', 'problema'].includes(word));
+            const wordFrequencies = wordCloudData.reduce((acc, word) => { acc[word] = (acc[word] || 0) + 1; return acc; }, {});
+            const topKeywords = Object.entries(wordFrequencies).sort(([, a], [, b]) => b - a).slice(0, 5).map(item => `<strong>${item[0]}</strong>`);
+            
+            let narrative = `<h4>Análisis para: ${periodText}</h4>`;
+            narrative += `<p>Durante este período, se gestionaron un total de <strong>${totalTickets} tickets</strong>. A continuación, un resumen de los hallazgos clave:</p>`;
+            narrative += '<ul>';
+
+            narrative += `<li><strong>Rendimiento General:</strong> Se alcanzó una tasa de resolución del <strong>${resolutionRate}%</strong>, con un tiempo promedio para resolver cada ticket de <strong>${avgResolution} horas</strong>.</li>`;
+
+            if (topRequestTypes.length > 0) {
+                const topType = topRequestTypes[0];
+                const topTypePercentage = (topType[1] / totalTickets * 100).toFixed(0);
+                narrative += `<li><strong>Categoría Principal:</strong> La solicitud más frecuente fue "<strong>${topType[0]}</strong>", constituyendo aproximadamente el <strong>${topTypePercentage}%</strong> del total de incidentes.</li>`;
+            }
+
+            if (maxTicketsInPeak > 0) {
+                narrative += `<li><strong>Pico de Actividad:</strong> La mayor concentración de tickets se registró los días <strong>${peakDay}</strong>, específicamente en la franja horaria de las <strong>${peakHour}:00 hs</strong>.</li>`;
+            }
+
+			if (totalSentiment > 0) {
+				let predominantSentiment = 'Neutral';
+				let maxCount = neutralSentiment;
+
+				if (positiveSentiment > maxCount) {
+					predominantSentiment = 'Positivo';
+					maxCount = positiveSentiment;
+				}
+				if (negativeSentiment > maxCount) {
+					predominantSentiment = 'Negativo';
+					maxCount = negativeSentiment;
+				}
+
+				const percent = ((maxCount / totalSentiment) * 100).toFixed(0);
+				narrative += `<li><strong>Análisis de Sentimiento:</strong> El análisis de las interacciones indica que el sentimiento predominante fue <strong>${predominantSentiment}</strong> (${percent}%).</li>`;
+			}
+
+            if (topKeywords.length > 0) {
+                narrative += `<li><strong>Voz del Cliente:</strong> Las palabras que más resonaron en los resúmenes de los tickets fueron: ${topKeywords.join(', ')}. Estos términos son clave para entender las preocupaciones principales.</li>`;
+            }
+
+            narrative += '</ul>';
+            narrative += `<p class="mt-4 text-xs text-gray-500 italic"><strong>Nota sobre el Sentimiento:</strong> El sentimiento se determina mediante un analisis de palabras utilizas por el cliente en el campo "Resumen" de cada ticket, clasificándolo como positivo, negativo o neutral.</p>`;
+            narrative += `<p class="mt-2 text-sm text-gray-500 italic">Este es un análisis autogenerado. Para un detalle más profundo, explore los gráficos interactivos.</p>`;
+
+            return narrative;
+        }
+
+        function processData(data) {
+            if (data.length === 0) return {};
+            const statusCounts = data.reduce((acc, curr) => { acc[curr.status] = (acc[curr.status] || 0) + 1; return acc; }, {});
+            const priorityCounts = data.reduce((acc, curr) => { acc[curr.priority] = (acc[curr.priority] || 0) + 1; return acc; }, {});
+            const clientCounts = data.reduce((acc, curr) => { acc[curr.client] = (acc[curr.client] || 0) + 1; return acc; }, {});
+            const assigneeCounts = data.reduce((acc, curr) => { acc[curr.assignee] = (acc[curr.assignee] || 0) + 1; return acc; }, {});
+            const requestTypeCounts = data.reduce((acc, curr) => { acc[curr.requestType] = (acc[curr.requestType] || 0) + 1; return acc; }, {});
+            const diagnosisCounts = data.reduce((acc, curr) => { acc[curr.diagnosis] = (acc[curr.diagnosis] || 0) + 1; return acc; }, {});
+            const problemTypeCounts = data.reduce((acc, curr) => { acc[curr.problemType] = (acc[curr.problemType] || 0) + 1; return acc; }, {});
+            const sentimentCounts = data.reduce((acc, curr) => { acc[curr.sentiment] = (acc[curr.sentiment] || 0) + 1; return acc; }, {});
+
+            const topClients = Object.entries(clientCounts).sort(([,a],[,b]) => b-a).slice(0, 10);
+            const topAssignees = Object.entries(assigneeCounts).sort(([,a],[,b]) => b-a).slice(0, 10);
+            
+            const trendData = data.reduce((acc, curr) => {
+                const date = curr.created.toISOString().split('T')[0];
+                acc[date] = (acc[date] || 0) + 1;
+                return acc;
+            }, {});
+            const sortedTrend = Object.entries(trendData).sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB));
+
+            const wordCloudData = data.map(d => d.summary.split(/\s+/)).flat()
+                .map(word => word.toLowerCase().replace(/[^a-záéíóúñü]/g, ''))
+                .filter(word => word.length > 3 && !['para', 'como', 'desde', 'sobre', 'este', 'esta', 'con', 'del', 'que', 'los', 'las', 'por', 'una', 'un', 'el', 'la', 'se', 'es', 'en', 'y', 'o', 'a', 'de', 'su', 'sus', 'mi', 'mis', 'tu', 'tus', 'mas', 'más', 'pero', 'ni', 'sin', 'al', 'lo', 'le', 'les', 'me', 'te', 'nos', 'os', 'si', 'no', 'para que', 'de la', 'en el', 'un de', 'y el'].includes(word));
+            const wordFrequencies = wordCloudData.reduce((acc, word) => { acc[word] = (acc[word] || 0) + 1; return acc; }, {});
+
+            const heatmapData = {};
+            DAY_NAMES.forEach(day => { heatmapData[day] = Array(24).fill(0); });
+            data.forEach(d => {
+                const dayIndex = d.created.getDay();
+                const hour = d.created.getHours();
+                heatmapData[DAY_NAMES[dayIndex]][hour]++;
+            });
+
+            const top10ClientNames = Object.entries(clientCounts).sort(([,a],[,b]) => b-a).slice(0, 10).map(item => item[0]);
+            const allRequestTypesInDataset = Array.from(new Set(data.map(d => d.requestType))).sort();
+            const nestedClientRequestData = {};
+            top10ClientNames.forEach(client => {
+                nestedClientRequestData[client] = {};
+                const clientTickets = data.filter(ticket => ticket.client === client);
+                clientTickets.forEach(ticket => {
+                    nestedClientRequestData[client][ticket.requestType] = (nestedClientRequestData[client][ticket.requestType] || 0) + 1;
+                });
+            });
+            const clientRequestTypeFinalData = {
+                clients: top10ClientNames,
+                requestTypes: allRequestTypesInDataset,
+                data: nestedClientRequestData
+            };
+            const monthlyComparisonData = {};
+            const allReqTypesForMonthlyChart = new Set();
+            data.forEach(d => {
+                const monthKey = `${d.created.getFullYear()}-${d.created.getMonth()}`;
+                if (!monthlyComparisonData[monthKey]) monthlyComparisonData[monthKey] = {};
+                monthlyComparisonData[monthKey][d.requestType] = (monthlyComparisonData[monthKey][d.requestType] || 0) + 1;
+                allReqTypesForMonthlyChart.add(d.requestType);
+            });
+            const sortedMonths = Object.keys(monthlyComparisonData).sort((a,b) => {
+                const [yearA, monthA] = a.split('-').map(Number);
+                const [yearB, monthB] = b.split('-').map(Number);
+                return yearA - yearB || monthA - monthB;
+            });
+            const sortedReqTypes = Array.from(allReqTypesForMonthlyChart).sort();
+
+            return {
+                status: { labels: Object.keys(statusCounts), values: Object.values(statusCounts) },
+                priority: { labels: Object.keys(priorityCounts), values: Object.values(priorityCounts) },
+                topClients: { labels: topClients.map(item => item[0]), values: topClients.map(item => item[1]) },
+                topAssignees: { labels: topAssignees.map(item => item[0]), values: topAssignees.map(item => item[1]) },
+                requestType: { labels: Object.keys(requestTypeCounts), values: Object.values(requestTypeCounts) },
+                diagnosis: { labels: Object.keys(diagnosisCounts), values: Object.values(diagnosisCounts) },
+                problemType: { labels: Object.keys(problemTypeCounts), values: Object.values(problemTypeCounts) },
+                sentiment: { labels: Object.keys(sentimentCounts), values: Object.values(sentimentCounts) },
+                trend: { labels: sortedTrend.map(item => item[0]), values: sortedTrend.map(item => item[1]) },
+                wordCloud: Object.entries(wordFrequencies).map(([text, weight]) => [text, weight * 5]),
+                heatmap: heatmapData,
+                clientRequestType: clientRequestTypeFinalData,
+                monthlyComparison: {
+                    months: sortedMonths,
+                    requestTypes: sortedReqTypes,
+                    data: monthlyComparisonData
+                }
+            };
+        }
+        
+        function renderKPIs(data) {
+            const totalTickets = data.length;
+            const resolvedTickets = data.filter(d => ['Closed', 'Resolved', 'Done', 'Cerrado', 'Resuelto'].includes(d.status)).length;
+            const openTickets = data.filter(d => !['Closed', 'Resolved', 'Done', 'Cerrado', 'Resuelto', 'Canceled', 'Cancelled', 'Cancelado'].includes(d.status)).length;
+            const validResolutionTimes = data.filter(d => d.resolutionTime > 0);
+            const avgResolution = validResolutionTimes.length > 0 ? (validResolutionTimes.reduce((sum, d) => sum + d.resolutionTime, 0) / validResolutionTimes.length).toFixed(1) : 0;
+            const validFirstResponseTimes = data.filter(d => d.firstResponseTime > 0);
+            const avgFirstResponse = validFirstResponseTimes.length > 0 ? (validFirstResponseTimes.reduce((sum, d) => sum + d.firstResponseTime, 0) / validFirstResponseTimes.length).toFixed(1) : 0;
+            const unassignedTickets = data.filter(d => !d.assignee || d.assignee.toLowerCase() === 'unassigned' || d.assignee.toLowerCase() === 'sin asignar').length;
+            const uniqueDays = new Set(data.map(d => d.created.toISOString().split('T')[0]));
+            const avgPerDay = uniqueDays.size > 0 ? (totalTickets / uniqueDays.size).toFixed(1) : '0.0';
+            const uniqueMonths = new Set(data.map(d => `${d.created.getFullYear()}-${d.created.getMonth()}`));
+            const avgPerMonth = uniqueMonths.size > 0 ? (totalTickets / uniqueMonths.size).toFixed(1) : '0.0';
+
+            document.getElementById('kpi-total-tickets').textContent = totalTickets;
+            document.getElementById('kpi-resolved-tickets').textContent = totalTickets > 0 ? `${((resolvedTickets / totalTickets) * 100).toFixed(0)}%` : '0%';
+            document.getElementById('kpi-open-tickets').textContent = openTickets;
+            document.getElementById('kpi-avg-resolution').textContent = `${avgResolution} hrs`;
+            document.getElementById('kpi-avg-first-response').textContent = `${avgFirstResponse} hrs`;
+            document.getElementById('kpi-unassigned-tickets').textContent = unassignedTickets;
+            document.getElementById('kpi-avg-day').textContent = avgPerDay;
+            document.getElementById('kpi-avg-month').textContent = avgPerMonth;
+        }
+
+        const createChart = (ctx, type, data, options) => {
+            if (charts[ctx.id]) charts[ctx.id].destroy();
+            charts[ctx.id] = new Chart(ctx, { type, data, options });
+        }
+        
+        function renderCharts(data) {
+             if (data.length === 0) {
+                 Object.values(charts).forEach(chart => chart.destroy());
+                 charts = {};
+                 document.getElementById('heatmap-grid').innerHTML = '';
+                 document.getElementById('heatmap-day-labels').innerHTML = '';
+                 document.getElementById('word-cloud-container').innerHTML = '<p class="text-gray-500">No hay datos suficientes para generar la Nube de Palabras.</p>';
+                 return;
+             }
+            const chartData = processData(data);
+            
+            const sharedOptions = (onClickHandler) => ({
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', color: FONT_COLOR, font: { weight: 'bold' }, formatter: (value) => value > 0 ? value : '' }},
+                scales: { x: { ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR }}, y: { ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR }} },
+                onClick: onClickHandler
+            });
+
+            const defaultClickHandler = (e, elements, chart) => {
+                if (elements.length > 0) handleChartClick(chart.canvas.id, chart.config.type, chart.data.labels[elements[0].index]);
+            };
+            
+            createChart(document.getElementById('statusChart'), 'bar', {
+                labels: chartData.status.labels,
+                datasets: [{ data: chartData.status.values, backgroundColor: Object.values(PALETTE) }]
+            }, { ...sharedOptions(defaultClickHandler), indexAxis: 'y' });
+            
+            createChart(document.getElementById('priorityChart'), 'doughnut', {
+                labels: chartData.priority.labels,
+                datasets: [{ data: chartData.priority.values, backgroundColor: Object.values(PALETTE) }]
+            }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: FONT_COLOR } }, datalabels: { color: '#fff', formatter: (v, ctx) => (v * 100 / ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0)) > 5 ? (v * 100 / ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0)).toFixed(0) + "%" : ''}}, onClick: defaultClickHandler });
+            
+            createChart(document.getElementById('requestTypeChart'), 'bar', {
+                labels: chartData.requestType.labels,
+                datasets: [{ data: chartData.requestType.values, backgroundColor: PALETTE.green }]
+            }, { ...sharedOptions(defaultClickHandler), indexAxis: 'y' });
+
+            createChart(document.getElementById('diagnosisChart'), 'pie', {
+                labels: chartData.diagnosis.labels,
+                datasets: [{ data: chartData.diagnosis.values, backgroundColor: Object.values(PALETTE).reverse() }]
+            }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: FONT_COLOR } }, datalabels: { display: false } }, onClick: defaultClickHandler });
+
+            createChart(document.getElementById('problemTypeChart'), 'pie', {
+                labels: chartData.problemType.labels,
+                datasets: [{ data: chartData.problemType.values, backgroundColor: Object.values(PALETTE) }]
+            }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: FONT_COLOR } }, datalabels: { display: false } }, onClick: defaultClickHandler });
+
+			const sentimentColors = {
+				"Positivo": PALETTE.green,
+				"Neutral": PALETTE.slate,
+				"Negativo": PALETTE.red
+			};
+
+			const sentimentLabels = chartData.sentiment.labels;
+			const sentimentValues = chartData.sentiment.values;
+
+			const sentimentColorArray = sentimentLabels.map(label => sentimentColors[label] || PALETTE.gray);
+
+			createChart(document.getElementById('sentimentChart'), 'pie', {
+				labels: sentimentLabels,
+				datasets: [{
+					data: sentimentValues,
+					backgroundColor: sentimentColorArray
+				}]
+			}, {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						position: 'bottom',
+						labels: { color: FONT_COLOR }
+					},
+					datalabels: { display: false }
+				},
+				onClick: defaultClickHandler
+			});
+
+
+            createChart(document.getElementById('topClientsChart'), 'bar', {
+                labels: chartData.topClients.labels,
+                datasets: [{ label: 'Tickets', data: chartData.topClients.values, backgroundColor: PALETTE.blue }]
+            }, { ...sharedOptions(defaultClickHandler), indexAxis: 'y' });
+            
+            createChart(document.getElementById('assigneeChart'), 'bar', {
+                labels: chartData.topAssignees.labels,
+                datasets: [{ label: 'Tickets', data: chartData.topAssignees.values, backgroundColor: PALETTE.sky }]
+            }, { ...sharedOptions(defaultClickHandler), indexAxis: 'y' });
+            
+            const ctxTrend = document.getElementById('trendChart').getContext('2d');
+            const gradient = ctxTrend.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(234, 88, 12, 0.8)');
+            gradient.addColorStop(0.5, 'rgba(249, 115, 22, 0.6)');
+            gradient.addColorStop(1, 'rgba(251, 146, 60, 0.3)');
+
+            createChart(document.getElementById('trendChart'), 'line', {
+                labels: chartData.trend.labels,
+                datasets: [{ 
+                    label: 'Tickets Creados', 
+                    data: chartData.trend.values, 
+                    borderColor: PALETTE.red,
+                    backgroundColor: gradient,
+                    fill: 'origin',
+                    tension: 0.3,
+                    borderWidth: 2, 
+                    pointRadius: 4,
+                    pointBackgroundColor: PALETTE.orange,
+                    pointBorderColor: '#fff',
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: PALETTE.red
+                }]
+            }, { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: {
+                    legend: { display: false }, 
+                    datalabels: { display: false },
+                    zoom: {
+                        zoom: {
+                            wheel: { enabled: true },
+                            pinch: { enabled: true },
+                            mode: 'x',
+                            drag: { enabled: true, borderColor: PALETTE.indigo, borderWidth: 1, backgroundColor: 'rgba(79, 70, 229, 0.2)' }
+                        },
+                        pan: { enabled: true, mode: 'x' }
+                    }
+                }, 
+                scales: { 
+                    x: { 
+                        type: 'time', 
+                        time: { unit: 'day', tooltipFormat: 'dd MMM yy', displayFormats: { day: 'dd MMM' }}, 
+                        ticks: { color: FONT_COLOR }, 
+                        grid: { color: GRID_COLOR }
+                    }, 
+                    y: { ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR } } 
+                },
+                onClick: (e, elements, chart) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const dateValue = chart.data.labels[index];
+                        handleChartClick('trendChart', 'dateSpecific', dateValue);
+                    }
+                }
+            });
+
+            renderHeatmap(chartData.heatmap);
+            renderClientRequestTypeChart(chartData.clientRequestType);
+            renderMonthlyComparisonChart(chartData.monthlyComparison);
+
+            const wcContainer = document.getElementById('word-cloud-container');
+            wcContainer.innerHTML = '';
+            if (chartData.wordCloud && chartData.wordCloud.length > 0) {
+                 WordCloud(wcContainer, { list: chartData.wordCloud, gridSize: 10, weightFactor: 2, shrinkToFit: true, minSize: 10, color: () => PALETTE[Object.keys(PALETTE)[Math.floor(Math.random() * Object.keys(PALETTE).length)]], fontFamily: 'Inter', rotateRatio: 0.5, ellipticity: 1 });
+            } else {
+                wcContainer.innerHTML = '<p class="text-gray-500">No hay datos para esta Nube de Palabras.</p>';
+            }
+        }
+        
+        function renderHeatmap(heatmapData) {
+            const heatmapGrid = document.getElementById('heatmap-grid');
+            const dayLabelsContainer = document.getElementById('heatmap-day-labels');
+            heatmapGrid.innerHTML = ''; dayLabelsContainer.innerHTML = '';
+            let maxCount = 0;
+            Object.values(heatmapData).forEach(h => h.forEach(c => { if (c > maxCount) maxCount = c; }));
+            heatmapGrid.style.gridTemplateRows = `repeat(${DAY_NAMES.length}, 1fr)`;
+            dayLabelsContainer.style.gridTemplateRows = `repeat(${DAY_NAMES.length}, 1fr)`;
+            const getColorForValue = (v, max) => v === 0 ? '#F8FAFC' : `hsl(220, 80%, ${90 - (v / max) * 60}%)`;
+            DAY_NAMES.forEach((day, dayIndex) => {
+                const dayLabel = document.createElement('div');
+                dayLabel.className = 'heatmap-day-label'; dayLabel.textContent = day;
+                dayLabelsContainer.appendChild(dayLabel);
+                const hoursData = heatmapData[day] || Array(24).fill(0);
+                for (let hour = 0; hour < 24; hour++) {
+                    const count = hoursData[hour];
+                    const cell = document.createElement('div');
+                    cell.className = 'heatmap-cell';
+                    cell.style.backgroundColor = getColorForValue(count, maxCount);
+                    cell.textContent = count > 0 ? count : '';
+                    cell.title = `${day}, ${hour}:00 - ${hour+1}:00: ${count} tickets`;
+                    cell.dataset.dayIndex = dayIndex; cell.dataset.hour = hour;
+                    cell.addEventListener('click', handleHeatmapClick);
+                    heatmapGrid.appendChild(cell);
+                }
+            });
+        }
+        
+        function handleHeatmapClick(event) {
+            const { dayIndex, hour } = event.currentTarget.dataset;
+            const dayName = DAY_NAMES[parseInt(dayIndex)];
+            const drilldownData = getFilteredData().filter(d => d.created.getDay() === parseInt(dayIndex) && d.created.getHours() === parseInt(hour));
+            if (drilldownData.length === 0) return alert(`No hay tickets para el ${dayName} a las ${hour}:00.`);
+            showModalWithData(`Tickets del ${dayName} entre ${hour}:00 y ${hour+1}:00`, drilldownData, COMMON_TABLE_HEADERS);
+        }
+
+        function renderClientRequestTypeChart(chartData) {
+            const ctx = document.getElementById('clientRequestTypeChart');
+            if (!ctx) return;
+        
+            const { clients, requestTypes, data: nestedData } = chartData;
+
+            if (!clients || clients.length === 0) {
+                if (charts[ctx.id]) charts[ctx.id].destroy();
+                return;
+            }
+        
+            const datasets = requestTypes.map((type, index) => {
+                const colorKeys = Object.keys(PALETTE);
+                const color = PALETTE[colorKeys[index % colorKeys.length]] || PALETTE.gray;
+                
+                const seriesData = clients.map(client => (nestedData[client] && nestedData[client][type]) || 0);
+        
+                return {
+                    label: type,
+                    data: seriesData,
+                    backgroundColor: color,
+                    stack: 'clientStack'
+                };
+            });
+        
+            createChart(ctx, 'bar', {
+                labels: clients,
+                datasets: datasets
+            }, {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true, position: 'right', labels: { color: FONT_COLOR } },
+                    datalabels: { display: false }
+                },
+                scales: {
+                    x: { stacked: true, ticks: { color: FONT_COLOR, autoSkip: false, maxRotation: 45, minRotation: 45 }, grid: { display: false } },
+                    y: { stacked: true, ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR } }
+                },
+                onClick: (e, elements, chart) => {
+                    if (elements.length > 0) {
+                        const { index, datasetIndex } = elements[0];
+                        const clientLabel = chart.data.labels[index];
+                        const requestTypeLabel = chart.data.datasets[datasetIndex].label;
+                        handleChartClick('clientRequestTypeChart', 'clientAndRequestType', { client: clientLabel, requestType: requestTypeLabel });
+                    }
+                }
+            });
+        }
+        
+        function renderMonthlyComparisonChart(monthlyData) {
+            const ctx = document.getElementById('monthlyComparisonChart');
+            if (!ctx) return;
+            const { months, requestTypes, data } = monthlyData;
+            const labels = months.map(monthKey => {
+                const [year, monthIndex] = monthKey.split('-').map(Number);
+                return `${MONTH_NAMES[monthIndex]} ${year}`;
+            });
+            const datasets = requestTypes.map((type, index) => {
+                const colorKeys = Object.keys(PALETTE);
+                return {
+                    label: type,
+                    data: months.map(monthKey => data[monthKey][type] || 0),
+                    backgroundColor: PALETTE[colorKeys[index % colorKeys.length]] || PALETTE.gray,
+                };
+            });
+            createChart(ctx, 'bar', {
+                labels: labels,
+                datasets: datasets
+            }, {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: true, position: 'right', labels: { color: FONT_COLOR } }, datalabels: { display: false } },
+                scales: { x: { stacked: true, ticks: { color: FONT_COLOR }, grid: { display: false } }, y: { stacked: true, ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR } } },
+                onClick: (e, elements, chart) => {
+                    if (elements.length > 0) {
+                        const { index, datasetIndex } = elements[0];
+                        const monthLabel = chart.data.labels[index];
+                        const requestTypeLabel = chart.data.datasets[datasetIndex].label;
+                        handleChartClick('monthlyComparisonChart', 'monthAndRequestType', { month: monthLabel, requestType: requestTypeLabel });
+                    }
+                }
+            });
+        }
+
+        const modal = document.getElementById('data-modal');
+        const closeModalBtn = document.getElementById('close-modal-button');
+
+        function showModalWithData(title, content, headers) {
+            document.getElementById('modal-title').innerText = title;
+            const modalBody = document.getElementById('modal-body-container');
+
+            if (typeof content === 'string') {
+                modalBody.innerHTML = content;
+            } 
+            else {
+                const data = content;
+                let tableHTML = `
+                    <div class="overflow-x-auto">
+                        <table id="modal-table" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    ${headers.map(h => `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${h.displayName}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${data.length === 0 
+                                    ? `<tr><td colspan="${headers.length}" class="px-6 py-4 text-center text-gray-500">No hay datos.</td></tr>`
+                                    : data.map(rowObject => `
+                                        <tr>
+                                            ${headers.map(header => {
+                                                let cellValue = rowObject[header.key] || '';
+                                                if (header.key.toLowerCase().includes('time') && typeof cellValue === 'number') {
+                                                    cellValue = cellValue.toFixed(2);
+                                                } else if (cellValue instanceof Date) {
+                                                    cellValue = cellValue.toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' });
+                                                }
+                                                const p = document.createElement("p");
+                                                p.textContent = cellValue;
+                                                return `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${p.innerHTML}</td>`;
+                                            }).join('')}
+                                        </tr>
+                                    `).join('')
+                                }
+                            </tbody>
+                        </table>
+                    </div>`;
+                modalBody.innerHTML = tableHTML;
+            }
+            modal.style.display = 'flex';
+        }
+
+        closeModalBtn.onclick = () => { modal.style.display = "none"; };
+        window.onclick = (event) => { if (event.target == modal) modal.style.display = "none"; };
+        
+        function setupDrilldown() {}
+
+        // MODIFICADO: La función ahora explica cómo se calculan los promedios de tiempo
+        function setupKpiCardClickHandlers() {
+            const kpiGrid = document.getElementById('kpi-grid');
+            if (!kpiGrid) return;
+
+            kpiGrid.addEventListener('click', (event) => {
+                const kpiCard = event.target.closest('.kpi-card');
+                if (!kpiCard) return;
+
+                const kpiValueElement = kpiCard.querySelector('.kpi-value');
+                if (!kpiValueElement) return;
+
+                const kpiId = kpiValueElement.id;
+                const currentData = getFilteredData();
+                let drilldownData = [];
+                let modalTitle = 'Detalle de Datos';
+                let headers = COMMON_TABLE_HEADERS;
+
+                const escapeHTML = (str) => {
+                    const p = document.createElement("p");
+                    p.textContent = str;
+                    return p.innerHTML;
+                };
+
+                switch (kpiId) {
+                    case 'kpi-total-tickets':
+                        modalTitle = 'Detalle: Tickets Totales';
+                        drilldownData = currentData;
+                        showModalWithData(modalTitle, drilldownData.slice(0, 500), headers);
+                        break;
+                    
+                    case 'kpi-resolved-tickets':
+                        modalTitle = 'Detalle: Tickets Resueltos';
+                        drilldownData = currentData.filter(d => ['Closed', 'Resolved', 'Done', 'Cerrado', 'Resuelto'].includes(d.status));
+                        showModalWithData(modalTitle, drilldownData.slice(0, 500), headers);
+                        break;
+
+                    case 'kpi-open-tickets':
+                        modalTitle = 'Detalle: Tickets Abiertos';
+                        drilldownData = currentData.filter(d => !['Closed', 'Resolved', 'Done', 'Cerrado', 'Resuelto', 'Canceled', 'Cancelled', 'Cancelado'].includes(d.status));
+                        showModalWithData(modalTitle, drilldownData.slice(0, 500), headers);
+                        break;
+
+                    case 'kpi-avg-resolution': {
+                        modalTitle = `Cálculo de Tiempo Promedio de Resolución`;
+                        const validTickets = currentData.filter(d => d.resolutionTime > 0);
+                        if (validTickets.length === 0) {
+                            alert('No hay tickets con tiempo de resolución válido para mostrar.');
+                            return;
+                        }
+                        const totalHours = validTickets.reduce((sum, d) => sum + d.resolutionTime, 0);
+                        const avgHours = totalHours / validTickets.length;
+                        const top20Tickets = [...validTickets].sort((a,b) => b.resolutionTime - a.resolutionTime).slice(0, 20);
+
+                        let explanationHTML = `
+                            <div class="p-4 mb-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg">
+                                <p class="font-bold">Fórmula de Cálculo:</p>
+                                <p>Suma Total de Horas de Resolución / Cantidad de Tickets Válidos = Tiempo Promedio</p>
+                                <p class="mt-2 text-xl">
+                                    <strong>${totalHours.toFixed(2)}</strong> Horas / <strong>${validTickets.length}</strong> Tickets = <strong>${avgHours.toFixed(2)}</strong> Horas Promedio
+                                </p>
+                            </div>
+                            <h4 class="font-bold mt-6 mb-2 text-gray-700">Top 20 Tickets con Mayor Tiempo de Resolución:</h4>
+                            <div class="max-h-96 overflow-y-auto border rounded-lg">
+                                <table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50 sticky top-0"><tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue Key</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiempo de Resolución (Hrs)</th>
+                                </tr></thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${top20Tickets.map(t => `<tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">${escapeHTML(t.issue)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${escapeHTML(t.summary)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap font-semibold">${t.resolutionTime.toFixed(2)}</td>
+                                    </tr>`).join('')}
+                                </tbody></table>
+                            </div>
+                            <p class="mt-2 text-xs text-gray-500 italic">Nota: Solo se consideran para el cálculo los tickets que tienen un tiempo de resolución registrado y mayor a cero.</p>`;
+                        showModalWithData(modalTitle, explanationHTML);
+                        break;
+                    }
+                    
+                    case 'kpi-avg-first-response': {
+                        modalTitle = `Cálculo de Tiempo Promedio de Primera Respuesta`;
+                        const validTickets = currentData.filter(d => d.firstResponseTime > 0);
+                        if (validTickets.length === 0) {
+                            alert('No hay tickets con tiempo de primera respuesta válido para mostrar.');
+                            return;
+                        }
+                        const totalHours = validTickets.reduce((sum, d) => sum + d.firstResponseTime, 0);
+                        const avgHours = totalHours / validTickets.length;
+                        const top20Tickets = [...validTickets].sort((a,b) => b.firstResponseTime - a.firstResponseTime).slice(0, 20);
+
+                        let explanationHTML = `
+                            <div class="p-4 mb-4 bg-amber-50 border-l-4 border-amber-400 text-amber-800 rounded-r-lg">
+                                <p class="font-bold">Fórmula de Cálculo:</p>
+                                <p>Suma Total de Horas de 1ra Respuesta / Cantidad de Tickets Válidos = Tiempo Promedio</p>
+                                <p class="mt-2 text-xl">
+                                    <strong>${totalHours.toFixed(2)}</strong> Horas / <strong>${validTickets.length}</strong> Tickets = <strong>${avgHours.toFixed(2)}</strong> Horas Promedio
+                                </p>
+                            </div>
+                            <h4 class="font-bold mt-6 mb-2 text-gray-700">Top 20 Tickets con Mayor Tiempo de 1ra Respuesta:</h4>
+                            <div class="max-h-96 overflow-y-auto border rounded-lg">
+                                <table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50 sticky top-0"><tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue Key</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiempo 1ra Respuesta (Hrs)</th>
+                                </tr></thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${top20Tickets.map(t => `<tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">${escapeHTML(t.issue)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${escapeHTML(t.summary)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap font-semibold">${t.firstResponseTime.toFixed(2)}</td>
+                                    </tr>`).join('')}
+                                </tbody></table>
+                            </div>
+                            <p class="mt-2 text-xs text-gray-500 italic">Nota: Solo se consideran para el cálculo los tickets que tienen un tiempo de primera respuesta registrado y mayor a cero.</p>`;
+                        showModalWithData(modalTitle, explanationHTML);
+                        break;
+                    }
+
+                    case 'kpi-unassigned-tickets':
+                        modalTitle = 'Detalle: Tickets sin Asignar';
+                        drilldownData = currentData.filter(d => !d.assignee || d.assignee.toLowerCase() === 'unassigned' || d.assignee.toLowerCase() === 'sin asignar');
+                        showModalWithData(modalTitle, drilldownData.slice(0, 500), headers);
+                        break;
+                    
+                    case 'kpi-avg-day': {
+                        const totalTicketsDay = currentData.length;
+                        const uniqueDaysSet = new Set(currentData.map(d => d.created.toISOString().split('T')[0]));
+                        const uniqueDaysCount = uniqueDaysSet.size;
+                        const avgPerDay = uniqueDaysCount > 0 ? (totalTicketsDay / uniqueDaysCount).toFixed(2) : '0.0';
+                        modalTitle = `Cálculo de Promedio de Tickets por Día`;
+                        const ticketsByDay = {};
+                        currentData.forEach(ticket => {
+                            const day = ticket.created.toISOString().split('T')[0];
+                            if (!ticketsByDay[day]) ticketsByDay[day] = 0;
+                            ticketsByDay[day]++;
+                        });
+                        const sortedDays = Object.entries(ticketsByDay).sort((a, b) => new Date(a[0]) - new Date(b[0]));
+                        let explanationHTML = `
+                            <div class="p-4 mb-4 bg-blue-50 border-l-4 border-blue-400 text-blue-800 rounded-r-lg">
+                                <p class="font-bold">Fórmula de Cálculo:</p>
+                                <p>Total de Tickets / Días con Actividad = Promedio de Tickets por Día</p>
+                                <p class="mt-2 text-xl"><strong>${totalTicketsDay}</strong> Tickets / <strong>${uniqueDaysCount}</strong> Días = <strong>${avgPerDay}</strong> Tickets/Día</p>
+                            </div>
+                            <h4 class="font-bold mt-6 mb-2 text-gray-700">Desglose de Tickets por Día:</h4>
+                            <div class="max-h-96 overflow-y-auto border rounded-lg">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50 sticky top-0"><tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad de Tickets</th>
+                                    </tr></thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        ${sortedDays.map(([day, count]) => `<tr><td class="px-6 py-4 whitespace-nowrap">${new Date(day).toLocaleDateString('es-ES', { timeZone: 'UTC', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td><td class="px-6 py-4">${count}</td></tr>`).join('')}
+                                    </tbody>
+                                </table>
+                            </div>`;
+                        showModalWithData(modalTitle, explanationHTML);
+                        break;
+                    }
+
+                    case 'kpi-avg-month': {
+                        const totalTicketsMonth = currentData.length;
+                        const uniqueMonthsSet = new Set(currentData.map(d => `${d.created.getFullYear()}-${d.created.getMonth()}`));
+                        const uniqueMonthsCount = uniqueMonthsSet.size;
+                        const avgPerMonth = uniqueMonthsCount > 0 ? (totalTicketsMonth / uniqueMonthsCount).toFixed(2) : '0.0';
+                        modalTitle = `Cálculo de Promedio de Tickets por Mes`;
+                        const ticketsByMonth = {};
+                        currentData.forEach(ticket => {
+                            const monthKey = `${ticket.created.getFullYear()}-${ticket.created.getMonth()}`;
+                            if (!ticketsByMonth[monthKey]) ticketsByMonth[monthKey] = 0;
+                            ticketsByMonth[monthKey]++;
+                        });
+                        const sortedMonths = Object.entries(ticketsByMonth).sort((a,b) => {
+                            const [yearA, monthA] = a[0].split('-'); const [yearB, monthB] = b[0].split('-');
+                            return new Date(yearA, monthA) - new Date(yearB, monthB);
+                        });
+                        let monthExplanationHTML = `
+                            <div class="p-4 mb-4 bg-teal-50 border-l-4 border-teal-400 text-teal-800 rounded-r-lg">
+                                <p class="font-bold">Fórmula de Cálculo:</p>
+                                <p>Total de Tickets / Meses con Actividad = Promedio de Tickets por Mes</p>
+                                <p class="mt-2 text-xl"><strong>${totalTicketsMonth}</strong> Tickets / <strong>${uniqueMonthsCount}</strong> Meses = <strong>${avgPerMonth}</strong> Tickets/Mes</p>
+                            </div>
+                            <h4 class="font-bold mt-6 mb-2 text-gray-700">Desglose de Tickets por Mes:</h4>
+                            <div class="max-h-96 overflow-y-auto border rounded-lg">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50 sticky top-0"><tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mes</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad de Tickets</th>
+                                    </tr></thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        ${sortedMonths.map(([monthKey, count]) => {
+                                            const [year, monthIndex] = monthKey.split('-');
+                                            return `<tr><td class="px-6 py-4 whitespace-nowrap">${MONTH_NAMES[parseInt(monthIndex)]} ${year}</td><td class="px-6 py-4">${count}</td></tr>`
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>`;
+                        showModalWithData(modalTitle, monthExplanationHTML);
+                        break;
+                    }
+                }
+            });
+        }
+
+        function handleChartClick(chartId, filterType, filterValue) {
+            const currentData = getFilteredData();
+            let drilldownData = [], modalTitle = 'Detalle de Tickets';
+
+            switch (chartId) {
+                case 'statusChart': drilldownData = currentData.filter(d => d.status === filterValue); modalTitle = `Tickets con Estado: "${filterValue}"`; break;
+                case 'priorityChart': drilldownData = currentData.filter(d => d.priority === filterValue); modalTitle = `Tickets con Prioridad: "${filterValue}"`; break;
+                case 'requestTypeChart': drilldownData = currentData.filter(d => d.requestType === filterValue); modalTitle = `Tickets con Tipo de Solicitud: "${filterValue}"`; break;
+                case 'diagnosisChart': drilldownData = currentData.filter(d => d.diagnosis === filterValue); modalTitle = `Tickets con Diagnóstico: "${filterValue}"`; break;
+                case 'problemTypeChart': drilldownData = currentData.filter(d => d.problemType === filterValue); modalTitle = `Tickets con Tipo de Problema: "${filterValue}"`; break;
+                case 'sentimentChart': drilldownData = currentData.filter(d => d.sentiment === filterValue); modalTitle = `Tickets con Sentimiento: "${filterValue}"`; break;
+                case 'topClientsChart': drilldownData = currentData.filter(d => d.client === filterValue); modalTitle = `Tickets del Cliente: "${filterValue}"`; break;
+                case 'assigneeChart': drilldownData = currentData.filter(d => d.assignee === filterValue); modalTitle = `Tickets Asignados a: "${filterValue}"`; break;
+                case 'trendChart':
+                    const clickedYear = parseInt(filterValue.substring(0, 4));
+                    const clickedMonth = parseInt(filterValue.substring(5, 7)) - 1; 
+                    const clickedDay = parseInt(filterValue.substring(8, 10));
+
+                    drilldownData = currentData.filter(d => {
+                        return d.created.getFullYear() === clickedYear &&
+                               d.created.getMonth() === clickedMonth &&
+                               d.created.getDate() === clickedDay;
+                    });
+                    modalTitle = `Tickets Creados el ${new Date(filterValue).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
+                    break;
+                case 'clientRequestTypeChart':
+                    if (filterType === 'clientAndRequestType') {
+                        drilldownData = currentData.filter(d => d.client === filterValue.client && d.requestType === filterValue.requestType);
+                        modalTitle = `Tickets de "${filterValue.client}" con Tipo: "${filterValue.requestType}"`;
+                    }
+                    break;
+                case 'monthlyComparisonChart':
+                    if (filterType === 'monthAndRequestType') {
+                        const [monthName, year] = filterValue.month.split(' ');
+                        const monthIndex = MONTH_NAMES.indexOf(monthName);
+                        drilldownData = currentData.filter(d => d.created.getFullYear() == year && d.created.getMonth() == monthIndex && d.requestType === filterValue.requestType);
+                        modalTitle = `Tickets de ${filterValue.month} con Tipo: "${filterValue.requestType}"`;
+                    }
+                    break;
+                default: console.warn("Click no manejado:", chartId); drilldownData = currentData;
+            }
+            if (drilldownData.length === 0 && chartId === 'trendChart') {
+                alert(`No se encontraron registros para la fecha seleccionada: ${modalTitle.replace('Tickets Creados el ', '')}. Esto podría deberse a un desfase de zona horaria en los datos o un error en la fecha exportada.`);
+            }
+            showModalWithData(modalTitle, drilldownData.slice(0, 200), COMMON_TABLE_HEADERS);
+        }
+
+        new Sortable(document.getElementById('dashboard-grid'), { animation: 150, ghostClass: 'sortable-ghost' });
+    </script>
+</body>
+</html>
