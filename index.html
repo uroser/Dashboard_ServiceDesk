@@ -468,6 +468,99 @@
             margin-bottom: 0.75rem;
         }
     </style>
+
+    <style>
+        @media (max-width: 768px) {
+            /* Ajustar el contenedor principal y el header para móviles */
+            .container {
+                padding: 1rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.5rem;
+            }
+
+            .header-actions {
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch; /* Botones ocupan todo el ancho */
+            }
+            
+            .header-actions .btn-primary, .header-actions .btn-secondary {
+                justify-content: center; /* Centrar texto del botón */
+                width: 100%;
+            }
+            
+            .logo-section img {
+                height: 2.5rem; /* Logo más pequeño en móvil */
+            }
+
+            /* Reducir tamaño del título principal en móvil */
+            .header-text h1 {
+                font-size: 1.75rem; /* Reducido de 2.25rem */
+            }
+
+            /* Reducir tamaño de los valores de KPI en móvil para evitar desbordamiento */
+            .kpi-value {
+                font-size: 2rem; /* Reducido de 2.5rem */
+            }
+            
+            /* Los KPIs ya son 2 columnas en la base, así que está bien */
+            #kpi-grid {
+                gap: 0.75rem; /* Espacio reducido entre KPIs */
+            }
+            
+            /* La grilla de gráficos ya es de 1 columna en la base, lo que es correcto para móvil */
+            #dashboard-grid {
+                gap: 1rem; /* Espacio reducido entre gráficos */
+            }
+
+            .chart-card h3 {
+                font-size: 1.1rem; /* Títulos de gráficos ligeramente más pequeños */
+            }
+
+            /* Contenedor de gráficos con altura ajustada para móvil */
+            .chart-container-inner {
+                 height: 22rem; 
+            }
+             .chart-container-inner.h-96 {
+                height: 24rem; /* Ajustar las alturas fijas también */
+             }
+
+            /* Hacer que el contenedor del heatmap sea desplazable horizontalmente */
+            #heatmap-card .chart-container-inner {
+                 overflow-x: auto;
+                 padding-bottom: 1rem; /* Espacio para la barra de scroll */
+            }
+
+            #heatmap-wrapper {
+                /* Se asegura que el contenido no se encoja y pueda ser desplazado */
+                min-width: 900px; 
+            }
+            
+            /* Ajustes al modal para una experiencia de pantalla completa en móvil */
+            .modal-content {
+                padding: 1rem;
+                width: 100%;
+                height: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+
+            .modal-title {
+                font-size: 1.25rem;
+            }
+
+            /* Tabla del modal con padding reducido para caber más información */
+            #modal-table thead th,
+            #modal-table tbody td {
+                padding: 0.75rem 0.5rem; 
+                font-size: 0.8rem; /* Fuente más pequeña para la tabla en móvil */
+            }
+        }
+    </style>
 </head>
 <body class="text-gray-800">
 
@@ -478,7 +571,7 @@
                  <div class="logo-section">
                     <img src="https://cardinal-systems.com/wp-content/uploads/2021/08/cardinalSystems-logo.webp" alt="Cardinal Systems Logo" class="h-14 mr-4">
                     <div class="header-text">
-                        <h1 class="text-gray-900">Dashboard de Analítica Avanzada de Soporte</h1>
+                        <h1 class="text-gray-900">Service Desk BI</h1>
                         <p class="text-gray-600">Carga tu archivo CSV para un análisis profundo del rendimiento.</p>
                     </div>
                 </div>
@@ -556,7 +649,7 @@
                 <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" />
                 </svg>
-                <h2 class="mt-4 text-2xl font-bold text-gray-900">Bienvenido a tu Dashboard Interactivo</h2>
+                <h2 class="mt-4 text-2xl font-bold text-gray-900">Bienvenido al Dashboard Interactivo de Service Desk</h2>
                 <p class="mt-2 text-md text-gray-600">Por favor, carga un archivo CSV para comenzar el análisis.</p>
                 <div id="loading-message" class="hidden mt-6 text-blue-600 flex items-center justify-center">
                     <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -574,7 +667,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-3 text-purple-500">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 01-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 013.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 013.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 01-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.562L16.25 21.75l-.648-1.188a2.25 2.25 0 01-1.423-1.423L13.5 18.75l1.188-.648a2.25 2.25 0 011.423-1.423L16.25 15l.648 1.188a2.25 2.25 0 011.423 1.423L18.5 18.75l-1.188.648a2.25 2.25 0 01-1.423 1.423z" />
                             </svg>
-                            Análisis por IA
+                            Insights Estratégicos
                         </h2>
                         <div id="ai-analysis-loading" class="text-center py-4" style="display: none;">
                              <p class="text-gray-600 flex items-center justify-center">
@@ -750,15 +843,17 @@
                             </svg>
                             Actividad por Hora y Día de la Semana
                         </h3>
-                        <div id="heatmap-wrapper" class="h-full">
-                            <div id="heatmap-corner"></div>
-                            <div id="heatmap-hour-labels">
-                                <div class="heatmap-hour-label">0</div><div class="heatmap-hour-label">1</div><div class="heatmap-hour-label">2</div><div class="heatmap-hour-label">3</div><div class="heatmap-hour-label">4</div><div class="heatmap-hour-label">5</div><div class="heatmap-hour-label">6</div><div class="heatmap-hour-label">7</div><div class="heatmap-hour-label">8</div><div class="heatmap-hour-label">9</div><div class="heatmap-hour-label">10</div><div class="heatmap-hour-label">11</div><div class="heatmap-hour-label">12</div><div class="heatmap-hour-label">13</div><div class="heatmap-hour-label">14</div><div class="heatmap-hour-label">15</div><div class="heatmap-hour-label">16</div><div class="heatmap-hour-label">17</div><div class="heatmap-hour-label">18</div><div class="heatmap-hour-label">19</div><div class="heatmap-hour-label">20</div><div class="heatmap-hour-label">21</div><div class="heatmap-hour-label">22</div><div class="heatmap-hour-label">23</div>
+                        <div class="chart-container-inner">
+                            <div id="heatmap-wrapper" class="h-full">
+                                <div id="heatmap-corner"></div>
+                                <div id="heatmap-hour-labels">
+                                    <div class="heatmap-hour-label">0</div><div class="heatmap-hour-label">1</div><div class="heatmap-hour-label">2</div><div class="heatmap-hour-label">3</div><div class="heatmap-hour-label">4</div><div class="heatmap-hour-label">5</div><div class="heatmap-hour-label">6</div><div class="heatmap-hour-label">7</div><div class="heatmap-hour-label">8</div><div class="heatmap-hour-label">9</div><div class="heatmap-hour-label">10</div><div class="heatmap-hour-label">11</div><div class="heatmap-hour-label">12</div><div class="heatmap-hour-label">13</div><div class="heatmap-hour-label">14</div><div class="heatmap-hour-label">15</div><div class="heatmap-hour-label">16</div><div class="heatmap-hour-label">17</div><div class="heatmap-hour-label">18</div><div class="heatmap-hour-label">19</div><div class="heatmap-hour-label">20</div><div class="heatmap-hour-label">21</div><div class="heatmap-hour-label">22</div><div class="heatmap-hour-label">23</div>
+                                </div>
+                                <div id="heatmap-day-labels">
+                                    </div>
+                                <div id="heatmap-grid">
+                                    </div>
                             </div>
-                            <div id="heatmap-day-labels">
-                                </div>
-                            <div id="heatmap-grid">
-                                </div>
                         </div>
                     </div>
 
@@ -809,8 +904,1119 @@
     </div>
 
     <script>
-function _0x5e7d(){const _0x1e7059=['no\x20puedo','Cancelado','replace','sobre','</strong>\x20Horas\x20/\x20<strong>','trim','sus','Error\x20al\x20leer\x20el\x20archivo.\x20Asegúrate\x20de\x20que\x20sea\x20un\x20archivo\x20CSV\x20válido.','Tickets\x20con\x20Prioridad:\x20\x22','no\x20carga','Resuelto','Resolved','green','getMonth','remove','Custom\x20field\x20(OU\x20Grupo\x20(MDA))','push','clear-filters-btn','innerHTML','Todos\x20los\x20Tipos\x20de\x20Solicitud','medium','bar','block','pie','Noviembre','diagnosisChart','duplicado','proceso','no\x20se\x20visualiza','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22p-4\x20mb-4\x20bg-yellow-50\x20border-l-4\x20border-yellow-400\x20text-yellow-800\x20rounded-r-lg\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22font-bold\x22>Fórmula\x20de\x20Cálculo:</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p>Suma\x20Total\x20de\x20Horas\x20de\x20Resolución\x20/\x20Cantidad\x20de\x20Tickets\x20Válidos\x20=\x20Tiempo\x20Promedio</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22mt-2\x20text-xl\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<strong>','cambio\x20exitoso','del','Cálculo\x20de\x20Promedio\x20de\x20Tickets\x20por\x20Mes','Tickets\x20con\x20Diagnóstico:\x20\x22','Unassigned',':00','client','#7C3AED','text','sentimentChart','pero','datasets','sortable-ghost','topClients','red','<th\x20class=\x22px-6\x20py-3\x20text-left\x20text-xs\x20font-medium\x20text-gray-500\x20uppercase\x20tracking-wider\x22>','gray','assigneeChart','<strong>','Fecha\x20Creación','Parsing\x20CSV\x20data...','%</strong>\x20del\x20total\x20de\x20incidentes.</li>','option','request-type-filter','Cancelled','<p\x20class=\x22mt-2\x20text-sm\x20text-gray-500\x20italic\x22>Este\x20es\x20un\x20análisis\x20autogenerado.\x20Para\x20un\x20detalle\x20más\x20profundo,\x20explore\x20los\x20gráficos\x20interactivos.</p>','.filter-select','add','configurar','cancelar','Status','Todos\x20los\x20Tipos\x20de\x20Problema','les','Priority','</strong>\x20Tickets\x20/\x20<strong>','type','sort','de\x20la','requestTypeChart','status','329zMrlUc','Tickets\x20de\x20','reduce','<p\x20class=\x22text-gray-500\x22>No\x20hay\x20datos\x20para\x20esta\x20Nube\x20de\x20Palabras.</p>','las','log','configuración','Domingo','trend','options','dd\x20MMM\x20yy','monthAndRequestType','rgba(234,\x2088,\x2012,\x200.8)','selectedIndex','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22p-4\x20mb-4\x20bg-teal-50\x20border-l-4\x20border-teal-400\x20text-teal-800\x20rounded-r-lg\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22font-bold\x22>Fórmula\x20de\x20Cálculo:</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p>Total\x20de\x20Tickets\x20/\x20Meses\x20con\x20Actividad\x20=\x20Promedio\x20de\x20Tickets\x20por\x20Mes</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22mt-2\x20text-xl\x22><strong>','toISOString','dateSpecific','sentiment','destroy','<p>Durante\x20este\x20período,\x20se\x20gestionaron\x20un\x20total\x20de\x20<strong>','click','month-filter','</strong>\x20Horas\x20Promedio\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h4\x20class=\x22font-bold\x20mt-6\x20mb-2\x20text-gray-700\x22>Top\x2020\x20Tickets\x20con\x20Mayor\x20Tiempo\x20de\x20Resolución:</h4>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22max-h-96\x20overflow-y-auto\x20border\x20rounded-lg\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<table\x20class=\x22min-w-full\x20divide-y\x20divide-gray-200\x22><thead\x20class=\x22bg-gray-50\x20sticky\x20top-0\x22><tr>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<th\x20class=\x22px-6\x20py-3\x20text-left\x20text-xs\x20font-medium\x20text-gray-500\x20uppercase\x20tracking-wider\x22>Issue\x20Key</th>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<th\x20class=\x22px-6\x20py-3\x20text-left\x20text-xs\x20font-medium\x20text-gray-500\x20uppercase\x20tracking-wider\x22>Título</th>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<th\x20class=\x22px-6\x20py-3\x20text-left\x20text-xs\x20font-medium\x20text-gray-500\x20uppercase\x20tracking-wider\x22>Tiempo\x20de\x20Resolución\x20(Hrs)</th>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</tr></thead>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<tbody\x20class=\x22bg-white\x20divide-y\x20divide-gray-200\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','ai-analysis-content','falla','data-modal','</strong>\x20(','<li><strong>Voz\x20del\x20Cliente:</strong>\x20Las\x20palabras\x20que\x20más\x20resonaron\x20en\x20los\x20resúmenes\x20de\x20los\x20tickets\x20fueron:\x20','No\x20file\x20selected.','%).</li>','solicitud','sin','kpi-open-tickets','ai-analysis-section','actualización','</option>','Created','esta','index','split','N/A','substring','demora','Neutral','reverse','es-ES','priorityChart','con','Custom\x20field\x20(Request\x20Type)','Custom\x20field\x20(Task\x20Type\x20(MDA))','</td></tr>','kpi-avg-first-response','appendChild','Done','Custom\x20field\x20(Diagnosis\x20(MDA))','<p>No\x20se\x20encontraron\x20datos\x20para\x20el\x20período\x20seleccionado.\x20No\x20es\x20posible\x20generar\x20un\x20análisis.</p>','Enero','Viernes','kpi-avg-resolution','para\x20que','#0D9488','style','issue','problema','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</tbody></table>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22mt-2\x20text-xs\x20text-gray-500\x20italic\x22>Nota:\x20Solo\x20se\x20consideran\x20para\x20el\x20cálculo\x20los\x20tickets\x20que\x20tienen\x20un\x20tiempo\x20de\x20primera\x20respuesta\x20registrado\x20y\x20mayor\x20a\x20cero.</p>','all','<option\x20value=\x22all\x22>Análisis\x20General</option>','inconveniente','documentación','dayIndex','join','1745152DOKTRs','</td><td\x20class=\x22px-6\x20py-4\x22>','monthlyComparisonChart','UTF-8','toLocaleDateString','kpi-avg-month','#6B7280',':00\x20y\x20','topClientsChart','classList','labels','Título','expirada','\x20con\x20Tipo:\x20\x22','kpi-grid','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</tr>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','getDate','some','como','\x20entre\x20','#F8FAFC','change','flat','Sábado','Cliente','no\x20se\x20firma','sin\x20asignar',',\x201fr)','indigo','Todos\x20los\x20Diagnósticos','#059669','Tickets\x20con\x20Estado:\x20\x22','Tickets','no\x20aparece','Tickets\x20de\x20\x22','</th>','error',':00:\x20','token','desde','backgroundColor','Detalle:\x20Tickets\x20Abiertos','className','result','Marzo','currentTarget','94878zZvvWy','Issue\x20key','para','#C026D3','Diciembre','este','Positivo','incompleto','Asignado','no\x20llega','displayName','flex','gridTemplateRows','Jueves','</ul>','heatmap-grid','numeric','Detalle:\x20Tickets\x20Resueltos','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</tbody></table>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22mt-2\x20text-xs\x20text-gray-500\x20italic\x22>Nota:\x20Solo\x20se\x20consideran\x20para\x20el\x20cálculo\x20los\x20tickets\x20que\x20tienen\x20un\x20tiempo\x20de\x20resolución\x20registrado\x20y\x20mayor\x20a\x20cero.</p>','\x20tickets','1753210zepvCv','getDay','No\x20especificado','Custom\x20field\x20(Time\x20to\x20first\x20response)','Issue\x20Key','cliente','toLowerCase','no\x20se\x20ven','</td>','sky','assignee-filter','Summary','heatmap','config','end','diagnosis','warn','\x22\x20con\x20Tipo:\x20\x22','mis','El\x20archivo\x20CSV\x20está\x20vacío\x20o\x20no\x20se\x20pudo\x20parsear\x20correctamente.\x20Por\x20favor,\x20revisa\x20el\x20formato\x20y\x20asegúrate\x20que\x20no\x20esté\x20vacío.','addEventListener','status-filter','Tickets\x20Creados\x20el\x20','div','mas','</strong>\x20Tickets\x20=\x20<strong>','map','key','Después\x20de\x20procesar,\x20no\x20se\x20encontraron\x20datos\x20válidos.\x20Revisa\x20las\x20cabeceras\x20de\x20columna\x20y\x20el\x20formato\x20de\x20las\x20fechas\x20(\x27Created\x27\x20en\x20particular).','Todos\x20los\x20Asignados','textContent','Custom\x20field\x20(Time\x20to\x20resolution)','modificación','toLocaleString','</strong>\x20Tickets/Mes</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h4\x20class=\x22font-bold\x20mt-6\x20mb-2\x20text-gray-700\x22>Desglose\x20de\x20Tickets\x20por\x20Mes:</h4>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22max-h-96\x20overflow-y-auto\x20border\x20rounded-lg\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<table\x20class=\x22min-w-full\x20divide-y\x20divide-gray-200\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<thead\x20class=\x22bg-gray-50\x20sticky\x20top-0\x22><tr>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<th\x20class=\x22px-6\x20py-3\x20text-left\x20text-xs\x20font-medium\x20text-gray-500\x20uppercase\x20tracking-wider\x22>Mes</th>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<th\x20class=\x22px-6\x20py-3\x20text-left\x20text-xs\x20font-medium\x20text-gray-500\x20uppercase\x20tracking-wider\x22>Cantidad\x20de\x20Tickets</th>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</tr></thead>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<tbody\x20class=\x22bg-white\x20divide-y\x20divide-gray-200\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','month','problem-type-filter','includes','Julio','addColorStop','clientStack','line','Tickets\x20del\x20','entries','getElementById','urgente','Cálculo\x20de\x20Promedio\x20de\x20Tickets\x20por\x20Día','.\x20Esto\x20podría\x20deberse\x20a\x20un\x20desfase\x20de\x20zona\x20horaria\x20en\x20los\x20datos\x20o\x20un\x20error\x20en\x20la\x20fecha\x20exportada.','nos','<li><strong>Análisis\x20de\x20Sentimiento:</strong>\x20El\x20análisis\x20de\x20las\x20interacciones\x20indica\x20que\x20el\x20sentimiento\x20predominante\x20fue\x20<strong>','.\x20Estos\x20términos\x20son\x20clave\x20para\x20entender\x20las\x20preocupaciones\x20principales.</li>','Custom\x20field\x20(Problem\x20Type\x20(MDA))','getHours','random','<tr>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<td\x20class=\x22px-6\x20py-4\x20whitespace-nowrap\x22>','Cálculo\x20de\x20Tiempo\x20Promedio\x20de\x20Primera\x20Respuesta','statusChart','querySelector','keys','CSV\x20file\x20loaded.\x20Initiating\x20dashboard.','closest','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<tr>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','</strong>\x20Días\x20=\x20<strong>','size','presentación','0.0','#DC2626','los','origin','priority-filter','fallo','csv-file-input','assignee','visualización\x20correcta','values','ingreso','dashboard-grid','instrucciones','</strong>\x20Tickets/Día</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h4\x20class=\x22font-bold\x20mt-6\x20mb-2\x20text-gray-700\x22>Desglose\x20de\x20Tickets\x20por\x20Día:</h4>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22max-h-96\x20overflow-y-auto\x20border\x20rounded-lg\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<table\x20class=\x22min-w-full\x20divide-y\x20divide-gray-200\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<thead\x20class=\x22bg-gray-50\x20sticky\x20top-0\x22><tr>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<th\x20class=\x22px-6\x20py-3\x20text-left\x20text-xs\x20font-medium\x20text-gray-500\x20uppercase\x20tracking-wider\x22>Fecha</th>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<th\x20class=\x22px-6\x20py-3\x20text-left\x20text-xs\x20font-medium\x20text-gray-500\x20uppercase\x20tracking-wider\x22>Cantidad\x20de\x20Tickets</th>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</tr></thead>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<tbody\x20class=\x22bg-white\x20divide-y\x20divide-gray-200\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22p-4\x20mb-4\x20bg-blue-50\x20border-l-4\x20border-blue-400\x20text-blue-800\x20rounded-r-lg\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22font-bold\x22>Fórmula\x20de\x20Cálculo:</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p>Total\x20de\x20Tickets\x20/\x20Días\x20con\x20Actividad\x20=\x20Promedio\x20de\x20Tickets\x20por\x20Día</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22mt-2\x20text-xl\x22><strong>','created','clientRequestTypeChart','right','rgba(249,\x20115,\x2022,\x200.6)','<td\x20class=\x22px-6\x20py-4\x20whitespace-nowrap\x20text-sm\x20text-gray-700\x22>','asignación','descarga','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</tr>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</thead>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<tbody\x20class=\x22bg-white\x20divide-y\x20divide-gray-200\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','number','en\x20el','Negativo','kpi-unassigned-tickets','none','revisión','766432gukvIc','toFixed','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</tbody>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</table>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>','traba','dd\x20MMM','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22overflow-x-auto\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<table\x20id=\x22modal-table\x22\x20class=\x22min-w-full\x20divide-y\x20divide-gray-200\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<thead\x20class=\x22bg-gray-50\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<tr>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','heatmap-cell','UTC','long','clientRequestType','No\x20hay\x20tickets\x20con\x20tiempo\x20de\x20resolución\x20válido\x20para\x20mostrar.','resolutionTime','hsl(220,\x2080%,\x20','una','\x20horas</strong>.</li>','un\x20de','sistema','4298904mGOAQY','</strong>\x22,\x20constituyendo\x20aproximadamente\x20el\x20<strong>','forEach','invalido','diagnosis-filter','incidente','initial-message','<tr><td\x20colspan=\x22','\x20tickets</strong>.\x20A\x20continuación,\x20un\x20resumen\x20de\x20los\x20hallazgos\x20clave:</p>','priority','getTime','register','length','wordCloud','bottom','Tickets\x20con\x20Sentimiento:\x20\x22','no\x20avanza','floor','No\x20se\x20encontraron\x20registros\x20para\x20la\x20fecha\x20seleccionada:\x20','#2563EB','hidden','<p\x20class=\x22text-gray-500\x22>No\x20hay\x20datos\x20suficientes\x20para\x20generar\x20la\x20Nube\x20de\x20Palabras.</p>','loading-message','querySelectorAll','dashboard-content','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</tbody>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</table>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>','hour','#475569','requestType','Assignee','createElement','notificación','<li><strong>Rendimiento\x20General:</strong>\x20Se\x20alcanzó\x20una\x20tasa\x20de\x20resolución\x20del\x20<strong>','filter','Tickets\x20Creados','modal-title','127518nZuUbo','</td>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<td\x20class=\x22px-6\x20py-4\x20whitespace-nowrap\x22>','1052969wUxqAM','Tickets\x20del\x20Cliente:\x20\x22','Canceled','kpi-avg-day','readAsText','getFullYear','subio\x20mal','firstResponseTime','target','match','label','Todas\x20las\x20Prioridades','empleado','</td>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<td\x20class=\x22px-6\x20py-4\x20whitespace-nowrap\x20font-semibold\x22>','topAssignees','Martes','que','%</strong>,\x20con\x20un\x20tiempo\x20promedio\x20para\x20resolver\x20cada\x20ticket\x20de\x20<strong>','<tr><td\x20class=\x22px-6\x20py-4\x20whitespace-nowrap\x22>','createLinearGradient','files','Tickets\x20Asignados\x20a:\x20\x22','problemType','Cerrado','Todos\x20los\x20Clientes','No\x20Asignado','por','Prioridad','ticket','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22p-4\x20mb-4\x20bg-amber-50\x20border-l-4\x20border-amber-400\x20text-amber-800\x20rounded-r-lg\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22font-bold\x22>Fórmula\x20de\x20Cálculo:</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p>Suma\x20Total\x20de\x20Horas\x20de\x201ra\x20Respuesta\x20/\x20Cantidad\x20de\x20Tickets\x20Válidos\x20=\x20Tiempo\x20Promedio</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p\x20class=\x22mt-2\x20text-xl\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<strong>','summary','\x20hrs','</td>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</tr>','clientAndRequestType','Closed','doughnut','value','No\x20hay\x20tickets\x20con\x20tiempo\x20de\x20primera\x20respuesta\x20válido\x20para\x20mostrar.','onerror','candidato','más','onclick','fill','orange','Septiembre','<p\x20class=\x22mt-4\x20text-xs\x20text-gray-500\x20italic\x22><strong>Nota\x20sobre\x20el\x20Sentimiento:</strong>\x20El\x20sentimiento\x20se\x20determina\x20mediante\x20un\x20analisis\x20de\x20palabras\x20utilizas\x20por\x20el\x20cliente\x20en\x20el\x20campo\x20\x22Resumen\x22\x20de\x20cada\x20ticket,\x20clasificándolo\x20como\x20positivo,\x20negativo\x20o\x20neutral.</p>','.kpi-card','unassigned','#fff','#0891B2','short','kpi-resolved-tickets','.filter-select:not(#month-filter)','Inter','problemTypeChart','Error\x20reading\x20file:','</h4>','Tickets\x20con\x20Tipo\x20de\x20Problema:\x20\x22','creación','data','string','display','#16A34A','#65A30D','formulario','trendChart','y\x20el','chart','from','ai-analysis-loading','</strong>\x20Meses\x20=\x20<strong>','Detalle:\x20Tickets\x20sin\x20Asignar','slice','dataset','<option\x20value=\x22all\x22>Filtro\x20por\x20Mes</option>'];_0x5e7d=function(){return _0x1e7059;};return _0x5e7d();}const _0x25d084=_0x49b6;(function(_0x2f5ff2,_0x40ca83){const _0x44f3b0=_0x49b6,_0x50d4f5=_0x2f5ff2();while(!![]){try{const _0x169091=parseInt(_0x44f3b0(0x1fb))/0x1+-parseInt(_0x44f3b0(0x124))/0x2+parseInt(_0x44f3b0(0x152))/0x3+-parseInt(_0x44f3b0(0x1d5))/0x4+parseInt(_0x44f3b0(0x166))/0x5+parseInt(_0x44f3b0(0x1f9))/0x6*(parseInt(_0x44f3b0(0xdd))/0x7)+parseInt(_0x44f3b0(0x1c4))/0x8;if(_0x169091===_0x40ca83)break;else _0x50d4f5['push'](_0x50d4f5['shift']());}catch(_0x25083f){_0x50d4f5['push'](_0x50d4f5['shift']());}}}(_0x5e7d,0x8e3e6));let allData=[],charts={};const FONT_COLOR=_0x25d084(0x1f0),GRID_COLOR='#E2E8F0',PALETTE={'indigo':'#4F46E5','blue':_0x25d084(0x1e8),'cyan':_0x25d084(0x22c),'teal':_0x25d084(0x119),'emerald':_0x25d084(0x142),'green':_0x25d084(0x239),'lime':_0x25d084(0x23a),'yellow':'#CA8A04','amber':'#D97706','orange':'#EA580C','red':_0x25d084(0x1a8),'purple':_0x25d084(0x26b),'rose':'#E11D48','fuchsia':_0x25d084(0x155),'slate':'#64748B','gray':_0x25d084(0x12a)},MONTH_NAMES=[_0x25d084(0x115),'Febrero',_0x25d084(0x150),'Abril','Mayo','Junio',_0x25d084(0x18c),'Agosto',_0x25d084(0x227),'Octubre',_0x25d084(0x25e),_0x25d084(0x156)],DAY_NAMES=[_0x25d084(0xe4),'Lunes',_0x25d084(0x20a),'Miércoles',_0x25d084(0x15f),_0x25d084(0x116),_0x25d084(0x13b)],COMMON_TABLE_HEADERS=[{'key':_0x25d084(0x11b),'displayName':_0x25d084(0x16a)},{'key':_0x25d084(0x219),'displayName':_0x25d084(0x12f)},{'key':_0x25d084(0x1de),'displayName':_0x25d084(0x216)},{'key':_0x25d084(0xdc),'displayName':'Estado'},{'key':'assignee','displayName':_0x25d084(0x15a)},{'key':_0x25d084(0x26a),'displayName':_0x25d084(0x13c)},{'key':_0x25d084(0x1f1),'displayName':'Tipo\x20Solicitud'},{'key':_0x25d084(0x1b6),'displayName':_0x25d084(0x277)}];Chart[_0x25d084(0x1e0)](ChartDataLabels,ChartZoom),document[_0x25d084(0x192)](_0x25d084(0x1ad))[_0x25d084(0x17a)](_0x25d084(0x139),handleFileSelect,![]),document[_0x25d084(0x192)](_0x25d084(0x257))[_0x25d084(0x17a)]('click',clearAllFilters);async function handleFileSelect(_0xb4b1c9){const _0x3bf8b5=_0x25d084,_0x38948c=_0xb4b1c9[_0x3bf8b5(0x203)][_0x3bf8b5(0x20f)][0x0];if(!_0x38948c){console[_0x3bf8b5(0xe2)](_0x3bf8b5(0xf9));return;}const _0x3c2094=new FileReader();_0x3c2094['onload']=async function(_0x104c4f){const _0xa18b49=_0x3bf8b5,_0x38a4d3=_0x104c4f[_0xa18b49(0x203)][_0xa18b49(0x14f)];console[_0xa18b49(0xe2)](_0xa18b49(0x1a1)),await initializeDashboard(_0x38a4d3);},_0x3c2094[_0x3bf8b5(0x221)]=_0x3d71ee=>{const _0x38f93f=_0x3bf8b5;console[_0x38f93f(0x148)](_0x38f93f(0x232),_0x3d71ee),alert(_0x38f93f(0x24d));},_0x3c2094[_0x3bf8b5(0x1ff)](_0x38948c,_0x3bf8b5(0x127));}async function initializeDashboard(_0x9c794d){const _0x109f9f=_0x25d084,_0x32ae92=document[_0x109f9f(0x192)](_0x109f9f(0x1eb));document[_0x109f9f(0x192)](_0x109f9f(0x1db))[_0x109f9f(0x12d)][_0x109f9f(0x254)](_0x109f9f(0x1e9)),_0x32ae92[_0x109f9f(0x12d)][_0x109f9f(0x254)]('hidden'),console[_0x109f9f(0xe2)](_0x109f9f(0x278));const _0x397968=parseCSV(_0x9c794d);if(_0x397968[_0x109f9f(0x1e1)]===0x0||Object[_0x109f9f(0x1a0)](_0x397968[0x0])[_0x109f9f(0x1e1)]===0x0){alert(_0x109f9f(0x179)),_0x32ae92[_0x109f9f(0x12d)][_0x109f9f(0x27f)](_0x109f9f(0x1e9)),document[_0x109f9f(0x192)](_0x109f9f(0x1db))[_0x109f9f(0x12d)]['remove'](_0x109f9f(0x1e9)),document[_0x109f9f(0x192)](_0x109f9f(0x1ed))[_0x109f9f(0x12d)]['add'](_0x109f9f(0x1e9));return;}allData=_0x397968[_0x109f9f(0x180)](_0x6c12b8=>{const _0x5d38fa=_0x109f9f;let _0x455780;const _0x497397=_0x210aed=>{const _0x51757e=_0x49b6;if(!_0x210aed||typeof _0x210aed!==_0x51757e(0x237))return null;let _0x17e521=_0x210aed['match'](/(\d{1,2})\/(\d{1,2})\/(\d{4})\s(\d{1,2}):(\d{1,2})/);if(_0x17e521)return new Date(_0x17e521[0x3],_0x17e521[0x2]-0x1,_0x17e521[0x1],_0x17e521[0x4],_0x17e521[0x5]);_0x17e521=_0x210aed['match'](/(\d{4})-(\d{1,2})-(\d{1,2})\s(\d{1,2}):(\d{1,2}):(\d{1,2})/);if(_0x17e521)return new Date(_0x17e521[0x1],_0x17e521[0x2]-0x1,_0x17e521[0x3],_0x17e521[0x4],_0x17e521[0x5],_0x17e521[0x6]);try{const _0x54ffaa=new Date(_0x210aed);if(!isNaN(_0x54ffaa[_0x51757e(0x1df)]()))return _0x54ffaa;}catch(_0x585a77){}return null;};_0x455780=_0x497397(_0x6c12b8[_0x5d38fa(0x101)]);if(!_0x455780||isNaN(_0x455780[_0x5d38fa(0x1df)]()))return null;return{'issue':_0x6c12b8[_0x5d38fa(0x153)]||_0x5d38fa(0x105),'priority':_0x6c12b8[_0x5d38fa(0x285)]||'N/A','status':_0x6c12b8[_0x5d38fa(0x282)]||_0x5d38fa(0x105),'assignee':_0x6c12b8[_0x5d38fa(0x1f2)]||_0x5d38fa(0x268),'client':_0x6c12b8[_0x5d38fa(0x255)]||_0x5d38fa(0x214),'diagnosis':_0x6c12b8[_0x5d38fa(0x113)]||_0x5d38fa(0x168),'requestType':_0x6c12b8[_0x5d38fa(0x10d)]||_0x5d38fa(0x168),'problemType':_0x6c12b8[_0x5d38fa(0x199)]||'N/A','taskType':_0x6c12b8[_0x5d38fa(0x10e)]||_0x5d38fa(0x105),'summary':_0x6c12b8[_0x5d38fa(0x171)]||'','created':_0x455780,'resolutionTime':hmsToHours(_0x6c12b8[_0x5d38fa(0x185)]),'firstResponseTime':hmsToHours(_0x6c12b8[_0x5d38fa(0x169)])};})[_0x109f9f(0x1f6)](_0x44255c=>_0x44255c!==null);if(allData[_0x109f9f(0x1e1)]===0x0){alert(_0x109f9f(0x182)),_0x32ae92[_0x109f9f(0x12d)][_0x109f9f(0x27f)](_0x109f9f(0x1e9)),document[_0x109f9f(0x192)](_0x109f9f(0x1db))[_0x109f9f(0x12d)][_0x109f9f(0x254)](_0x109f9f(0x1e9)),document[_0x109f9f(0x192)](_0x109f9f(0x1ed))[_0x109f9f(0x12d)][_0x109f9f(0x27f)](_0x109f9f(0x1e9));return;}await simulateSentimentAnalysis(allData),_0x32ae92[_0x109f9f(0x12d)]['add'](_0x109f9f(0x1e9)),document['getElementById'](_0x109f9f(0x1db))[_0x109f9f(0x12d)][_0x109f9f(0x27f)](_0x109f9f(0x1e9)),document[_0x109f9f(0x192)]('dashboard-content')['classList'][_0x109f9f(0x254)](_0x109f9f(0x1e9)),populateFilters(),updateDashboard(getFilteredData()),setupDrilldown(),setupKpiCardClickHandlers(),await triggerAIAnalysis();}async function simulateSentimentAnalysis(_0x10d3dd){const _0x3fb1e7=_0x25d084,_0x262868=[_0x3fb1e7(0x186),_0x3fb1e7(0x1bb),_0x3fb1e7(0x235),_0x3fb1e7(0x1bc),'firma\x20exitosa',_0x3fb1e7(0x1b3),'actualización',_0x3fb1e7(0xe3),_0x3fb1e7(0x264),'habilitación',_0x3fb1e7(0x1a6),_0x3fb1e7(0x1af)],_0x3dc089=[_0x3fb1e7(0x148),_0x3fb1e7(0x193),_0x3fb1e7(0x120),_0x3fb1e7(0x262),_0x3fb1e7(0x24f),_0x3fb1e7(0x246),_0x3fb1e7(0x11c),_0x3fb1e7(0x1da),_0x3fb1e7(0x145),'vencido',_0x3fb1e7(0x260),_0x3fb1e7(0x159),_0x3fb1e7(0x13d),_0x3fb1e7(0x15b),_0x3fb1e7(0x130),_0x3fb1e7(0x281),_0x3fb1e7(0x1ac),_0x3fb1e7(0x1c7),_0x3fb1e7(0x107),_0x3fb1e7(0x201),_0x3fb1e7(0x1e5),_0x3fb1e7(0x14a),_0x3fb1e7(0x1d8),_0x3fb1e7(0xf5),_0x3fb1e7(0x16d),'no\x20se\x20pueden',_0x3fb1e7(0x262)],_0x545041=['cambio',_0x3fb1e7(0xfb),_0x3fb1e7(0x121),_0x3fb1e7(0x23b),'liquidación',_0x3fb1e7(0x1f4),_0x3fb1e7(0x222),_0x3fb1e7(0x207),'certificado',_0x3fb1e7(0x261),_0x3fb1e7(0x1c3),_0x3fb1e7(0x1b1),_0x3fb1e7(0xff),_0x3fb1e7(0x280)];for(let _0x501b66=0x0;_0x501b66<_0x10d3dd[_0x3fb1e7(0x1e1)];_0x501b66++){const _0x26729b=(_0x10d3dd[_0x501b66][_0x3fb1e7(0x219)]||'')[_0x3fb1e7(0x16c)](),_0x1cb930=_0x2e0b15=>_0x2e0b15[_0x3fb1e7(0x135)](_0x155b98=>_0x26729b[_0x3fb1e7(0x18b)](_0x155b98));if(_0x1cb930(_0x3dc089))_0x10d3dd[_0x501b66]['sentiment']='Negativo';else{if(_0x1cb930(_0x262868))_0x10d3dd[_0x501b66][_0x3fb1e7(0xee)]=_0x3fb1e7(0x158);else{if(_0x1cb930(_0x545041))_0x10d3dd[_0x501b66][_0x3fb1e7(0xee)]=_0x3fb1e7(0x108);else _0x10d3dd[_0x501b66][_0x3fb1e7(0xee)]='Neutral';}}}}function updateDashboard(_0x2fdde1){renderKPIs(_0x2fdde1),renderCharts(_0x2fdde1);}function parseCSV(_0x470aa5){const _0x4ce80b=_0x25d084,_0x270d4e=_0x470aa5['trim']()['split']('\x0a');if(_0x270d4e['length']===0x0)return[];let _0x5d68ba=(_0x270d4e[0x0][_0x4ce80b(0x204)](/;/g)||[])[_0x4ce80b(0x1e1)]>(_0x270d4e[0x0][_0x4ce80b(0x204)](/,/g)||[])[_0x4ce80b(0x1e1)]?';':',';const _0x3b5e67=_0x1e6893=>{const _0x2e3da5=_0x4ce80b,_0x572e1b=[];let _0x11d53b=![],_0x4f17a0='';for(let _0x4e6be6=0x0;_0x4e6be6<_0x1e6893['length'];_0x4e6be6++){const _0x301a15=_0x1e6893[_0x4e6be6];if(_0x301a15==='\x22')_0x11d53b=!_0x11d53b;else{if(_0x301a15===_0x5d68ba&&!_0x11d53b)_0x572e1b[_0x2e3da5(0x256)](_0x4f17a0[_0x2e3da5(0x24b)]()),_0x4f17a0='';else _0x4f17a0+=_0x301a15;}}return _0x572e1b[_0x2e3da5(0x256)](_0x4f17a0[_0x2e3da5(0x24b)]()),_0x572e1b['map'](_0x44b943=>_0x44b943['replace'](/^"|"$/g,''));},_0x121ecf=_0x3b5e67(_0x270d4e[0x0]);return _0x270d4e[_0x4ce80b(0x243)](0x1)[_0x4ce80b(0x180)](_0x358d52=>{const _0x2ff8dd=_0x4ce80b,_0x489182=_0x3b5e67(_0x358d52);let _0x5eb0e7={};return _0x121ecf[_0x2ff8dd(0x1d7)]((_0xc02e6,_0x348a77)=>{_0x5eb0e7[_0xc02e6]=_0x489182[_0x348a77]!==undefined?_0x489182[_0x348a77]:'';}),_0x5eb0e7;});}function hmsToHours(_0x4bd974){const _0x3e8059=_0x25d084;if(!_0x4bd974||typeof _0x4bd974!==_0x3e8059(0x237))return 0x0;_0x4bd974=_0x4bd974['trim']()[_0x3e8059(0x16c)]();const _0x2970a8=_0x4bd974[_0x3e8059(0x204)](/(\d+)d/),_0xd8f5ea=_0x4bd974[_0x3e8059(0x204)](/(\d+)h/),_0x57430a=_0x4bd974[_0x3e8059(0x204)](/(\d+)m/);let _0x51daf3=0x0;if(_0x2970a8)_0x51daf3+=parseInt(_0x2970a8[0x1])*0x18;if(_0xd8f5ea)_0x51daf3+=parseInt(_0xd8f5ea[0x1]);if(_0x57430a)_0x51daf3+=parseInt(_0x57430a[0x1])/0x3c;if(_0x51daf3>0x0)return parseFloat(_0x51daf3[_0x3e8059(0x1c5)](0x2));const _0x2e2798=_0x4bd974[_0x3e8059(0x104)](':');if(_0x2e2798['length']>=0x2){const _0xd8aadc=parseInt(_0x2e2798[0x0],0xa)||0x0,_0x2c6dab=parseInt(_0x2e2798[0x1],0xa)||0x0;return parseFloat((_0xd8aadc+_0x2c6dab/0x3c)[_0x3e8059(0x1c5)](0x2));}return 0x0;}function populateFilters(){const _0x197f94=_0x25d084;populateMonthFilter(),populateUniqueFilter(_0x197f94(0x170),'assignee',_0x197f94(0x183)),populateUniqueFilter('client-filter',_0x197f94(0x26a),_0x197f94(0x213)),populateUniqueFilter('priority-filter',_0x197f94(0x1de),_0x197f94(0x206)),populateUniqueFilter('status-filter',_0x197f94(0xdc),'Todos\x20los\x20Estados'),populateUniqueFilter(_0x197f94(0x27b),_0x197f94(0x1f1),_0x197f94(0x259)),populateUniqueFilter('diagnosis-filter','diagnosis',_0x197f94(0x141)),populateUniqueFilter(_0x197f94(0x18a),_0x197f94(0x211),_0x197f94(0x283)),document[_0x197f94(0x192)](_0x197f94(0xf2))[_0x197f94(0x17a)]('change',handleMonthFilterChange),document[_0x197f94(0x1ec)](_0x197f94(0x22f))['forEach'](_0x300532=>{const _0xcda1c6=_0x197f94;_0x300532[_0xcda1c6(0x17a)]('change',()=>updateDashboard(getFilteredData()));});}async function handleMonthFilterChange(){updateDashboard(getFilteredData()),await triggerAIAnalysis();}async function clearAllFilters(){const _0x1a408b=_0x25d084;if(allData['length']===0x0)return;document['querySelectorAll'](_0x1a408b(0x27e))[_0x1a408b(0x1d7)](_0x3e8a8c=>{const _0x3ed2e2=_0x1a408b;_0x3e8a8c[_0x3ed2e2(0x21f)]='all';}),updateDashboard(getFilteredData()),await triggerAIAnalysis();}function populateMonthFilter(){const _0xae3872=_0x25d084,_0x4bc244=document[_0xae3872(0x192)]('month-filter');if(!allData||allData['length']===0x0){_0x4bc244[_0xae3872(0x258)]=_0xae3872(0x245);return;}const _0x4b2202=new Set(allData['map'](_0x5ca99f=>_0x5ca99f[_0xae3872(0x1b6)][_0xae3872(0x200)]()+'-'+_0x5ca99f[_0xae3872(0x1b6)]['getMonth']()));_0x4bc244[_0xae3872(0x258)]=_0xae3872(0x11f),Array[_0xae3872(0x23f)](_0x4b2202)[_0xae3872(0xd9)]((_0x4a8ebc,_0x4be646)=>{const _0x540ea9=_0xae3872,[_0x576e96,_0x559295]=_0x4a8ebc[_0x540ea9(0x104)]('-')[_0x540ea9(0x180)](Number),[_0x52a2bb,_0x51d289]=_0x4be646[_0x540ea9(0x104)]('-')[_0x540ea9(0x180)](Number);return _0x576e96!==_0x52a2bb?_0x576e96-_0x52a2bb:_0x559295-_0x51d289;})[_0xae3872(0x109)]()[_0xae3872(0x1d7)](_0x1dee4b=>{const _0x4d01bd=_0xae3872,[_0x6d04f8,_0x29f2ab]=_0x1dee4b[_0x4d01bd(0x104)]('-'),_0x2fcacd=document[_0x4d01bd(0x1f3)](_0x4d01bd(0x27a));_0x2fcacd[_0x4d01bd(0x21f)]=_0x29f2ab,_0x2fcacd['textContent']=MONTH_NAMES[parseInt(_0x29f2ab)]+'\x20'+_0x6d04f8,_0x4bc244[_0x4d01bd(0x111)](_0x2fcacd);});}function populateUniqueFilter(_0xa8d148,_0x5438e9,_0x4630a8){const _0x7e073d=_0x25d084,_0x2ca1da=document[_0x7e073d(0x192)](_0xa8d148);if(!_0x2ca1da)return;_0x2ca1da['innerHTML']='<option\x20value=\x22all\x22>'+_0x4630a8+_0x7e073d(0x100);if(!allData||allData[_0x7e073d(0x1e1)]===0x0)return;const _0x56f92e=new Set(allData[_0x7e073d(0x180)](_0x3d7876=>_0x3d7876[_0x5438e9])[_0x7e073d(0x1f6)](_0x2fb82d=>_0x2fb82d&&_0x2fb82d!==_0x7e073d(0x105)&&_0x2fb82d!==_0x7e073d(0x214)&&_0x2fb82d!==_0x7e073d(0x168)));Array['from'](_0x56f92e)['sort']()[_0x7e073d(0x1d7)](_0x22592e=>{const _0x12210d=_0x7e073d,_0x3251f7=document['createElement'](_0x12210d(0x27a));_0x3251f7[_0x12210d(0x21f)]=_0x22592e,_0x3251f7[_0x12210d(0x184)]=_0x22592e,_0x2ca1da[_0x12210d(0x111)](_0x3251f7);});}function getFilteredData(){const _0x51984a=_0x25d084;let _0x572ae3=allData;const _0x2eb08e={'month':document[_0x51984a(0x192)](_0x51984a(0xf2))['value'],'assignee':document[_0x51984a(0x192)](_0x51984a(0x170))[_0x51984a(0x21f)],'client':document['getElementById']('client-filter')[_0x51984a(0x21f)],'priority':document[_0x51984a(0x192)](_0x51984a(0x1ab))[_0x51984a(0x21f)],'status':document[_0x51984a(0x192)](_0x51984a(0x17b))['value'],'requestType':document[_0x51984a(0x192)](_0x51984a(0x27b))[_0x51984a(0x21f)],'diagnosis':document[_0x51984a(0x192)](_0x51984a(0x1d9))[_0x51984a(0x21f)],'problemType':document[_0x51984a(0x192)](_0x51984a(0x18a))[_0x51984a(0x21f)]};if(_0x2eb08e[_0x51984a(0x189)]!==_0x51984a(0x11e))_0x572ae3=_0x572ae3[_0x51984a(0x1f6)](_0x1a9de3=>_0x1a9de3[_0x51984a(0x1b6)][_0x51984a(0x253)]()==parseInt(_0x2eb08e[_0x51984a(0x189)]));if(_0x2eb08e['assignee']!==_0x51984a(0x11e))_0x572ae3=_0x572ae3[_0x51984a(0x1f6)](_0xa1d2c1=>_0xa1d2c1['assignee']===_0x2eb08e[_0x51984a(0x1ae)]);if(_0x2eb08e[_0x51984a(0x26a)]!==_0x51984a(0x11e))_0x572ae3=_0x572ae3[_0x51984a(0x1f6)](_0x120fab=>_0x120fab[_0x51984a(0x26a)]===_0x2eb08e[_0x51984a(0x26a)]);if(_0x2eb08e[_0x51984a(0x1de)]!==_0x51984a(0x11e))_0x572ae3=_0x572ae3['filter'](_0x44bae9=>_0x44bae9['priority']===_0x2eb08e['priority']);if(_0x2eb08e[_0x51984a(0xdc)]!=='all')_0x572ae3=_0x572ae3[_0x51984a(0x1f6)](_0x116a3f=>_0x116a3f[_0x51984a(0xdc)]===_0x2eb08e[_0x51984a(0xdc)]);if(_0x2eb08e['requestType']!==_0x51984a(0x11e))_0x572ae3=_0x572ae3[_0x51984a(0x1f6)](_0x224bc0=>_0x224bc0['requestType']===_0x2eb08e[_0x51984a(0x1f1)]);if(_0x2eb08e[_0x51984a(0x175)]!=='all')_0x572ae3=_0x572ae3[_0x51984a(0x1f6)](_0x349727=>_0x349727['diagnosis']===_0x2eb08e[_0x51984a(0x175)]);if(_0x2eb08e['problemType']!==_0x51984a(0x11e))_0x572ae3=_0x572ae3[_0x51984a(0x1f6)](_0x176a94=>_0x176a94[_0x51984a(0x211)]===_0x2eb08e[_0x51984a(0x211)]);return _0x572ae3;}async function triggerAIAnalysis(){const _0x49f6c0=_0x25d084,_0x58e02e=document['getElementById'](_0x49f6c0(0xfe)),_0x1e80d2=document[_0x49f6c0(0x192)](_0x49f6c0(0x240)),_0x5898a=document['getElementById'](_0x49f6c0(0xf4)),_0x1b182b=document[_0x49f6c0(0x192)](_0x49f6c0(0xf2));_0x58e02e['classList']['remove'](_0x49f6c0(0x1e9)),_0x1e80d2[_0x49f6c0(0x11a)][_0x49f6c0(0x238)]=_0x49f6c0(0x25c),_0x5898a[_0x49f6c0(0x258)]='';const _0x337255=_0x1b182b[_0x49f6c0(0x21f)],_0x19b26f=_0x1b182b[_0x49f6c0(0xe6)][_0x1b182b[_0x49f6c0(0xea)]][_0x49f6c0(0x26c)];let _0x1a06d7;_0x337255===_0x49f6c0(0x11e)?_0x1a06d7=allData:_0x1a06d7=allData['filter'](_0xf0cbb=>_0xf0cbb[_0x49f6c0(0x1b6)][_0x49f6c0(0x253)]()==parseInt(_0x337255));const _0x48fd39=await generateAIAnalysis(_0x1a06d7,_0x19b26f);_0x5898a['innerHTML']=_0x48fd39,_0x1e80d2[_0x49f6c0(0x11a)][_0x49f6c0(0x238)]='none';}async function generateAIAnalysis(_0xab2704,_0x1e849f){const _0x1bfd6=_0x25d084;await new Promise(_0x58e49c=>setTimeout(_0x58e49c,0x320));if(!_0xab2704||_0xab2704[_0x1bfd6(0x1e1)]===0x0)return _0x1bfd6(0x114);const _0x26dafe=_0xab2704[_0x1bfd6(0x1e1)],_0x25597c=_0xab2704[_0x1bfd6(0x1f6)](_0x4bb38d=>[_0x1bfd6(0x21d),'Resolved',_0x1bfd6(0x112),_0x1bfd6(0x212),_0x1bfd6(0x250)]['includes'](_0x4bb38d[_0x1bfd6(0xdc)]))[_0x1bfd6(0x1e1)],_0x53387a=_0x26dafe>0x0?(_0x25597c/_0x26dafe*0x64)['toFixed'](0x0):0x0,_0x3a5627=_0xab2704[_0x1bfd6(0x1f6)](_0x2d7c1c=>_0x2d7c1c[_0x1bfd6(0x1cf)]>0x0),_0x25e4a9=_0x3a5627[_0x1bfd6(0x1e1)]>0x0?(_0x3a5627[_0x1bfd6(0xdf)]((_0x4587ee,_0x24f86b)=>_0x4587ee+_0x24f86b['resolutionTime'],0x0)/_0x3a5627[_0x1bfd6(0x1e1)])['toFixed'](0x1):0x0,_0x5f5d35=_0xab2704[_0x1bfd6(0xdf)]((_0x3c4078,_0x5ca9da)=>{const _0x16c966=_0x1bfd6;return _0x3c4078[_0x5ca9da[_0x16c966(0xee)]]=(_0x3c4078[_0x5ca9da[_0x16c966(0xee)]]||0x0)+0x1,_0x3c4078;},{}),_0x4dcb3e=_0x5f5d35[_0x1bfd6(0x158)]||0x0,_0x5e42c6=_0x5f5d35[_0x1bfd6(0x1c0)]||0x0,_0x16c01d=_0x5f5d35[_0x1bfd6(0x108)]||0x0,_0x4a86b8=_0x4dcb3e+_0x5e42c6+_0x16c01d,_0x45ec35=(_0x1342f1,_0x4eac7b)=>{const _0x392f36=_0x1bfd6,_0x35d5cc=_0xab2704[_0x392f36(0xdf)]((_0x208807,_0x3bc6d7)=>{const _0x353ef0=_0x392f36,_0x11a9f4=_0x3bc6d7[_0x1342f1]||_0x353ef0(0x105);return _0x11a9f4!==_0x353ef0(0x105)&&_0x11a9f4!=='No\x20Asignado'&&_0x11a9f4!==_0x353ef0(0x168)&&(_0x208807[_0x11a9f4]=(_0x208807[_0x11a9f4]||0x0)+0x1),_0x208807;},{});return Object[_0x392f36(0x191)](_0x35d5cc)[_0x392f36(0xd9)](([,_0x35ea22],[,_0x311ec4])=>_0x311ec4-_0x35ea22)[_0x392f36(0x243)](0x0,_0x4eac7b);},_0x206958=_0x45ec35(_0x1bfd6(0x1f1),0x1),_0x3bd162=_0x45ec35(_0x1bfd6(0x26a),0x1),_0x1ab813={};DAY_NAMES['forEach'](_0x3b8779=>{const _0x22ff04=_0x1bfd6;_0x1ab813[_0x3b8779]=Array(0x18)[_0x22ff04(0x225)](0x0);}),_0xab2704[_0x1bfd6(0x1d7)](_0x3e4e97=>{const _0x36e0af=_0x1bfd6,_0x396cb1=_0x3e4e97[_0x36e0af(0x1b6)][_0x36e0af(0x167)](),_0x32338c=_0x3e4e97[_0x36e0af(0x1b6)][_0x36e0af(0x19a)]();_0x1ab813[DAY_NAMES[_0x396cb1]][_0x32338c]++;});let _0x2ab0d3='',_0x441ee8=-0x1,_0x490ffc=-0x1;Object[_0x1bfd6(0x191)](_0x1ab813)[_0x1bfd6(0x1d7)](([_0x1667b1,_0x515ad2])=>{const _0x2ac131=_0x1bfd6;_0x515ad2[_0x2ac131(0x1d7)]((_0x4940d6,_0x2fb39f)=>{_0x4940d6>_0x490ffc&&(_0x490ffc=_0x4940d6,_0x2ab0d3=_0x1667b1,_0x441ee8=_0x2fb39f);});});const _0x3553aa=_0xab2704['map'](_0x551d6b=>_0x551d6b['summary'][_0x1bfd6(0x104)](/\s+/))[_0x1bfd6(0x13a)]()[_0x1bfd6(0x180)](_0x9eae61=>_0x9eae61[_0x1bfd6(0x16c)]()[_0x1bfd6(0x248)](/[^a-záéíóúñü]/g,''))[_0x1bfd6(0x1f6)](_0x192642=>_0x192642['length']>0x4&&!['para',_0x1bfd6(0x136),_0x1bfd6(0x14b),_0x1bfd6(0x249),_0x1bfd6(0x157),'esta',_0x1bfd6(0x10c),_0x1bfd6(0x265),_0x1bfd6(0x20b),_0x1bfd6(0x1a9),_0x1bfd6(0xe1),_0x1bfd6(0x215),_0x1bfd6(0x1d1),'un','el','la','se','es','en','y','o','a','de','su','sus','mi',_0x1bfd6(0x178),'tu','tus',_0x1bfd6(0x17e),_0x1bfd6(0x223),_0x1bfd6(0x26e),'ni',_0x1bfd6(0xfc),'al','lo','le',_0x1bfd6(0x284),'me','te',_0x1bfd6(0x196),'os','si','no',_0x1bfd6(0x118),_0x1bfd6(0xda),_0x1bfd6(0x1bf),_0x1bfd6(0x1d3),'y\x20el',_0x1bfd6(0x217),_0x1bfd6(0x148),_0x1bfd6(0x16b),_0x1bfd6(0x1d4),_0x1bfd6(0x11c)][_0x1bfd6(0x18b)](_0x192642)),_0x1239ff=_0x3553aa[_0x1bfd6(0xdf)]((_0x2a7c4d,_0x13c137)=>{return _0x2a7c4d[_0x13c137]=(_0x2a7c4d[_0x13c137]||0x0)+0x1,_0x2a7c4d;},{}),_0x59a5bf=Object[_0x1bfd6(0x191)](_0x1239ff)[_0x1bfd6(0xd9)](([,_0x293a98],[,_0x44fcab])=>_0x44fcab-_0x293a98)[_0x1bfd6(0x243)](0x0,0x5)[_0x1bfd6(0x180)](_0x26d9b3=>_0x1bfd6(0x276)+_0x26d9b3[0x0]+'</strong>');let _0x7daa4f='<h4>Análisis\x20para:\x20'+_0x1e849f+_0x1bfd6(0x233);_0x7daa4f+=_0x1bfd6(0xf0)+_0x26dafe+_0x1bfd6(0x1dd),_0x7daa4f+='<ul>',_0x7daa4f+=_0x1bfd6(0x1f5)+_0x53387a+_0x1bfd6(0x20c)+_0x25e4a9+_0x1bfd6(0x1d2);if(_0x206958[_0x1bfd6(0x1e1)]>0x0){const _0x535c34=_0x206958[0x0],_0x27e976=(_0x535c34[0x1]/_0x26dafe*0x64)[_0x1bfd6(0x1c5)](0x0);_0x7daa4f+='<li><strong>Categoría\x20Principal:</strong>\x20La\x20solicitud\x20más\x20frecuente\x20fue\x20\x22<strong>'+_0x535c34[0x0]+_0x1bfd6(0x1d6)+_0x27e976+_0x1bfd6(0x279);}_0x490ffc>0x0&&(_0x7daa4f+='<li><strong>Pico\x20de\x20Actividad:</strong>\x20La\x20mayor\x20concentración\x20de\x20tickets\x20se\x20registró\x20los\x20días\x20<strong>'+_0x2ab0d3+'</strong>,\x20específicamente\x20en\x20la\x20franja\x20horaria\x20de\x20las\x20<strong>'+_0x441ee8+':00\x20hs</strong>.</li>');if(_0x4a86b8>0x0){let _0x195d45=_0x1bfd6(0x108),_0x3f0917=_0x16c01d;_0x4dcb3e>_0x3f0917&&(_0x195d45='Positivo',_0x3f0917=_0x4dcb3e);_0x5e42c6>_0x3f0917&&(_0x195d45=_0x1bfd6(0x1c0),_0x3f0917=_0x5e42c6);const _0x219396=(_0x3f0917/_0x4a86b8*0x64)[_0x1bfd6(0x1c5)](0x0);_0x7daa4f+=_0x1bfd6(0x197)+_0x195d45+_0x1bfd6(0xf7)+_0x219396+_0x1bfd6(0xfa);}return _0x59a5bf[_0x1bfd6(0x1e1)]>0x0&&(_0x7daa4f+=_0x1bfd6(0xf8)+_0x59a5bf['join'](',\x20')+_0x1bfd6(0x198)),_0x7daa4f+=_0x1bfd6(0x160),_0x7daa4f+=_0x1bfd6(0x228),_0x7daa4f+=_0x1bfd6(0x27d),_0x7daa4f;}function processData(_0x4809bc){const _0x1045e0=_0x25d084;if(_0x4809bc['length']===0x0)return{};const _0x3749c2=_0x4809bc[_0x1045e0(0xdf)]((_0x582639,_0x363579)=>{const _0x273ddc=_0x1045e0;return _0x582639[_0x363579[_0x273ddc(0xdc)]]=(_0x582639[_0x363579[_0x273ddc(0xdc)]]||0x0)+0x1,_0x582639;},{}),_0x31e9ad=_0x4809bc[_0x1045e0(0xdf)]((_0x33f96b,_0x18453f)=>{const _0x94c94b=_0x1045e0;return _0x33f96b[_0x18453f[_0x94c94b(0x1de)]]=(_0x33f96b[_0x18453f[_0x94c94b(0x1de)]]||0x0)+0x1,_0x33f96b;},{}),_0x401c38=_0x4809bc[_0x1045e0(0xdf)]((_0x3d82a1,_0x291a9)=>{const _0x84cee7=_0x1045e0;return _0x3d82a1[_0x291a9[_0x84cee7(0x26a)]]=(_0x3d82a1[_0x291a9[_0x84cee7(0x26a)]]||0x0)+0x1,_0x3d82a1;},{}),_0x12f6c3=_0x4809bc[_0x1045e0(0xdf)]((_0x21c389,_0x3ee1b7)=>{const _0x34c7e9=_0x1045e0;return _0x21c389[_0x3ee1b7['assignee']]=(_0x21c389[_0x3ee1b7[_0x34c7e9(0x1ae)]]||0x0)+0x1,_0x21c389;},{}),_0x3d0b65=_0x4809bc[_0x1045e0(0xdf)]((_0x161d57,_0x55b769)=>{const _0x136531=_0x1045e0;return _0x161d57[_0x55b769[_0x136531(0x1f1)]]=(_0x161d57[_0x55b769[_0x136531(0x1f1)]]||0x0)+0x1,_0x161d57;},{}),_0xa04781=_0x4809bc[_0x1045e0(0xdf)]((_0x19b2c1,_0x4309a1)=>{const _0x3da75a=_0x1045e0;return _0x19b2c1[_0x4309a1[_0x3da75a(0x175)]]=(_0x19b2c1[_0x4309a1['diagnosis']]||0x0)+0x1,_0x19b2c1;},{}),_0x47433e=_0x4809bc[_0x1045e0(0xdf)]((_0x7491a4,_0x37d8c2)=>{const _0x2dd215=_0x1045e0;return _0x7491a4[_0x37d8c2[_0x2dd215(0x211)]]=(_0x7491a4[_0x37d8c2[_0x2dd215(0x211)]]||0x0)+0x1,_0x7491a4;},{}),_0x51ef0c=_0x4809bc['reduce']((_0x40a16d,_0x4485fa)=>{const _0xf7d221=_0x1045e0;return _0x40a16d[_0x4485fa[_0xf7d221(0xee)]]=(_0x40a16d[_0x4485fa[_0xf7d221(0xee)]]||0x0)+0x1,_0x40a16d;},{}),_0x55f954=Object[_0x1045e0(0x191)](_0x401c38)[_0x1045e0(0xd9)](([,_0x229336],[,_0x26e7a9])=>_0x26e7a9-_0x229336)['slice'](0x0,0xa),_0x5b9240=Object['entries'](_0x12f6c3)[_0x1045e0(0xd9)](([,_0x34dd0f],[,_0x471ab7])=>_0x471ab7-_0x34dd0f)[_0x1045e0(0x243)](0x0,0xa),_0x36aac3=_0x4809bc[_0x1045e0(0xdf)]((_0x589d4a,_0xcc903a)=>{const _0x4f999d=_0x1045e0,_0x5c3162=_0xcc903a[_0x4f999d(0x1b6)]['toISOString']()[_0x4f999d(0x104)]('T')[0x0];return _0x589d4a[_0x5c3162]=(_0x589d4a[_0x5c3162]||0x0)+0x1,_0x589d4a;},{}),_0xb4f1e9=Object[_0x1045e0(0x191)](_0x36aac3)[_0x1045e0(0xd9)](([_0x397e02],[_0x11a421])=>new Date(_0x397e02)-new Date(_0x11a421)),_0x1f1539=_0x4809bc['map'](_0x363d66=>_0x363d66[_0x1045e0(0x219)][_0x1045e0(0x104)](/\s+/))[_0x1045e0(0x13a)]()[_0x1045e0(0x180)](_0x2bfac3=>_0x2bfac3['toLowerCase']()[_0x1045e0(0x248)](/[^a-záéíóúñü]/g,''))[_0x1045e0(0x1f6)](_0x294e04=>_0x294e04['length']>0x3&&![_0x1045e0(0x154),_0x1045e0(0x136),_0x1045e0(0x14b),_0x1045e0(0x249),_0x1045e0(0x157),_0x1045e0(0x102),_0x1045e0(0x10c),'del',_0x1045e0(0x20b),_0x1045e0(0x1a9),_0x1045e0(0xe1),_0x1045e0(0x215),_0x1045e0(0x1d1),'un','el','la','se','es','en','y','o','a','de','su',_0x1045e0(0x24c),'mi','mis','tu','tus',_0x1045e0(0x17e),_0x1045e0(0x223),'pero','ni','sin','al','lo','le',_0x1045e0(0x284),'me','te',_0x1045e0(0x196),'os','si','no',_0x1045e0(0x118),_0x1045e0(0xda),'en\x20el',_0x1045e0(0x1d3),_0x1045e0(0x23d)][_0x1045e0(0x18b)](_0x294e04)),_0x304281=_0x1f1539['reduce']((_0x591e9a,_0x45f7f7)=>{return _0x591e9a[_0x45f7f7]=(_0x591e9a[_0x45f7f7]||0x0)+0x1,_0x591e9a;},{}),_0x15d576={};DAY_NAMES[_0x1045e0(0x1d7)](_0x465c37=>{const _0x397c4e=_0x1045e0;_0x15d576[_0x465c37]=Array(0x18)[_0x397c4e(0x225)](0x0);}),_0x4809bc[_0x1045e0(0x1d7)](_0x2bcaed=>{const _0x568d44=_0x1045e0,_0x4448c9=_0x2bcaed['created'][_0x568d44(0x167)](),_0x57b059=_0x2bcaed[_0x568d44(0x1b6)][_0x568d44(0x19a)]();_0x15d576[DAY_NAMES[_0x4448c9]][_0x57b059]++;});const _0x5b0cff=Object[_0x1045e0(0x191)](_0x401c38)[_0x1045e0(0xd9)](([,_0x4188da],[,_0x4bf36a])=>_0x4bf36a-_0x4188da)['slice'](0x0,0xa)[_0x1045e0(0x180)](_0x2cce26=>_0x2cce26[0x0]),_0x5c2ec9=Array[_0x1045e0(0x23f)](new Set(_0x4809bc[_0x1045e0(0x180)](_0x133e32=>_0x133e32[_0x1045e0(0x1f1)])))[_0x1045e0(0xd9)](),_0x31c53e={};_0x5b0cff[_0x1045e0(0x1d7)](_0x3f9a71=>{const _0x45dde0=_0x1045e0;_0x31c53e[_0x3f9a71]={};const _0x5be8c7=_0x4809bc[_0x45dde0(0x1f6)](_0x103717=>_0x103717[_0x45dde0(0x26a)]===_0x3f9a71);_0x5be8c7[_0x45dde0(0x1d7)](_0x156884=>{const _0x1ad341=_0x45dde0;_0x31c53e[_0x3f9a71][_0x156884[_0x1ad341(0x1f1)]]=(_0x31c53e[_0x3f9a71][_0x156884[_0x1ad341(0x1f1)]]||0x0)+0x1;});});const _0x2fd3a0={'clients':_0x5b0cff,'requestTypes':_0x5c2ec9,'data':_0x31c53e},_0x38ad8a={},_0x58b96a=new Set();_0x4809bc[_0x1045e0(0x1d7)](_0x4fbb26=>{const _0xb953de=_0x1045e0,_0x333cc4=_0x4fbb26['created']['getFullYear']()+'-'+_0x4fbb26['created']['getMonth']();if(!_0x38ad8a[_0x333cc4])_0x38ad8a[_0x333cc4]={};_0x38ad8a[_0x333cc4][_0x4fbb26[_0xb953de(0x1f1)]]=(_0x38ad8a[_0x333cc4][_0x4fbb26['requestType']]||0x0)+0x1,_0x58b96a[_0xb953de(0x27f)](_0x4fbb26[_0xb953de(0x1f1)]);});const _0x427faf=Object[_0x1045e0(0x1a0)](_0x38ad8a)[_0x1045e0(0xd9)]((_0x5a53b4,_0x219e48)=>{const _0x2a8b10=_0x1045e0,[_0xd267cc,_0x3c55ef]=_0x5a53b4[_0x2a8b10(0x104)]('-')[_0x2a8b10(0x180)](Number),[_0xd45035,_0x110d15]=_0x219e48['split']('-')[_0x2a8b10(0x180)](Number);return _0xd267cc-_0xd45035||_0x3c55ef-_0x110d15;}),_0x370665=Array[_0x1045e0(0x23f)](_0x58b96a)['sort']();return{'status':{'labels':Object[_0x1045e0(0x1a0)](_0x3749c2),'values':Object[_0x1045e0(0x1b0)](_0x3749c2)},'priority':{'labels':Object[_0x1045e0(0x1a0)](_0x31e9ad),'values':Object[_0x1045e0(0x1b0)](_0x31e9ad)},'topClients':{'labels':_0x55f954[_0x1045e0(0x180)](_0x51b258=>_0x51b258[0x0]),'values':_0x55f954[_0x1045e0(0x180)](_0x2095e6=>_0x2095e6[0x1])},'topAssignees':{'labels':_0x5b9240['map'](_0x27318e=>_0x27318e[0x0]),'values':_0x5b9240[_0x1045e0(0x180)](_0x28385d=>_0x28385d[0x1])},'requestType':{'labels':Object[_0x1045e0(0x1a0)](_0x3d0b65),'values':Object['values'](_0x3d0b65)},'diagnosis':{'labels':Object[_0x1045e0(0x1a0)](_0xa04781),'values':Object['values'](_0xa04781)},'problemType':{'labels':Object[_0x1045e0(0x1a0)](_0x47433e),'values':Object[_0x1045e0(0x1b0)](_0x47433e)},'sentiment':{'labels':Object[_0x1045e0(0x1a0)](_0x51ef0c),'values':Object['values'](_0x51ef0c)},'trend':{'labels':_0xb4f1e9['map'](_0x2f3b67=>_0x2f3b67[0x0]),'values':_0xb4f1e9[_0x1045e0(0x180)](_0x1f32ac=>_0x1f32ac[0x1])},'wordCloud':Object['entries'](_0x304281)[_0x1045e0(0x180)](([_0x43480f,_0x2f2a40])=>[_0x43480f,_0x2f2a40*0x5]),'heatmap':_0x15d576,'clientRequestType':_0x2fd3a0,'monthlyComparison':{'months':_0x427faf,'requestTypes':_0x370665,'data':_0x38ad8a}};}function renderKPIs(_0x3d14d1){const _0x3d66a8=_0x25d084,_0x30d330=_0x3d14d1[_0x3d66a8(0x1e1)],_0x422700=_0x3d14d1[_0x3d66a8(0x1f6)](_0x3a64b0=>['Closed',_0x3d66a8(0x251),_0x3d66a8(0x112),_0x3d66a8(0x212),'Resuelto'][_0x3d66a8(0x18b)](_0x3a64b0[_0x3d66a8(0xdc)]))['length'],_0x4a4646=_0x3d14d1['filter'](_0x484825=>!['Closed',_0x3d66a8(0x251),_0x3d66a8(0x112),'Cerrado',_0x3d66a8(0x250),_0x3d66a8(0x1fd),_0x3d66a8(0x27c),_0x3d66a8(0x247)][_0x3d66a8(0x18b)](_0x484825['status']))['length'],_0x398a31=_0x3d14d1['filter'](_0x3cfaba=>_0x3cfaba[_0x3d66a8(0x1cf)]>0x0),_0xeb9bc7=_0x398a31['length']>0x0?(_0x398a31[_0x3d66a8(0xdf)]((_0x1b360f,_0x63ab8)=>_0x1b360f+_0x63ab8['resolutionTime'],0x0)/_0x398a31[_0x3d66a8(0x1e1)])['toFixed'](0x1):0x0,_0x11a0b0=_0x3d14d1[_0x3d66a8(0x1f6)](_0x373ea8=>_0x373ea8[_0x3d66a8(0x202)]>0x0),_0x5ba49d=_0x11a0b0[_0x3d66a8(0x1e1)]>0x0?(_0x11a0b0[_0x3d66a8(0xdf)]((_0x17bd27,_0x101f84)=>_0x17bd27+_0x101f84[_0x3d66a8(0x202)],0x0)/_0x11a0b0[_0x3d66a8(0x1e1)])[_0x3d66a8(0x1c5)](0x1):0x0,_0x430a11=_0x3d14d1['filter'](_0x1912e2=>!_0x1912e2[_0x3d66a8(0x1ae)]||_0x1912e2[_0x3d66a8(0x1ae)][_0x3d66a8(0x16c)]()==='unassigned'||_0x1912e2['assignee'][_0x3d66a8(0x16c)]()==='sin\x20asignar')[_0x3d66a8(0x1e1)],_0x3fcec4=new Set(_0x3d14d1[_0x3d66a8(0x180)](_0x56f073=>_0x56f073['created'][_0x3d66a8(0xec)]()['split']('T')[0x0])),_0x383e40=_0x3fcec4['size']>0x0?(_0x30d330/_0x3fcec4['size'])[_0x3d66a8(0x1c5)](0x1):'0.0',_0x132574=new Set(_0x3d14d1[_0x3d66a8(0x180)](_0x4cba79=>_0x4cba79[_0x3d66a8(0x1b6)][_0x3d66a8(0x200)]()+'-'+_0x4cba79[_0x3d66a8(0x1b6)][_0x3d66a8(0x253)]())),_0x93a4d9=_0x132574[_0x3d66a8(0x1a5)]>0x0?(_0x30d330/_0x132574[_0x3d66a8(0x1a5)])[_0x3d66a8(0x1c5)](0x1):_0x3d66a8(0x1a7);document[_0x3d66a8(0x192)]('kpi-total-tickets')[_0x3d66a8(0x184)]=_0x30d330,document[_0x3d66a8(0x192)](_0x3d66a8(0x22e))['textContent']=_0x30d330>0x0?(_0x422700/_0x30d330*0x64)[_0x3d66a8(0x1c5)](0x0)+'%':'0%',document['getElementById'](_0x3d66a8(0xfd))['textContent']=_0x4a4646,document[_0x3d66a8(0x192)](_0x3d66a8(0x117))[_0x3d66a8(0x184)]=_0xeb9bc7+_0x3d66a8(0x21a),document['getElementById'](_0x3d66a8(0x110))[_0x3d66a8(0x184)]=_0x5ba49d+_0x3d66a8(0x21a),document[_0x3d66a8(0x192)](_0x3d66a8(0x1c1))[_0x3d66a8(0x184)]=_0x430a11,document[_0x3d66a8(0x192)]('kpi-avg-day')[_0x3d66a8(0x184)]=_0x383e40,document[_0x3d66a8(0x192)](_0x3d66a8(0x129))[_0x3d66a8(0x184)]=_0x93a4d9;}const createChart=(_0x4f1cd9,_0x42b037,_0x3faa21,_0x426929)=>{if(charts[_0x4f1cd9['id']])charts[_0x4f1cd9['id']]['destroy']();charts[_0x4f1cd9['id']]=new Chart(_0x4f1cd9,{'type':_0x42b037,'data':_0x3faa21,'options':_0x426929});};function renderCharts(_0x16cb0b){const _0x3bc7af=_0x25d084;if(_0x16cb0b[_0x3bc7af(0x1e1)]===0x0){Object[_0x3bc7af(0x1b0)](charts)[_0x3bc7af(0x1d7)](_0x22773d=>_0x22773d[_0x3bc7af(0xef)]()),charts={},document['getElementById'](_0x3bc7af(0x161))[_0x3bc7af(0x258)]='',document[_0x3bc7af(0x192)]('heatmap-day-labels')[_0x3bc7af(0x258)]='',document[_0x3bc7af(0x192)]('word-cloud-container')[_0x3bc7af(0x258)]=_0x3bc7af(0x1ea);return;}const _0x207e2c=processData(_0x16cb0b),_0x2d0f7a=_0x5ae81a=>({'responsive':!![],'maintainAspectRatio':![],'plugins':{'legend':{'display':![]},'datalabels':{'anchor':_0x3bc7af(0x174),'align':_0x3bc7af(0x174),'color':FONT_COLOR,'font':{'weight':'bold'},'formatter':_0x54512c=>_0x54512c>0x0?_0x54512c:''}},'scales':{'x':{'ticks':{'color':FONT_COLOR},'grid':{'color':GRID_COLOR}},'y':{'ticks':{'color':FONT_COLOR},'grid':{'color':GRID_COLOR}}},'onClick':_0x5ae81a}),_0x47c785=(_0x288d6d,_0x434fbd,_0x595005)=>{const _0x146735=_0x3bc7af;if(_0x434fbd[_0x146735(0x1e1)]>0x0)handleChartClick(_0x595005['canvas']['id'],_0x595005[_0x146735(0x173)][_0x146735(0xd8)],_0x595005[_0x146735(0x236)][_0x146735(0x12e)][_0x434fbd[0x0]['index']]);};createChart(document[_0x3bc7af(0x192)](_0x3bc7af(0x19e)),_0x3bc7af(0x25b),{'labels':_0x207e2c[_0x3bc7af(0xdc)][_0x3bc7af(0x12e)],'datasets':[{'data':_0x207e2c[_0x3bc7af(0xdc)][_0x3bc7af(0x1b0)],'backgroundColor':Object[_0x3bc7af(0x1b0)](PALETTE)}]},{..._0x2d0f7a(_0x47c785),'indexAxis':'y'}),createChart(document[_0x3bc7af(0x192)]('priorityChart'),_0x3bc7af(0x21e),{'labels':_0x207e2c[_0x3bc7af(0x1de)][_0x3bc7af(0x12e)],'datasets':[{'data':_0x207e2c[_0x3bc7af(0x1de)][_0x3bc7af(0x1b0)],'backgroundColor':Object[_0x3bc7af(0x1b0)](PALETTE)}]},{'responsive':!![],'maintainAspectRatio':![],'plugins':{'legend':{'position':_0x3bc7af(0x1e3),'labels':{'color':FONT_COLOR}},'datalabels':{'color':_0x3bc7af(0x22b),'formatter':(_0xe6605d,_0x5ec8a5)=>_0xe6605d*0x64/_0x5ec8a5[_0x3bc7af(0x23e)][_0x3bc7af(0x236)][_0x3bc7af(0x26f)][0x0][_0x3bc7af(0x236)]['reduce']((_0x59419a,_0x193642)=>_0x59419a+_0x193642,0x0)>0x5?(_0xe6605d*0x64/_0x5ec8a5[_0x3bc7af(0x23e)][_0x3bc7af(0x236)][_0x3bc7af(0x26f)][0x0]['data']['reduce']((_0x2f620e,_0x48d759)=>_0x2f620e+_0x48d759,0x0))[_0x3bc7af(0x1c5)](0x0)+'%':''}},'onClick':_0x47c785}),createChart(document[_0x3bc7af(0x192)](_0x3bc7af(0xdb)),_0x3bc7af(0x25b),{'labels':_0x207e2c[_0x3bc7af(0x1f1)][_0x3bc7af(0x12e)],'datasets':[{'data':_0x207e2c['requestType'][_0x3bc7af(0x1b0)],'backgroundColor':PALETTE[_0x3bc7af(0x252)]}]},{..._0x2d0f7a(_0x47c785),'indexAxis':'y'}),createChart(document[_0x3bc7af(0x192)]('diagnosisChart'),'pie',{'labels':_0x207e2c['diagnosis']['labels'],'datasets':[{'data':_0x207e2c[_0x3bc7af(0x175)][_0x3bc7af(0x1b0)],'backgroundColor':Object[_0x3bc7af(0x1b0)](PALETTE)[_0x3bc7af(0x109)]()}]},{'responsive':!![],'maintainAspectRatio':![],'plugins':{'legend':{'position':'bottom','labels':{'color':FONT_COLOR}},'datalabels':{'display':![]}},'onClick':_0x47c785}),createChart(document['getElementById'](_0x3bc7af(0x231)),_0x3bc7af(0x25d),{'labels':_0x207e2c[_0x3bc7af(0x211)][_0x3bc7af(0x12e)],'datasets':[{'data':_0x207e2c[_0x3bc7af(0x211)][_0x3bc7af(0x1b0)],'backgroundColor':Object[_0x3bc7af(0x1b0)](PALETTE)}]},{'responsive':!![],'maintainAspectRatio':![],'plugins':{'legend':{'position':_0x3bc7af(0x1e3),'labels':{'color':FONT_COLOR}},'datalabels':{'display':![]}},'onClick':_0x47c785});const _0x381266={'Positivo':PALETTE[_0x3bc7af(0x252)],'Neutral':PALETTE['slate'],'Negativo':PALETTE[_0x3bc7af(0x272)]},_0x1c78cb=_0x207e2c['sentiment']['labels'],_0x1b05ea=_0x207e2c['sentiment'][_0x3bc7af(0x1b0)],_0x5024db=_0x1c78cb[_0x3bc7af(0x180)](_0x56999f=>_0x381266[_0x56999f]||PALETTE[_0x3bc7af(0x274)]);createChart(document['getElementById'](_0x3bc7af(0x26d)),_0x3bc7af(0x25d),{'labels':_0x1c78cb,'datasets':[{'data':_0x1b05ea,'backgroundColor':_0x5024db}]},{'responsive':!![],'maintainAspectRatio':![],'plugins':{'legend':{'position':'bottom','labels':{'color':FONT_COLOR}},'datalabels':{'display':![]}},'onClick':_0x47c785}),createChart(document[_0x3bc7af(0x192)](_0x3bc7af(0x12c)),_0x3bc7af(0x25b),{'labels':_0x207e2c[_0x3bc7af(0x271)][_0x3bc7af(0x12e)],'datasets':[{'label':_0x3bc7af(0x144),'data':_0x207e2c[_0x3bc7af(0x271)][_0x3bc7af(0x1b0)],'backgroundColor':PALETTE['blue']}]},{..._0x2d0f7a(_0x47c785),'indexAxis':'y'}),createChart(document['getElementById']('assigneeChart'),_0x3bc7af(0x25b),{'labels':_0x207e2c['topAssignees']['labels'],'datasets':[{'label':_0x3bc7af(0x144),'data':_0x207e2c[_0x3bc7af(0x209)]['values'],'backgroundColor':PALETTE[_0x3bc7af(0x16f)]}]},{..._0x2d0f7a(_0x47c785),'indexAxis':'y'});const _0x31e53f=document['getElementById'](_0x3bc7af(0x23c))['getContext']('2d'),_0x397f27=_0x31e53f[_0x3bc7af(0x20e)](0x0,0x0,0x0,0x190);_0x397f27[_0x3bc7af(0x18d)](0x0,_0x3bc7af(0xe9)),_0x397f27[_0x3bc7af(0x18d)](0.5,_0x3bc7af(0x1b9)),_0x397f27[_0x3bc7af(0x18d)](0x1,'rgba(251,\x20146,\x2060,\x200.3)'),createChart(document[_0x3bc7af(0x192)](_0x3bc7af(0x23c)),_0x3bc7af(0x18f),{'labels':_0x207e2c[_0x3bc7af(0xe5)]['labels'],'datasets':[{'label':_0x3bc7af(0x1f7),'data':_0x207e2c[_0x3bc7af(0xe5)][_0x3bc7af(0x1b0)],'borderColor':PALETTE['red'],'backgroundColor':_0x397f27,'fill':_0x3bc7af(0x1aa),'tension':0.3,'borderWidth':0x2,'pointRadius':0x4,'pointBackgroundColor':PALETTE[_0x3bc7af(0x226)],'pointBorderColor':'#fff','pointHoverRadius':0x6,'pointHoverBackgroundColor':PALETTE['red']}]},{'responsive':!![],'maintainAspectRatio':![],'plugins':{'legend':{'display':![]},'datalabels':{'display':![]},'zoom':{'zoom':{'wheel':{'enabled':!![]},'pinch':{'enabled':!![]},'mode':'x','drag':{'enabled':!![],'borderColor':PALETTE[_0x3bc7af(0x140)],'borderWidth':0x1,'backgroundColor':'rgba(79,\x2070,\x20229,\x200.2)'}},'pan':{'enabled':!![],'mode':'x'}}},'scales':{'x':{'type':'time','time':{'unit':'day','tooltipFormat':_0x3bc7af(0xe7),'displayFormats':{'day':_0x3bc7af(0x1c8)}},'ticks':{'color':FONT_COLOR},'grid':{'color':GRID_COLOR}},'y':{'ticks':{'color':FONT_COLOR},'grid':{'color':GRID_COLOR}}},'onClick':(_0x16adb4,_0x4a38b5,_0x31e65b)=>{const _0x1041f4=_0x3bc7af;if(_0x4a38b5['length']>0x0){const _0xb6ceb6=_0x4a38b5[0x0][_0x1041f4(0x103)],_0x3b8cc9=_0x31e65b['data'][_0x1041f4(0x12e)][_0xb6ceb6];handleChartClick(_0x1041f4(0x23c),_0x1041f4(0xed),_0x3b8cc9);}}}),renderHeatmap(_0x207e2c[_0x3bc7af(0x172)]),renderClientRequestTypeChart(_0x207e2c[_0x3bc7af(0x1cd)]),renderMonthlyComparisonChart(_0x207e2c['monthlyComparison']);const _0x304fa1=document[_0x3bc7af(0x192)]('word-cloud-container');_0x304fa1[_0x3bc7af(0x258)]='',_0x207e2c[_0x3bc7af(0x1e2)]&&_0x207e2c['wordCloud']['length']>0x0?WordCloud(_0x304fa1,{'list':_0x207e2c[_0x3bc7af(0x1e2)],'gridSize':0xa,'weightFactor':0x2,'shrinkToFit':!![],'minSize':0xa,'color':()=>PALETTE[Object['keys'](PALETTE)[Math[_0x3bc7af(0x1e6)](Math[_0x3bc7af(0x19b)]()*Object['keys'](PALETTE)[_0x3bc7af(0x1e1)])]],'fontFamily':_0x3bc7af(0x230),'rotateRatio':0.5,'ellipticity':0x1}):_0x304fa1['innerHTML']=_0x3bc7af(0xe0);}function renderHeatmap(_0x16135e){const _0x2dd6d7=_0x25d084,_0x4fa5a1=document[_0x2dd6d7(0x192)](_0x2dd6d7(0x161)),_0x3f2c32=document[_0x2dd6d7(0x192)]('heatmap-day-labels');_0x4fa5a1['innerHTML']='',_0x3f2c32['innerHTML']='';let _0x4526a0=0x0;Object['values'](_0x16135e)[_0x2dd6d7(0x1d7)](_0x116dc4=>_0x116dc4[_0x2dd6d7(0x1d7)](_0x24059a=>{if(_0x24059a>_0x4526a0)_0x4526a0=_0x24059a;})),_0x4fa5a1[_0x2dd6d7(0x11a)]['gridTemplateRows']='repeat('+DAY_NAMES['length']+',\x201fr)',_0x3f2c32[_0x2dd6d7(0x11a)][_0x2dd6d7(0x15e)]='repeat('+DAY_NAMES[_0x2dd6d7(0x1e1)]+_0x2dd6d7(0x13f);const _0x188926=(_0x1fd8d1,_0x55233d)=>_0x1fd8d1===0x0?_0x2dd6d7(0x138):_0x2dd6d7(0x1d0)+(0x5a-_0x1fd8d1/_0x55233d*0x3c)+'%)';DAY_NAMES[_0x2dd6d7(0x1d7)]((_0x53a30b,_0x32cc00)=>{const _0x8dbf24=_0x2dd6d7,_0x52cae9=document[_0x8dbf24(0x1f3)](_0x8dbf24(0x17d));_0x52cae9[_0x8dbf24(0x14e)]='heatmap-day-label',_0x52cae9[_0x8dbf24(0x184)]=_0x53a30b,_0x3f2c32['appendChild'](_0x52cae9);const _0x25b081=_0x16135e[_0x53a30b]||Array(0x18)[_0x8dbf24(0x225)](0x0);for(let _0x263763=0x0;_0x263763<0x18;_0x263763++){const _0x49bd31=_0x25b081[_0x263763],_0x5abdc0=document[_0x8dbf24(0x1f3)]('div');_0x5abdc0[_0x8dbf24(0x14e)]=_0x8dbf24(0x1ca),_0x5abdc0[_0x8dbf24(0x11a)][_0x8dbf24(0x14c)]=_0x188926(_0x49bd31,_0x4526a0),_0x5abdc0['textContent']=_0x49bd31>0x0?_0x49bd31:'',_0x5abdc0['title']=_0x53a30b+',\x20'+_0x263763+':00\x20-\x20'+(_0x263763+0x1)+_0x8dbf24(0x149)+_0x49bd31+_0x8dbf24(0x165),_0x5abdc0[_0x8dbf24(0x244)][_0x8dbf24(0x122)]=_0x32cc00,_0x5abdc0[_0x8dbf24(0x244)][_0x8dbf24(0x1ef)]=_0x263763,_0x5abdc0[_0x8dbf24(0x17a)](_0x8dbf24(0xf1),handleHeatmapClick),_0x4fa5a1[_0x8dbf24(0x111)](_0x5abdc0);}});}function handleHeatmapClick(_0x1174b0){const _0x2d50b1=_0x25d084,{dayIndex:_0x1bb4f4,hour:_0x9718ed}=_0x1174b0[_0x2d50b1(0x151)][_0x2d50b1(0x244)],_0x39a01f=DAY_NAMES[parseInt(_0x1bb4f4)],_0x1a859d=getFilteredData()[_0x2d50b1(0x1f6)](_0x3edb31=>_0x3edb31['created']['getDay']()===parseInt(_0x1bb4f4)&&_0x3edb31[_0x2d50b1(0x1b6)][_0x2d50b1(0x19a)]()===parseInt(_0x9718ed));if(_0x1a859d['length']===0x0)return alert('No\x20hay\x20tickets\x20para\x20el\x20'+_0x39a01f+'\x20a\x20las\x20'+_0x9718ed+':00.');showModalWithData(_0x2d50b1(0x190)+_0x39a01f+_0x2d50b1(0x137)+_0x9718ed+_0x2d50b1(0x12b)+(_0x9718ed+0x1)+_0x2d50b1(0x269),_0x1a859d,COMMON_TABLE_HEADERS);}function renderClientRequestTypeChart(_0x39c208){const _0x544cec=_0x25d084,_0xc32a0f=document[_0x544cec(0x192)]('clientRequestTypeChart');if(!_0xc32a0f)return;const {clients:_0x4bcf1c,requestTypes:_0x2e4de4,data:_0x2ae241}=_0x39c208;if(!_0x4bcf1c||_0x4bcf1c[_0x544cec(0x1e1)]===0x0){if(charts[_0xc32a0f['id']])charts[_0xc32a0f['id']]['destroy']();return;}const _0x10da49=_0x2e4de4['map']((_0x2cda5e,_0x283077)=>{const _0x2fa6a5=_0x544cec,_0x2c7cb9=Object['keys'](PALETTE),_0x836204=PALETTE[_0x2c7cb9[_0x283077%_0x2c7cb9[_0x2fa6a5(0x1e1)]]]||PALETTE[_0x2fa6a5(0x274)],_0x248d69=_0x4bcf1c[_0x2fa6a5(0x180)](_0x1bfcdf=>_0x2ae241[_0x1bfcdf]&&_0x2ae241[_0x1bfcdf][_0x2cda5e]||0x0);return{'label':_0x2cda5e,'data':_0x248d69,'backgroundColor':_0x836204,'stack':_0x2fa6a5(0x18e)};});createChart(_0xc32a0f,_0x544cec(0x25b),{'labels':_0x4bcf1c,'datasets':_0x10da49},{'responsive':!![],'maintainAspectRatio':![],'plugins':{'legend':{'display':!![],'position':_0x544cec(0x1b8),'labels':{'color':FONT_COLOR}},'datalabels':{'display':![]}},'scales':{'x':{'stacked':!![],'ticks':{'color':FONT_COLOR,'autoSkip':![],'maxRotation':0x2d,'minRotation':0x2d},'grid':{'display':![]}},'y':{'stacked':!![],'ticks':{'color':FONT_COLOR},'grid':{'color':GRID_COLOR}}},'onClick':(_0x19d594,_0x305980,_0x5af2e2)=>{const _0x4242bc=_0x544cec;if(_0x305980[_0x4242bc(0x1e1)]>0x0){const {index:_0x2d5d51,datasetIndex:_0x58cb06}=_0x305980[0x0],_0x38bbae=_0x5af2e2[_0x4242bc(0x236)][_0x4242bc(0x12e)][_0x2d5d51],_0x35752d=_0x5af2e2[_0x4242bc(0x236)][_0x4242bc(0x26f)][_0x58cb06][_0x4242bc(0x205)];handleChartClick('clientRequestTypeChart',_0x4242bc(0x21c),{'client':_0x38bbae,'requestType':_0x35752d});}}});}function renderMonthlyComparisonChart(_0x177bce){const _0x48891a=_0x25d084,_0x3866fc=document[_0x48891a(0x192)](_0x48891a(0x126));if(!_0x3866fc)return;const {months:_0x3337ae,requestTypes:_0x31e9fe,data:_0x2089a9}=_0x177bce,_0x461493=_0x3337ae[_0x48891a(0x180)](_0x5a44d0=>{const [_0x2128b8,_0x5e8e33]=_0x5a44d0['split']('-')['map'](Number);return MONTH_NAMES[_0x5e8e33]+'\x20'+_0x2128b8;}),_0x3cf5ff=_0x31e9fe[_0x48891a(0x180)]((_0x4bf7a1,_0x162fb6)=>{const _0xab402b=_0x48891a,_0x155954=Object['keys'](PALETTE);return{'label':_0x4bf7a1,'data':_0x3337ae['map'](_0x49a918=>_0x2089a9[_0x49a918][_0x4bf7a1]||0x0),'backgroundColor':PALETTE[_0x155954[_0x162fb6%_0x155954[_0xab402b(0x1e1)]]]||PALETTE[_0xab402b(0x274)]};});createChart(_0x3866fc,_0x48891a(0x25b),{'labels':_0x461493,'datasets':_0x3cf5ff},{'responsive':!![],'maintainAspectRatio':![],'plugins':{'legend':{'display':!![],'position':_0x48891a(0x1b8),'labels':{'color':FONT_COLOR}},'datalabels':{'display':![]}},'scales':{'x':{'stacked':!![],'ticks':{'color':FONT_COLOR},'grid':{'display':![]}},'y':{'stacked':!![],'ticks':{'color':FONT_COLOR},'grid':{'color':GRID_COLOR}}},'onClick':(_0x598ecc,_0x323f44,_0xdde16e)=>{const _0x3a0dcb=_0x48891a;if(_0x323f44[_0x3a0dcb(0x1e1)]>0x0){const {index:_0x50c33b,datasetIndex:_0x36a028}=_0x323f44[0x0],_0x1b7b1a=_0xdde16e[_0x3a0dcb(0x236)][_0x3a0dcb(0x12e)][_0x50c33b],_0x17930f=_0xdde16e[_0x3a0dcb(0x236)][_0x3a0dcb(0x26f)][_0x36a028][_0x3a0dcb(0x205)];handleChartClick('monthlyComparisonChart',_0x3a0dcb(0xe8),{'month':_0x1b7b1a,'requestType':_0x17930f});}}});}function _0x49b6(_0x3fcbd9,_0x546d62){const _0x5e7ddc=_0x5e7d();return _0x49b6=function(_0x49b689,_0x241663){_0x49b689=_0x49b689-0xd7;let _0x375fb5=_0x5e7ddc[_0x49b689];return _0x375fb5;},_0x49b6(_0x3fcbd9,_0x546d62);}const modal=document[_0x25d084(0x192)](_0x25d084(0xf6)),closeModalBtn=document[_0x25d084(0x192)]('close-modal-button');function showModalWithData(_0x5954f6,_0xf16e77,_0x3510db){const _0x103c47=_0x25d084;document[_0x103c47(0x192)](_0x103c47(0x1f8))['innerText']=_0x5954f6;const _0x4a73ea=document['getElementById']('modal-body-container');if(typeof _0xf16e77===_0x103c47(0x237))_0x4a73ea['innerHTML']=_0xf16e77;else{const _0x3b832a=_0xf16e77;let _0x1de41d=_0x103c47(0x1c9)+_0x3510db['map'](_0x1329cb=>_0x103c47(0x273)+_0x1329cb[_0x103c47(0x15c)]+_0x103c47(0x147))[_0x103c47(0x123)]('')+_0x103c47(0x1bd)+(_0x3b832a['length']===0x0?_0x103c47(0x1dc)+_0x3510db[_0x103c47(0x1e1)]+'\x22\x20class=\x22px-6\x20py-4\x20text-center\x20text-gray-500\x22>No\x20hay\x20datos.</td></tr>':_0x3b832a[_0x103c47(0x180)](_0x20ed3a=>_0x103c47(0x1a3)+_0x3510db[_0x103c47(0x180)](_0x3b2fc5=>{const _0x199e8a=_0x103c47;let _0x50b8f5=_0x20ed3a[_0x3b2fc5[_0x199e8a(0x181)]]||'';if(_0x3b2fc5[_0x199e8a(0x181)][_0x199e8a(0x16c)]()[_0x199e8a(0x18b)]('time')&&typeof _0x50b8f5===_0x199e8a(0x1be))_0x50b8f5=_0x50b8f5['toFixed'](0x2);else _0x50b8f5 instanceof Date&&(_0x50b8f5=_0x50b8f5[_0x199e8a(0x187)](_0x199e8a(0x10a),{'dateStyle':_0x199e8a(0x25a),'timeStyle':_0x199e8a(0x22d)}));const _0x268e83=document[_0x199e8a(0x1f3)]('p');return _0x268e83['textContent']=_0x50b8f5,_0x199e8a(0x1ba)+_0x268e83[_0x199e8a(0x258)]+_0x199e8a(0x16e);})[_0x103c47(0x123)]('')+_0x103c47(0x133))[_0x103c47(0x123)](''))+_0x103c47(0x1ee);_0x4a73ea['innerHTML']=_0x1de41d;}modal['style'][_0x103c47(0x238)]=_0x103c47(0x15d);}closeModalBtn[_0x25d084(0x224)]=()=>{const _0x1b03f=_0x25d084;modal[_0x1b03f(0x11a)][_0x1b03f(0x238)]=_0x1b03f(0x1c2);},window[_0x25d084(0x224)]=_0x280d9f=>{const _0x421876=_0x25d084;if(_0x280d9f['target']==modal)modal[_0x421876(0x11a)][_0x421876(0x238)]='none';};function setupDrilldown(){}function setupKpiCardClickHandlers(){const _0x18d220=_0x25d084,_0x45ccd9=document[_0x18d220(0x192)](_0x18d220(0x132));if(!_0x45ccd9)return;_0x45ccd9['addEventListener'](_0x18d220(0xf1),_0xb2ff53=>{const _0x247afb=_0x18d220,_0x16dc15=_0xb2ff53[_0x247afb(0x203)][_0x247afb(0x1a2)](_0x247afb(0x229));if(!_0x16dc15)return;const _0x401573=_0x16dc15[_0x247afb(0x19f)]('.kpi-value');if(!_0x401573)return;const _0x4132c8=_0x401573['id'],_0x57be11=getFilteredData();let _0x5f4e64=[],_0x359a03='Detalle\x20de\x20Datos',_0x38569e=COMMON_TABLE_HEADERS;const _0x12d59d=_0x45ddf4=>{const _0x37c537=_0x247afb,_0x5d2e00=document['createElement']('p');return _0x5d2e00[_0x37c537(0x184)]=_0x45ddf4,_0x5d2e00[_0x37c537(0x258)];};switch(_0x4132c8){case'kpi-total-tickets':_0x359a03='Detalle:\x20Tickets\x20Totales',_0x5f4e64=_0x57be11,showModalWithData(_0x359a03,_0x5f4e64['slice'](0x0,0x1f4),_0x38569e);break;case _0x247afb(0x22e):_0x359a03=_0x247afb(0x163),_0x5f4e64=_0x57be11['filter'](_0x38e25a=>[_0x247afb(0x21d),_0x247afb(0x251),_0x247afb(0x112),_0x247afb(0x212),'Resuelto'][_0x247afb(0x18b)](_0x38e25a[_0x247afb(0xdc)])),showModalWithData(_0x359a03,_0x5f4e64[_0x247afb(0x243)](0x0,0x1f4),_0x38569e);break;case _0x247afb(0xfd):_0x359a03=_0x247afb(0x14d),_0x5f4e64=_0x57be11[_0x247afb(0x1f6)](_0x53f434=>![_0x247afb(0x21d),_0x247afb(0x251),_0x247afb(0x112),_0x247afb(0x212),_0x247afb(0x250),'Canceled',_0x247afb(0x27c),_0x247afb(0x247)][_0x247afb(0x18b)](_0x53f434[_0x247afb(0xdc)])),showModalWithData(_0x359a03,_0x5f4e64[_0x247afb(0x243)](0x0,0x1f4),_0x38569e);break;case _0x247afb(0x117):{_0x359a03='Cálculo\x20de\x20Tiempo\x20Promedio\x20de\x20Resolución';const _0x13a6ad=_0x57be11[_0x247afb(0x1f6)](_0x191d11=>_0x191d11[_0x247afb(0x1cf)]>0x0);if(_0x13a6ad[_0x247afb(0x1e1)]===0x0){alert(_0x247afb(0x1ce));return;}const _0x17af7b=_0x13a6ad[_0x247afb(0xdf)]((_0x2fe3a2,_0x2e3e7b)=>_0x2fe3a2+_0x2e3e7b[_0x247afb(0x1cf)],0x0),_0x2e4609=_0x17af7b/_0x13a6ad[_0x247afb(0x1e1)],_0xcfe19c=[..._0x13a6ad][_0x247afb(0xd9)]((_0x2392db,_0x3cffcf)=>_0x3cffcf[_0x247afb(0x1cf)]-_0x2392db[_0x247afb(0x1cf)])[_0x247afb(0x243)](0x0,0x14);let _0x102e23=_0x247afb(0x263)+_0x17af7b[_0x247afb(0x1c5)](0x2)+_0x247afb(0x24a)+_0x13a6ad[_0x247afb(0x1e1)]+_0x247afb(0x17f)+_0x2e4609[_0x247afb(0x1c5)](0x2)+_0x247afb(0xf3)+_0xcfe19c['map'](_0x4ecf29=>_0x247afb(0x19c)+_0x12d59d(_0x4ecf29[_0x247afb(0x11b)])+_0x247afb(0x1fa)+_0x12d59d(_0x4ecf29[_0x247afb(0x219)])+_0x247afb(0x208)+_0x4ecf29[_0x247afb(0x1cf)][_0x247afb(0x1c5)](0x2)+_0x247afb(0x21b))['join']('')+_0x247afb(0x164);showModalWithData(_0x359a03,_0x102e23);break;}case _0x247afb(0x110):{_0x359a03=_0x247afb(0x19d);const _0x579847=_0x57be11[_0x247afb(0x1f6)](_0x5100ff=>_0x5100ff[_0x247afb(0x202)]>0x0);if(_0x579847[_0x247afb(0x1e1)]===0x0){alert(_0x247afb(0x220));return;}const _0x42b664=_0x579847[_0x247afb(0xdf)]((_0x2af0ec,_0x21ebdb)=>_0x2af0ec+_0x21ebdb[_0x247afb(0x202)],0x0),_0x500a69=_0x42b664/_0x579847['length'],_0x19f13a=[..._0x579847][_0x247afb(0xd9)]((_0x3a8b43,_0x19e8cf)=>_0x19e8cf['firstResponseTime']-_0x3a8b43[_0x247afb(0x202)])['slice'](0x0,0x14);let _0x4554a7=_0x247afb(0x218)+_0x42b664[_0x247afb(0x1c5)](0x2)+_0x247afb(0x24a)+_0x579847[_0x247afb(0x1e1)]+_0x247afb(0x17f)+_0x500a69[_0x247afb(0x1c5)](0x2)+'</strong>\x20Horas\x20Promedio\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h4\x20class=\x22font-bold\x20mt-6\x20mb-2\x20text-gray-700\x22>Top\x2020\x20Tickets\x20con\x20Mayor\x20Tiempo\x20de\x201ra\x20Respuesta:</h4>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22max-h-96\x20overflow-y-auto\x20border\x20rounded-lg\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<table\x20class=\x22min-w-full\x20divide-y\x20divide-gray-200\x22><thead\x20class=\x22bg-gray-50\x20sticky\x20top-0\x22><tr>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<th\x20class=\x22px-6\x20py-3\x20text-left\x20text-xs\x20font-medium\x20text-gray-500\x20uppercase\x20tracking-wider\x22>Issue\x20Key</th>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<th\x20class=\x22px-6\x20py-3\x20text-left\x20text-xs\x20font-medium\x20text-gray-500\x20uppercase\x20tracking-wider\x22>Título</th>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<th\x20class=\x22px-6\x20py-3\x20text-left\x20text-xs\x20font-medium\x20text-gray-500\x20uppercase\x20tracking-wider\x22>Tiempo\x201ra\x20Respuesta\x20(Hrs)</th>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</tr></thead>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<tbody\x20class=\x22bg-white\x20divide-y\x20divide-gray-200\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'+_0x19f13a[_0x247afb(0x180)](_0x234d7a=>_0x247afb(0x19c)+_0x12d59d(_0x234d7a['issue'])+'</td>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<td\x20class=\x22px-6\x20py-4\x20whitespace-nowrap\x22>'+_0x12d59d(_0x234d7a['summary'])+_0x247afb(0x208)+_0x234d7a[_0x247afb(0x202)][_0x247afb(0x1c5)](0x2)+_0x247afb(0x21b))[_0x247afb(0x123)]('')+_0x247afb(0x11d);showModalWithData(_0x359a03,_0x4554a7);break;}case'kpi-unassigned-tickets':_0x359a03=_0x247afb(0x242),_0x5f4e64=_0x57be11[_0x247afb(0x1f6)](_0x3809dd=>!_0x3809dd[_0x247afb(0x1ae)]||_0x3809dd[_0x247afb(0x1ae)][_0x247afb(0x16c)]()===_0x247afb(0x22a)||_0x3809dd[_0x247afb(0x1ae)][_0x247afb(0x16c)]()===_0x247afb(0x13e)),showModalWithData(_0x359a03,_0x5f4e64[_0x247afb(0x243)](0x0,0x1f4),_0x38569e);break;case _0x247afb(0x1fe):{const _0x5124ff=_0x57be11[_0x247afb(0x1e1)],_0x39ea82=new Set(_0x57be11['map'](_0x2d821c=>_0x2d821c[_0x247afb(0x1b6)][_0x247afb(0xec)]()[_0x247afb(0x104)]('T')[0x0])),_0x68466=_0x39ea82[_0x247afb(0x1a5)],_0x55f20e=_0x68466>0x0?(_0x5124ff/_0x68466)[_0x247afb(0x1c5)](0x2):'0.0';_0x359a03=_0x247afb(0x194);const _0xfe4aa6={};_0x57be11[_0x247afb(0x1d7)](_0xbf9ce2=>{const _0x4874db=_0x247afb,_0x59ebed=_0xbf9ce2[_0x4874db(0x1b6)][_0x4874db(0xec)]()[_0x4874db(0x104)]('T')[0x0];if(!_0xfe4aa6[_0x59ebed])_0xfe4aa6[_0x59ebed]=0x0;_0xfe4aa6[_0x59ebed]++;});const _0x121647=Object[_0x247afb(0x191)](_0xfe4aa6)[_0x247afb(0xd9)]((_0x31ad85,_0x1338fb)=>new Date(_0x31ad85[0x0])-new Date(_0x1338fb[0x0]));let _0x2195f0=_0x247afb(0x1b5)+_0x5124ff+_0x247afb(0xd7)+_0x68466+_0x247afb(0x1a4)+_0x55f20e+_0x247afb(0x1b4)+_0x121647[_0x247afb(0x180)](([_0x428497,_0x4ededf])=>'<tr><td\x20class=\x22px-6\x20py-4\x20whitespace-nowrap\x22>'+new Date(_0x428497)[_0x247afb(0x128)](_0x247afb(0x10a),{'timeZone':_0x247afb(0x1cb),'weekday':_0x247afb(0x1cc),'year':'numeric','month':_0x247afb(0x1cc),'day':_0x247afb(0x162)})+'</td><td\x20class=\x22px-6\x20py-4\x22>'+_0x4ededf+_0x247afb(0x10f))[_0x247afb(0x123)]('')+_0x247afb(0x1c6);showModalWithData(_0x359a03,_0x2195f0);break;}case _0x247afb(0x129):{const _0xd000d3=_0x57be11[_0x247afb(0x1e1)],_0xf6d77f=new Set(_0x57be11['map'](_0x539c53=>_0x539c53['created'][_0x247afb(0x200)]()+'-'+_0x539c53[_0x247afb(0x1b6)]['getMonth']())),_0x4bc3a3=_0xf6d77f['size'],_0x539747=_0x4bc3a3>0x0?(_0xd000d3/_0x4bc3a3)[_0x247afb(0x1c5)](0x2):_0x247afb(0x1a7);_0x359a03=_0x247afb(0x266);const _0x402abf={};_0x57be11[_0x247afb(0x1d7)](_0x271ee4=>{const _0x4f4e11=_0x247afb,_0x40c23a=_0x271ee4['created'][_0x4f4e11(0x200)]()+'-'+_0x271ee4[_0x4f4e11(0x1b6)][_0x4f4e11(0x253)]();if(!_0x402abf[_0x40c23a])_0x402abf[_0x40c23a]=0x0;_0x402abf[_0x40c23a]++;});const _0xba5abc=Object[_0x247afb(0x191)](_0x402abf)[_0x247afb(0xd9)]((_0x2d5082,_0x22a119)=>{const _0x516611=_0x247afb,[_0x258e31,_0x3487fa]=_0x2d5082[0x0]['split']('-'),[_0x5d1089,_0x2ecf64]=_0x22a119[0x0][_0x516611(0x104)]('-');return new Date(_0x258e31,_0x3487fa)-new Date(_0x5d1089,_0x2ecf64);});let _0x4bb237=_0x247afb(0xeb)+_0xd000d3+_0x247afb(0xd7)+_0x4bc3a3+_0x247afb(0x241)+_0x539747+_0x247afb(0x188)+_0xba5abc[_0x247afb(0x180)](([_0x3744be,_0x6dc866])=>{const _0x1afcbf=_0x247afb,[_0x543f7f,_0x2871d8]=_0x3744be[_0x1afcbf(0x104)]('-');return _0x1afcbf(0x20d)+MONTH_NAMES[parseInt(_0x2871d8)]+'\x20'+_0x543f7f+_0x1afcbf(0x125)+_0x6dc866+_0x1afcbf(0x10f);})[_0x247afb(0x123)]('')+_0x247afb(0x1c6);showModalWithData(_0x359a03,_0x4bb237);break;}}});}function handleChartClick(_0x569d23,_0x372bc9,_0x58254e){const _0x23c9fc=_0x25d084,_0xa8731f=getFilteredData();let _0x3b2851=[],_0x45b979='Detalle\x20de\x20Tickets';switch(_0x569d23){case _0x23c9fc(0x19e):_0x3b2851=_0xa8731f[_0x23c9fc(0x1f6)](_0x40c5f9=>_0x40c5f9[_0x23c9fc(0xdc)]===_0x58254e),_0x45b979=_0x23c9fc(0x143)+_0x58254e+'\x22';break;case _0x23c9fc(0x10b):_0x3b2851=_0xa8731f[_0x23c9fc(0x1f6)](_0x37260a=>_0x37260a[_0x23c9fc(0x1de)]===_0x58254e),_0x45b979=_0x23c9fc(0x24e)+_0x58254e+'\x22';break;case _0x23c9fc(0xdb):_0x3b2851=_0xa8731f[_0x23c9fc(0x1f6)](_0x16d5c9=>_0x16d5c9['requestType']===_0x58254e),_0x45b979='Tickets\x20con\x20Tipo\x20de\x20Solicitud:\x20\x22'+_0x58254e+'\x22';break;case _0x23c9fc(0x25f):_0x3b2851=_0xa8731f['filter'](_0x31eeaf=>_0x31eeaf[_0x23c9fc(0x175)]===_0x58254e),_0x45b979=_0x23c9fc(0x267)+_0x58254e+'\x22';break;case _0x23c9fc(0x231):_0x3b2851=_0xa8731f[_0x23c9fc(0x1f6)](_0x3cfb7a=>_0x3cfb7a[_0x23c9fc(0x211)]===_0x58254e),_0x45b979=_0x23c9fc(0x234)+_0x58254e+'\x22';break;case _0x23c9fc(0x26d):_0x3b2851=_0xa8731f[_0x23c9fc(0x1f6)](_0x5b86d6=>_0x5b86d6['sentiment']===_0x58254e),_0x45b979=_0x23c9fc(0x1e4)+_0x58254e+'\x22';break;case _0x23c9fc(0x12c):_0x3b2851=_0xa8731f[_0x23c9fc(0x1f6)](_0x42873d=>_0x42873d[_0x23c9fc(0x26a)]===_0x58254e),_0x45b979=_0x23c9fc(0x1fc)+_0x58254e+'\x22';break;case _0x23c9fc(0x275):_0x3b2851=_0xa8731f[_0x23c9fc(0x1f6)](_0x48b200=>_0x48b200[_0x23c9fc(0x1ae)]===_0x58254e),_0x45b979=_0x23c9fc(0x210)+_0x58254e+'\x22';break;case _0x23c9fc(0x23c):const _0x3260ab=parseInt(_0x58254e[_0x23c9fc(0x106)](0x0,0x4)),_0x51c27f=parseInt(_0x58254e[_0x23c9fc(0x106)](0x5,0x7))-0x1,_0x2e49aa=parseInt(_0x58254e[_0x23c9fc(0x106)](0x8,0xa));_0x3b2851=_0xa8731f[_0x23c9fc(0x1f6)](_0x5f396a=>{const _0x276873=_0x23c9fc;return _0x5f396a[_0x276873(0x1b6)][_0x276873(0x200)]()===_0x3260ab&&_0x5f396a[_0x276873(0x1b6)][_0x276873(0x253)]()===_0x51c27f&&_0x5f396a[_0x276873(0x1b6)][_0x276873(0x134)]()===_0x2e49aa;}),_0x45b979=_0x23c9fc(0x17c)+new Date(_0x58254e)[_0x23c9fc(0x128)](_0x23c9fc(0x10a),{'weekday':_0x23c9fc(0x1cc),'year':'numeric','month':_0x23c9fc(0x1cc),'day':_0x23c9fc(0x162)});break;case _0x23c9fc(0x1b7):_0x372bc9==='clientAndRequestType'&&(_0x3b2851=_0xa8731f[_0x23c9fc(0x1f6)](_0x413cd6=>_0x413cd6[_0x23c9fc(0x26a)]===_0x58254e['client']&&_0x413cd6[_0x23c9fc(0x1f1)]===_0x58254e[_0x23c9fc(0x1f1)]),_0x45b979=_0x23c9fc(0x146)+_0x58254e[_0x23c9fc(0x26a)]+_0x23c9fc(0x177)+_0x58254e['requestType']+'\x22');break;case'monthlyComparisonChart':if(_0x372bc9===_0x23c9fc(0xe8)){const [_0x40f6f1,_0x5a6475]=_0x58254e[_0x23c9fc(0x189)][_0x23c9fc(0x104)]('\x20'),_0x5675ca=MONTH_NAMES['indexOf'](_0x40f6f1);_0x3b2851=_0xa8731f[_0x23c9fc(0x1f6)](_0x3af99b=>_0x3af99b['created'][_0x23c9fc(0x200)]()==_0x5a6475&&_0x3af99b[_0x23c9fc(0x1b6)][_0x23c9fc(0x253)]()==_0x5675ca&&_0x3af99b['requestType']===_0x58254e[_0x23c9fc(0x1f1)]),_0x45b979=_0x23c9fc(0xde)+_0x58254e[_0x23c9fc(0x189)]+_0x23c9fc(0x131)+_0x58254e[_0x23c9fc(0x1f1)]+'\x22';}break;default:console[_0x23c9fc(0x176)]('Click\x20no\x20manejado:',_0x569d23),_0x3b2851=_0xa8731f;}_0x3b2851['length']===0x0&&_0x569d23===_0x23c9fc(0x23c)&&alert(_0x23c9fc(0x1e7)+_0x45b979[_0x23c9fc(0x248)]('Tickets\x20Creados\x20el\x20','')+_0x23c9fc(0x195)),showModalWithData(_0x45b979,_0x3b2851[_0x23c9fc(0x243)](0x0,0xc8),COMMON_TABLE_HEADERS);}new Sortable(document[_0x25d084(0x192)](_0x25d084(0x1b2)),{'animation':0x96,'ghostClass':_0x25d084(0x270)});
-	    
+        let allData = [];
+        let charts = {};
+
+        // Paleta de colores más sofisticada y coherente
+        const FONT_COLOR = '#475569'; /* slate-600 */
+        const GRID_COLOR = '#E2E8F0'; /* slate-200 */
+        const PALETTE = {
+            indigo: '#4F46E5', /* Indigo-600 */
+            blue: '#2563EB',   /* Blue-600 */
+            cyan: '#0891B2',   /* Cyan-600 */
+            teal: '#0D9488',   /* Teal-600 */
+            emerald: '#059669',/* Emerald-600 */
+            green: '#16A34A',  /* Green-600 */
+            lime: '#65A30D',   /* Lime-600 */
+            yellow: '#CA8A04', /* Yellow-600 */
+            amber: '#D97706',  /* Amber-600 */
+            orange: '#EA580C', /* Orange-600 */
+            red: '#DC2626',    /* Red-600 */
+            purple: '#7C3AED', /* Purple-600 */
+            rose: '#E11D48',   /* Rose-600 */
+            fuchsia: '#C026D3',/* Fuchsia-600 */
+            slate: '#64748B',  /* Slate-500 */
+            gray: '#6B7280'    /* Gray-500 */
+        };
+
+        const MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+        const COMMON_TABLE_HEADERS = [
+            {key: 'issue', displayName: 'Issue Key'}, {key: 'summary', displayName: 'Título'},
+            {key: 'priority', displayName: 'Prioridad'}, {key: 'status', displayName: 'Estado'},
+            {key: 'assignee', displayName: 'Asignado'}, {key: 'client', displayName: 'Cliente'},
+            {key: 'requestType', displayName: 'Tipo Solicitud'},
+            {key: 'created', displayName: 'Fecha Creación'}
+        ];
+
+
+        Chart.register(ChartDataLabels, ChartZoom);
+
+        document.getElementById('csv-file-input').addEventListener('change', handleFileSelect, false);
+        document.getElementById('clear-filters-btn').addEventListener('click', clearAllFilters);
+
+
+        async function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) {
+                console.log("No file selected.");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                const csvData = e.target.result;
+                console.log("CSV file loaded. Initiating dashboard.");
+                await initializeDashboard(csvData);
+            };
+            reader.onerror = (e) => {
+                console.error("Error reading file:", e);
+                alert("Error al leer el archivo. Asegúrate de que sea un archivo CSV válido.");
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        async function initializeDashboard(csvData) {
+            const loadingMessage = document.getElementById('loading-message');
+            document.getElementById('initial-message').classList.remove('hidden');
+            loadingMessage.classList.remove('hidden');
+
+            console.log("Parsing CSV data...");
+            const rawData = parseCSV(csvData);
+            if (rawData.length === 0 || Object.keys(rawData[0]).length === 0) {
+                alert("El archivo CSV está vacío o no se pudo parsear correctamente. Por favor, revisa el formato y asegúrate que no esté vacío.");
+                loadingMessage.classList.add('hidden');
+                document.getElementById('initial-message').classList.remove('hidden');
+                document.getElementById('dashboard-content').classList.add('hidden');
+                return;
+            }
+            
+            allData = rawData.map(d => {
+                let createdDate;
+                const parseCustomDate = (dateStr) => {
+                    if (!dateStr || typeof dateStr !== 'string') return null;
+                    let match = dateStr.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s(\d{1,2}):(\d{1,2})/);
+                    if (match) return new Date(match[3], match[2] - 1, match[1], match[4], match[5]);
+                    match = dateStr.match(/(\d{4})-(\d{1,2})-(\d{1,2})\s(\d{1,2}):(\d{1,2}):(\d{1,2})/);
+                    if (match) return new Date(match[1], match[2] - 1, match[3], match[4], match[5], match[6]);
+                    try {
+                        const parsedDate = new Date(dateStr);
+                        if (!isNaN(parsedDate.getTime())) return parsedDate;
+                    } catch (e) {}
+                    return null;
+                };
+                createdDate = parseCustomDate(d['Created']);
+                if (!createdDate || isNaN(createdDate.getTime())) return null;
+                
+                return {
+                    issue: d['Issue key'] || 'N/A',
+                    priority: d['Priority'] || 'N/A',
+                    status: d['Status'] || 'N/A',
+                    assignee: d['Assignee'] || 'Unassigned',
+                    client: d['Custom field (OU Grupo (MDA))'] || 'No Asignado',
+                    diagnosis: d['Custom field (Diagnosis (MDA))'] || 'No especificado',
+                    requestType: d['Custom field (Request Type)'] || 'No especificado',
+                    problemType: d['Custom field (Problem Type (MDA))'] || 'N/A',
+                    taskType: d['Custom field (Task Type (MDA))'] || 'N/A',
+                    summary: d['Summary'] || '',
+                    created: createdDate,
+                    resolutionTime: hmsToHours(d['Custom field (Time to resolution)']),
+                    firstResponseTime: hmsToHours(d['Custom field (Time to first response)'])
+                };
+            }).filter(d => d !== null);
+            
+            if (allData.length === 0) {
+                alert("Después de procesar, no se encontraron datos válidos. Revisa las cabeceras de columna y el formato de las fechas ('Created' en particular).");
+                loadingMessage.classList.add('hidden');
+                document.getElementById('initial-message').classList.remove('hidden');
+                document.getElementById('dashboard-content').classList.add('hidden');
+                return;
+            }
+            await simulateSentimentAnalysis(allData);
+            loadingMessage.classList.add('hidden');
+            document.getElementById('initial-message').classList.add('hidden');
+            document.getElementById('dashboard-content').classList.remove('hidden');
+            
+            populateFilters(); 
+            updateDashboard(getFilteredData());
+            setupDrilldown();
+            setupKpiCardClickHandlers();
+            await triggerAIAnalysis(); 
+        }
+        
+		async function simulateSentimentAnalysis(data) {
+			const positives = ["modificación", "asignación", "creación", "descarga", "firma exitosa", "instrucciones", "actualización", "configuración", "cambio exitoso", "habilitación", "presentación", "visualización correcta"];
+			const negatives = ["error", "urgente", "inconveniente", "no se visualiza", "no carga", "no puedo", "problema", "incidente", "no aparece", "vencido", "duplicado", "incompleto", "no se firma", "no llega", "expirada", "cancelar", "fallo", "traba", "demora", "subio mal", "no avanza", "token", "invalido", "falla", "no se ven", "no se pueden", "no se visualiza"];
+			const neutrals = ["cambio", "solicitud", "documentación", "formulario", "liquidación", "notificación", "candidato", "empleado", "certificado", "proceso", "revisión", "ingreso", "actualización", "configurar"];
+
+			for (let i = 0; i < data.length; i++) {
+				const text = (data[i].summary || "").toLowerCase();
+
+				const match = (arr) => arr.some(palabra => text.includes(palabra));
+
+				if (match(negatives)) data[i].sentiment = "Negativo";
+				else if (match(positives)) data[i].sentiment = "Positivo";
+				else if (match(neutrals)) data[i].sentiment = "Neutral";
+				else data[i].sentiment = "Neutral"; // por defecto
+			}
+		}
+
+
+        function updateDashboard(data) {
+            renderKPIs(data);
+            renderCharts(data);
+        }
+        
+        function parseCSV(data) {
+            const lines = data.trim().split('\n');
+            if (lines.length === 0) return [];
+            let delimiter = (lines[0].match(/;/g) || []).length > (lines[0].match(/,/g) || []).length ? ';' : ',';
+            const parseLine = (line) => {
+                const values = [];
+                let inQuote = false;
+                let currentVal = '';
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') inQuote = !inQuote;
+                    else if (char === delimiter && !inQuote) {
+                        values.push(currentVal.trim());
+                        currentVal = '';
+                    } else currentVal += char;
+                }
+                values.push(currentVal.trim());
+                return values.map(val => val.replace(/^"|"$/g, ''));
+            };
+            const header = parseLine(lines[0]);
+            return lines.slice(1).map(line => {
+                const values = parseLine(line);
+                let rowData = {};
+                header.forEach((key, i) => { rowData[key] = values[i] !== undefined ? values[i] : ''; });
+                return rowData;
+            });
+        }
+
+        function hmsToHours(hms) {
+            if (!hms || typeof hms !== 'string') return 0;
+            hms = hms.trim().toLowerCase();
+            const dayMatch = hms.match(/(\d+)d/);
+            const hourMatch = hms.match(/(\d+)h/);
+            const minuteMatch = hms.match(/(\d+)m/);
+            let totalHours = 0;
+            if (dayMatch) totalHours += parseInt(dayMatch[1]) * 24;
+            if (hourMatch) totalHours += parseInt(hourMatch[1]);
+            if (minuteMatch) totalHours += parseInt(minuteMatch[1]) / 60;
+            if (totalHours > 0) return parseFloat(totalHours.toFixed(2));
+            const timeParts = hms.split(':');
+            if (timeParts.length >= 2) {
+                const hours = parseInt(timeParts[0], 10) || 0;
+                const minutes = parseInt(timeParts[1], 10) || 0;
+                return parseFloat((hours + minutes / 60).toFixed(2));
+            }
+            return 0;
+        }
+
+        function populateFilters() {
+            populateMonthFilter();
+            populateUniqueFilter('assignee-filter', 'assignee', 'Todos los Asignados');
+            populateUniqueFilter('client-filter', 'client', 'Todos los Clientes');
+            populateUniqueFilter('priority-filter', 'priority', 'Todas las Prioridades');
+            populateUniqueFilter('status-filter', 'status', 'Todos los Estados');
+            populateUniqueFilter('request-type-filter', 'requestType', 'Todos los Tipos de Solicitud');
+            populateUniqueFilter('diagnosis-filter', 'diagnosis', 'Todos los Diagnósticos');
+            populateUniqueFilter('problem-type-filter', 'problemType', 'Todos los Tipos de Problema');
+            
+            document.getElementById('month-filter').addEventListener('change', handleMonthFilterChange);
+            document.querySelectorAll('.filter-select:not(#month-filter)').forEach(selectElement => {
+                selectElement.addEventListener('change', () => updateDashboard(getFilteredData()));
+            });
+        }
+        
+        async function handleMonthFilterChange() {
+            updateDashboard(getFilteredData());
+            await triggerAIAnalysis();
+        }
+
+        async function clearAllFilters() {
+            if (allData.length === 0) return;
+            document.querySelectorAll('.filter-select').forEach(select => { select.value = 'all'; });
+            updateDashboard(getFilteredData());
+            await triggerAIAnalysis();
+        }
+
+        function populateMonthFilter() {
+            const monthFilter = document.getElementById('month-filter');
+            if (!allData || allData.length === 0) {
+                monthFilter.innerHTML = '<option value="all">Filtro por Mes</option>';
+                return;
+            }
+            const months = new Set(allData.map(d => `${d.created.getFullYear()}-${d.created.getMonth()}`));
+            monthFilter.innerHTML = '<option value="all">Todos los Periodos</option>';
+            Array.from(months).sort((a,b) => {
+                const [yearA, monthA] = a.split('-').map(Number);
+                const [yearB, monthB] = b.split('-').map(Number);
+                return yearA !== yearB ? yearA - yearB : monthA - monthB;
+            }).reverse().forEach(monthStr => {
+                const [year, monthIndex] = monthStr.split('-');
+                const option = document.createElement('option');
+                option.value = monthIndex;
+                option.textContent = `${MONTH_NAMES[parseInt(monthIndex)]} ${year}`;
+                monthFilter.appendChild(option);
+            });
+        }
+
+        function populateUniqueFilter(selectId, dataKey, defaultOptionText) {
+            const selectElement = document.getElementById(selectId);
+            if (!selectElement) return;
+            selectElement.innerHTML = `<option value="all">${defaultOptionText}</option>`;
+            if (!allData || allData.length === 0) return;
+            const uniqueValues = new Set(allData.map(d => d[dataKey]).filter(val => val && val !== 'N/A' && val !== 'No Asignado' && val !== 'No especificado'));
+            Array.from(uniqueValues).sort().forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                selectElement.appendChild(option);
+            });
+        }
+
+        function getFilteredData() {
+            let filtered = allData;
+            const filters = {
+                month: document.getElementById('month-filter').value,
+                assignee: document.getElementById('assignee-filter').value,
+                client: document.getElementById('client-filter').value,
+                priority: document.getElementById('priority-filter').value,
+                status: document.getElementById('status-filter').value,
+                requestType: document.getElementById('request-type-filter').value,
+                diagnosis: document.getElementById('diagnosis-filter').value,
+                problemType: document.getElementById('problem-type-filter').value
+            };
+            if (filters.month !== 'all') filtered = filtered.filter(d => d.created.getMonth() == parseInt(filters.month));
+            if (filters.assignee !== 'all') filtered = filtered.filter(d => d.assignee === filters.assignee);
+            if (filters.client !== 'all') filtered = filtered.filter(d => d.client === filters.client);
+            if (filters.priority !== 'all') filtered = filtered.filter(d => d.priority === filters.priority);
+            if (filters.status !== 'all') filtered = filtered.filter(d => d.status === filters.status);
+            if (filters.requestType !== 'all') filtered = filtered.filter(d => d.requestType === filters.requestType);
+            if (filters.diagnosis !== 'all') filtered = filtered.filter(d => d.diagnosis === filters.diagnosis);
+            if (filters.problemType !== 'all') filtered = filtered.filter(d => d.problemType === filters.problemType);
+            return filtered;
+        }
+        
+        async function triggerAIAnalysis() {
+            const analysisSection = document.getElementById('ai-analysis-section');
+            const loadingDiv = document.getElementById('ai-analysis-loading');
+            const contentP = document.getElementById('ai-analysis-content');
+            const monthFilter = document.getElementById('month-filter');
+
+            analysisSection.classList.remove('hidden');
+            loadingDiv.style.display = 'block';
+            contentP.innerHTML = '';
+
+            const selectedMonthValue = monthFilter.value;
+            const selectedPeriodText = monthFilter.options[monthFilter.selectedIndex].text;
+
+            let dataForAnalysis;
+            if (selectedMonthValue === 'all') {
+                dataForAnalysis = allData;
+            } else {
+                dataForAnalysis = allData.filter(d => d.created.getMonth() == parseInt(selectedMonthValue));
+            }
+
+            const analysisText = await generateAIAnalysis(dataForAnalysis, selectedPeriodText);
+
+            contentP.innerHTML = analysisText;
+            loadingDiv.style.display = 'none';
+        }
+        
+        async function generateAIAnalysis(data, periodText) {
+            await new Promise(resolve => setTimeout(resolve, 800));
+
+            if (!data || data.length === 0) {
+                return "<p>No se encontraron datos para el período seleccionado. No es posible generar un análisis.</p>";
+            }
+
+            const totalTickets = data.length;
+            const resolvedTickets = data.filter(d => ['Closed', 'Resolved', 'Done', 'Cerrado', 'Resuelto'].includes(d.status)).length;
+            const resolutionRate = totalTickets > 0 ? (resolvedTickets / totalTickets * 100).toFixed(0) : 0;
+            const validResolutionTimes = data.filter(d => d.resolutionTime > 0);
+            const avgResolution = validResolutionTimes.length > 0 ? (validResolutionTimes.reduce((sum, d) => sum + d.resolutionTime, 0) / validResolutionTimes.length).toFixed(1) : 0;
+            const sentimentCounts = data.reduce((acc, curr) => { acc[curr.sentiment] = (acc[curr.sentiment] || 0) + 1; return acc; }, {});
+            const positiveSentiment = sentimentCounts['Positivo'] || 0;
+            const negativeSentiment = sentimentCounts['Negativo'] || 0;
+            const neutralSentiment = sentimentCounts['Neutral'] || 0;
+            const totalSentiment = positiveSentiment + negativeSentiment + neutralSentiment;
+
+            const getTopN = (key, n) => {
+                const counts = data.reduce((acc, curr) => {
+                    const item = curr[key] || 'N/A';
+                    if (item !== 'N/A' && item !== 'No Asignado' && item !== 'No especificado') {
+                       acc[item] = (acc[item] || 0) + 1;
+                    }
+                    return acc;
+                }, {});
+                return Object.entries(counts).sort(([, a], [, b]) => b - a).slice(0, n);
+            };
+
+            const topRequestTypes = getTopN('requestType', 1);
+            const topClients = getTopN('client', 1);
+
+            const heatmapData = {};
+            DAY_NAMES.forEach(day => { heatmapData[day] = Array(24).fill(0); });
+            data.forEach(d => {
+                const dayIndex = d.created.getDay();
+                const hour = d.created.getHours();
+                heatmapData[DAY_NAMES[dayIndex]][hour]++;
+            });
+
+            let peakDay = '';
+            let peakHour = -1;
+            let maxTicketsInPeak = -1;
+            Object.entries(heatmapData).forEach(([day, hourCounts]) => {
+                hourCounts.forEach((count, hour) => {
+                    if (count > maxTicketsInPeak) {
+                        maxTicketsInPeak = count;
+                        peakDay = day;
+                        peakHour = hour;
+                    }
+                });
+            });
+
+            const wordCloudData = data.map(d => d.summary.split(/\s+/)).flat()
+                .map(word => word.toLowerCase().replace(/[^a-záéíóúñü]/g, ''))
+                .filter(word => word.length > 4 && !['para', 'como', 'desde', 'sobre', 'este', 'esta', 'con', 'del', 'que', 'los', 'las', 'por', 'una', 'un', 'el', 'la', 'se', 'es', 'en', 'y', 'o', 'a', 'de', 'su', 'sus', 'mi', 'mis', 'tu', 'tus', 'mas', 'más', 'pero', 'ni', 'sin', 'al', 'lo', 'le', 'les', 'me', 'te', 'nos', 'os', 'si', 'no', 'para que', 'de la', 'en el', 'un de', 'y el', 'ticket', 'error', 'cliente', 'sistema', 'problema'].includes(word));
+            const wordFrequencies = wordCloudData.reduce((acc, word) => { acc[word] = (acc[word] || 0) + 1; return acc; }, {});
+            const topKeywords = Object.entries(wordFrequencies).sort(([, a], [, b]) => b - a).slice(0, 5).map(item => `<strong>${item[0]}</strong>`);
+            
+            let narrative = `<h4>Análisis para: ${periodText}</h4>`;
+            narrative += `<p>Durante este período, se gestionaron un total de <strong>${totalTickets} tickets</strong>. A continuación, un resumen de los hallazgos clave:</p>`;
+            narrative += '<ul>';
+
+            narrative += `<li><strong>Rendimiento General:</strong> Se alcanzó una tasa de resolución del <strong>${resolutionRate}%</strong>, con un tiempo promedio para resolver cada ticket de <strong>${avgResolution} horas</strong>.</li>`;
+
+            if (topRequestTypes.length > 0) {
+                const topType = topRequestTypes[0];
+                const topTypePercentage = (topType[1] / totalTickets * 100).toFixed(0);
+                narrative += `<li><strong>Categoría Principal:</strong> La solicitud más frecuente fue "<strong>${topType[0]}</strong>", constituyendo aproximadamente el <strong>${topTypePercentage}%</strong> del total de incidentes.</li>`;
+            }
+
+            if (maxTicketsInPeak > 0) {
+                narrative += `<li><strong>Pico de Actividad:</strong> La mayor concentración de tickets se registró los días <strong>${peakDay}</strong>, específicamente en la franja horaria de las <strong>${peakHour}:00 hs</strong>.</li>`;
+            }
+
+			if (totalSentiment > 0) {
+				let predominantSentiment = 'Neutral';
+				let maxCount = neutralSentiment;
+
+				if (positiveSentiment > maxCount) {
+					predominantSentiment = 'Positivo';
+					maxCount = positiveSentiment;
+				}
+				if (negativeSentiment > maxCount) {
+					predominantSentiment = 'Negativo';
+					maxCount = negativeSentiment;
+				}
+
+				const percent = ((maxCount / totalSentiment) * 100).toFixed(0);
+				narrative += `<li><strong>Análisis de Sentimiento:</strong> El análisis de las interacciones indica que el sentimiento predominante fue <strong>${predominantSentiment}</strong> (${percent}%).</li>`;
+			}
+
+            if (topKeywords.length > 0) {
+                narrative += `<li><strong>Voz del Cliente:</strong> Las palabras que más resonaron en los resúmenes de los tickets fueron: ${topKeywords.join(', ')}. Estos términos son clave para entender las preocupaciones principales.</li>`;
+            }
+
+            narrative += '</ul>';
+            narrative += `<p class="mt-4 text-xs text-gray-500 italic"><strong>Nota sobre el Sentimiento:</strong> El sentimiento se determina mediante un analisis de palabras utilizas por el cliente en el campo "Resumen" de cada ticket, clasificándolo como positivo, negativo o neutral.</p>`;
+            narrative += `<p class="mt-2 text-sm text-gray-500 italic">Este es un análisis autogenerado. Para un detalle más profundo, explore los gráficos interactivos.</p>`;
+
+            return narrative;
+        }
+
+        function processData(data) {
+            if (data.length === 0) return {};
+            const statusCounts = data.reduce((acc, curr) => { acc[curr.status] = (acc[curr.status] || 0) + 1; return acc; }, {});
+            const priorityCounts = data.reduce((acc, curr) => { acc[curr.priority] = (acc[curr.priority] || 0) + 1; return acc; }, {});
+            const clientCounts = data.reduce((acc, curr) => { acc[curr.client] = (acc[curr.client] || 0) + 1; return acc; }, {});
+            const assigneeCounts = data.reduce((acc, curr) => { acc[curr.assignee] = (acc[curr.assignee] || 0) + 1; return acc; }, {});
+            const requestTypeCounts = data.reduce((acc, curr) => { acc[curr.requestType] = (acc[curr.requestType] || 0) + 1; return acc; }, {});
+            const diagnosisCounts = data.reduce((acc, curr) => { acc[curr.diagnosis] = (acc[curr.diagnosis] || 0) + 1; return acc; }, {});
+            const problemTypeCounts = data.reduce((acc, curr) => { acc[curr.problemType] = (acc[curr.problemType] || 0) + 1; return acc; }, {});
+            const sentimentCounts = data.reduce((acc, curr) => { acc[curr.sentiment] = (acc[curr.sentiment] || 0) + 1; return acc; }, {});
+
+            const topClients = Object.entries(clientCounts).sort(([,a],[,b]) => b-a).slice(0, 10);
+            const topAssignees = Object.entries(assigneeCounts).sort(([,a],[,b]) => b-a).slice(0, 10);
+            
+            const trendData = data.reduce((acc, curr) => {
+                const date = curr.created.toISOString().split('T')[0];
+                acc[date] = (acc[date] || 0) + 1;
+                return acc;
+            }, {});
+            const sortedTrend = Object.entries(trendData).sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB));
+
+            const wordCloudData = data.map(d => d.summary.split(/\s+/)).flat()
+                .map(word => word.toLowerCase().replace(/[^a-záéíóúñü]/g, ''))
+                .filter(word => word.length > 3 && !['para', 'como', 'desde', 'sobre', 'este', 'esta', 'con', 'del', 'que', 'los', 'las', 'por', 'una', 'un', 'el', 'la', 'se', 'es', 'en', 'y', 'o', 'a', 'de', 'su', 'sus', 'mi', 'mis', 'tu', 'tus', 'mas', 'más', 'pero', 'ni', 'sin', 'al', 'lo', 'le', 'les', 'me', 'te', 'nos', 'os', 'si', 'no', 'para que', 'de la', 'en el', 'un de', 'y el'].includes(word));
+            const wordFrequencies = wordCloudData.reduce((acc, word) => { acc[word] = (acc[word] || 0) + 1; return acc; }, {});
+
+            const heatmapData = {};
+            DAY_NAMES.forEach(day => { heatmapData[day] = Array(24).fill(0); });
+            data.forEach(d => {
+                const dayIndex = d.created.getDay();
+                const hour = d.created.getHours();
+                heatmapData[DAY_NAMES[dayIndex]][hour]++;
+            });
+
+            const top10ClientNames = Object.entries(clientCounts).sort(([,a],[,b]) => b-a).slice(0, 10).map(item => item[0]);
+            const allRequestTypesInDataset = Array.from(new Set(data.map(d => d.requestType))).sort();
+            const nestedClientRequestData = {};
+            top10ClientNames.forEach(client => {
+                nestedClientRequestData[client] = {};
+                const clientTickets = data.filter(ticket => ticket.client === client);
+                clientTickets.forEach(ticket => {
+                    nestedClientRequestData[client][ticket.requestType] = (nestedClientRequestData[client][ticket.requestType] || 0) + 1;
+                });
+            });
+            const clientRequestTypeFinalData = {
+                clients: top10ClientNames,
+                requestTypes: allRequestTypesInDataset,
+                data: nestedClientRequestData
+            };
+            const monthlyComparisonData = {};
+            const allReqTypesForMonthlyChart = new Set();
+            data.forEach(d => {
+                const monthKey = `${d.created.getFullYear()}-${d.created.getMonth()}`;
+                if (!monthlyComparisonData[monthKey]) monthlyComparisonData[monthKey] = {};
+                monthlyComparisonData[monthKey][d.requestType] = (monthlyComparisonData[monthKey][d.requestType] || 0) + 1;
+                allReqTypesForMonthlyChart.add(d.requestType);
+            });
+            const sortedMonths = Object.keys(monthlyComparisonData).sort((a,b) => {
+                const [yearA, monthA] = a.split('-').map(Number);
+                const [yearB, monthB] = b.split('-').map(Number);
+                return yearA - yearB || monthA - monthB;
+            });
+            const sortedReqTypes = Array.from(allReqTypesForMonthlyChart).sort();
+
+            return {
+                status: { labels: Object.keys(statusCounts), values: Object.values(statusCounts) },
+                priority: { labels: Object.keys(priorityCounts), values: Object.values(priorityCounts) },
+                topClients: { labels: topClients.map(item => item[0]), values: topClients.map(item => item[1]) },
+                topAssignees: { labels: topAssignees.map(item => item[0]), values: topAssignees.map(item => item[1]) },
+                requestType: { labels: Object.keys(requestTypeCounts), values: Object.values(requestTypeCounts) },
+                diagnosis: { labels: Object.keys(diagnosisCounts), values: Object.values(diagnosisCounts) },
+                problemType: { labels: Object.keys(problemTypeCounts), values: Object.values(problemTypeCounts) },
+                sentiment: { labels: Object.keys(sentimentCounts), values: Object.values(sentimentCounts) },
+                trend: { labels: sortedTrend.map(item => item[0]), values: sortedTrend.map(item => item[1]) },
+                wordCloud: Object.entries(wordFrequencies).map(([text, weight]) => [text, weight * 5]),
+                heatmap: heatmapData,
+                clientRequestType: clientRequestTypeFinalData,
+                monthlyComparison: {
+                    months: sortedMonths,
+                    requestTypes: sortedReqTypes,
+                    data: monthlyComparisonData
+                }
+            };
+        }
+        
+        function renderKPIs(data) {
+            const totalTickets = data.length;
+            const resolvedTickets = data.filter(d => ['Closed', 'Resolved', 'Done', 'Cerrado', 'Resuelto'].includes(d.status)).length;
+            const openTickets = data.filter(d => !['Closed', 'Resolved', 'Done', 'Cerrado', 'Resuelto', 'Canceled', 'Cancelled', 'Cancelado'].includes(d.status)).length;
+            const validResolutionTimes = data.filter(d => d.resolutionTime > 0);
+            const avgResolution = validResolutionTimes.length > 0 ? (validResolutionTimes.reduce((sum, d) => sum + d.resolutionTime, 0) / validResolutionTimes.length).toFixed(1) : 0;
+            const validFirstResponseTimes = data.filter(d => d.firstResponseTime > 0);
+            const avgFirstResponse = validFirstResponseTimes.length > 0 ? (validFirstResponseTimes.reduce((sum, d) => sum + d.firstResponseTime, 0) / validFirstResponseTimes.length).toFixed(1) : 0;
+            const unassignedTickets = data.filter(d => !d.assignee || d.assignee.toLowerCase() === 'unassigned' || d.assignee.toLowerCase() === 'sin asignar').length;
+            const uniqueDays = new Set(data.map(d => d.created.toISOString().split('T')[0]));
+            const avgPerDay = uniqueDays.size > 0 ? (totalTickets / uniqueDays.size).toFixed(1) : '0.0';
+            const uniqueMonths = new Set(data.map(d => `${d.created.getFullYear()}-${d.created.getMonth()}`));
+            const avgPerMonth = uniqueMonths.size > 0 ? (totalTickets / uniqueMonths.size).toFixed(1) : '0.0';
+
+            document.getElementById('kpi-total-tickets').textContent = totalTickets;
+            document.getElementById('kpi-resolved-tickets').textContent = totalTickets > 0 ? `${((resolvedTickets / totalTickets) * 100).toFixed(0)}%` : '0%';
+            document.getElementById('kpi-open-tickets').textContent = openTickets;
+            document.getElementById('kpi-avg-resolution').textContent = `${avgResolution} hrs`;
+            document.getElementById('kpi-avg-first-response').textContent = `${avgFirstResponse} hrs`;
+            document.getElementById('kpi-unassigned-tickets').textContent = unassignedTickets;
+            document.getElementById('kpi-avg-day').textContent = avgPerDay;
+            document.getElementById('kpi-avg-month').textContent = avgPerMonth;
+        }
+
+        const createChart = (ctx, type, data, options) => {
+            if (charts[ctx.id]) charts[ctx.id].destroy();
+            charts[ctx.id] = new Chart(ctx, { type, data, options });
+        }
+        
+        function renderCharts(data) {
+             if (data.length === 0) {
+                 Object.values(charts).forEach(chart => chart.destroy());
+                 charts = {};
+                 document.getElementById('heatmap-grid').innerHTML = '';
+                 document.getElementById('heatmap-day-labels').innerHTML = '';
+                 document.getElementById('word-cloud-container').innerHTML = '<p class="text-gray-500">No hay datos suficientes para generar la Nube de Palabras.</p>';
+                 return;
+             }
+            const chartData = processData(data);
+            
+            const sharedOptions = (onClickHandler) => ({
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', color: FONT_COLOR, font: { weight: 'bold' }, formatter: (value) => value > 0 ? value : '' }},
+                scales: { x: { ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR }}, y: { ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR }} },
+                onClick: onClickHandler
+            });
+
+            const defaultClickHandler = (e, elements, chart) => {
+                if (elements.length > 0) handleChartClick(chart.canvas.id, chart.config.type, chart.data.labels[elements[0].index]);
+            };
+            
+            createChart(document.getElementById('statusChart'), 'bar', {
+                labels: chartData.status.labels,
+                datasets: [{ data: chartData.status.values, backgroundColor: Object.values(PALETTE) }]
+            }, { ...sharedOptions(defaultClickHandler), indexAxis: 'y' });
+            
+            createChart(document.getElementById('priorityChart'), 'doughnut', {
+                labels: chartData.priority.labels,
+                datasets: [{ data: chartData.priority.values, backgroundColor: Object.values(PALETTE) }]
+            }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: FONT_COLOR } }, datalabels: { color: '#fff', formatter: (v, ctx) => (v * 100 / ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0)) > 5 ? (v * 100 / ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0)).toFixed(0) + "%" : ''}}, onClick: defaultClickHandler });
+            
+            createChart(document.getElementById('requestTypeChart'), 'bar', {
+                labels: chartData.requestType.labels,
+                datasets: [{ data: chartData.requestType.values, backgroundColor: PALETTE.green }]
+            }, { ...sharedOptions(defaultClickHandler), indexAxis: 'y' });
+
+            createChart(document.getElementById('diagnosisChart'), 'pie', {
+                labels: chartData.diagnosis.labels,
+                datasets: [{ data: chartData.diagnosis.values, backgroundColor: Object.values(PALETTE).reverse() }]
+            }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: FONT_COLOR } }, datalabels: { display: false } }, onClick: defaultClickHandler });
+
+            createChart(document.getElementById('problemTypeChart'), 'pie', {
+                labels: chartData.problemType.labels,
+                datasets: [{ data: chartData.problemType.values, backgroundColor: Object.values(PALETTE) }]
+            }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: FONT_COLOR } }, datalabels: { display: false } }, onClick: defaultClickHandler });
+
+			const sentimentColors = {
+				"Positivo": PALETTE.green,
+				"Neutral": PALETTE.slate,
+				"Negativo": PALETTE.red
+			};
+
+			const sentimentLabels = chartData.sentiment.labels;
+			const sentimentValues = chartData.sentiment.values;
+
+			const sentimentColorArray = sentimentLabels.map(label => sentimentColors[label] || PALETTE.gray);
+
+			createChart(document.getElementById('sentimentChart'), 'pie', {
+				labels: sentimentLabels,
+				datasets: [{
+					data: sentimentValues,
+					backgroundColor: sentimentColorArray
+				}]
+			}, {
+				responsive: true,
+				maintainAspectRatio: false,
+				plugins: {
+					legend: {
+						position: 'bottom',
+						labels: { color: FONT_COLOR }
+					},
+					datalabels: { display: false }
+				},
+				onClick: defaultClickHandler
+			});
+
+
+            createChart(document.getElementById('topClientsChart'), 'bar', {
+                labels: chartData.topClients.labels,
+                datasets: [{ label: 'Tickets', data: chartData.topClients.values, backgroundColor: PALETTE.blue }]
+            }, { ...sharedOptions(defaultClickHandler), indexAxis: 'y' });
+            
+            createChart(document.getElementById('assigneeChart'), 'bar', {
+                labels: chartData.topAssignees.labels,
+                datasets: [{ label: 'Tickets', data: chartData.topAssignees.values, backgroundColor: PALETTE.sky }]
+            }, { ...sharedOptions(defaultClickHandler), indexAxis: 'y' });
+            
+            const ctxTrend = document.getElementById('trendChart').getContext('2d');
+            const gradient = ctxTrend.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(234, 88, 12, 0.8)');
+            gradient.addColorStop(0.5, 'rgba(249, 115, 22, 0.6)');
+            gradient.addColorStop(1, 'rgba(251, 146, 60, 0.3)');
+
+            createChart(document.getElementById('trendChart'), 'line', {
+                labels: chartData.trend.labels,
+                datasets: [{ 
+                    label: 'Tickets Creados', 
+                    data: chartData.trend.values, 
+                    borderColor: PALETTE.red,
+                    backgroundColor: gradient,
+                    fill: 'origin',
+                    tension: 0.3,
+                    borderWidth: 2, 
+                    pointRadius: 4,
+                    pointBackgroundColor: PALETTE.orange,
+                    pointBorderColor: '#fff',
+                    pointHoverRadius: 6,
+                    pointHoverBackgroundColor: PALETTE.red
+                }]
+            }, { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: {
+                    legend: { display: false }, 
+                    datalabels: { display: false },
+                    zoom: {
+                        zoom: {
+                            wheel: { enabled: true },
+                            pinch: { enabled: true },
+                            mode: 'x',
+                            drag: { enabled: true, borderColor: PALETTE.indigo, borderWidth: 1, backgroundColor: 'rgba(79, 70, 229, 0.2)' }
+                        },
+                        pan: { enabled: true, mode: 'x' }
+                    }
+                }, 
+                scales: { 
+                    x: { 
+                        type: 'time', 
+                        time: { unit: 'day', tooltipFormat: 'dd MMM yy', displayFormats: { day: 'dd MMM' }}, 
+                        ticks: { color: FONT_COLOR }, 
+                        grid: { color: GRID_COLOR }
+                    }, 
+                    y: { ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR } } 
+                },
+                onClick: (e, elements, chart) => {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const dateValue = chart.data.labels[index];
+                        handleChartClick('trendChart', 'dateSpecific', dateValue);
+                    }
+                }
+            });
+
+            renderHeatmap(chartData.heatmap);
+            renderClientRequestTypeChart(chartData.clientRequestType);
+            renderMonthlyComparisonChart(chartData.monthlyComparison);
+
+            const wcContainer = document.getElementById('word-cloud-container');
+            wcContainer.innerHTML = '';
+            if (chartData.wordCloud && chartData.wordCloud.length > 0) {
+                 WordCloud(wcContainer, { list: chartData.wordCloud, gridSize: 10, weightFactor: 2, shrinkToFit: true, minSize: 10, color: () => PALETTE[Object.keys(PALETTE)[Math.floor(Math.random() * Object.keys(PALETTE).length)]], fontFamily: 'Inter', rotateRatio: 0.5, ellipticity: 1 });
+            } else {
+                wcContainer.innerHTML = '<p class="text-gray-500">No hay datos para esta Nube de Palabras.</p>';
+            }
+        }
+        
+        function renderHeatmap(heatmapData) {
+            const heatmapGrid = document.getElementById('heatmap-grid');
+            const dayLabelsContainer = document.getElementById('heatmap-day-labels');
+            heatmapGrid.innerHTML = ''; dayLabelsContainer.innerHTML = '';
+            let maxCount = 0;
+            Object.values(heatmapData).forEach(h => h.forEach(c => { if (c > maxCount) maxCount = c; }));
+            heatmapGrid.style.gridTemplateRows = `repeat(${DAY_NAMES.length}, 1fr)`;
+            dayLabelsContainer.style.gridTemplateRows = `repeat(${DAY_NAMES.length}, 1fr)`;
+            const getColorForValue = (v, max) => v === 0 ? '#F8FAFC' : `hsl(220, 80%, ${90 - (v / max) * 60}%)`;
+            DAY_NAMES.forEach((day, dayIndex) => {
+                const dayLabel = document.createElement('div');
+                dayLabel.className = 'heatmap-day-label'; dayLabel.textContent = day;
+                dayLabelsContainer.appendChild(dayLabel);
+                const hoursData = heatmapData[day] || Array(24).fill(0);
+                for (let hour = 0; hour < 24; hour++) {
+                    const count = hoursData[hour];
+                    const cell = document.createElement('div');
+                    cell.className = 'heatmap-cell';
+                    cell.style.backgroundColor = getColorForValue(count, maxCount);
+                    cell.textContent = count > 0 ? count : '';
+                    cell.title = `${day}, ${hour}:00 - ${hour+1}:00: ${count} tickets`;
+                    cell.dataset.dayIndex = dayIndex; cell.dataset.hour = hour;
+                    cell.addEventListener('click', handleHeatmapClick);
+                    heatmapGrid.appendChild(cell);
+                }
+            });
+        }
+        
+        function handleHeatmapClick(event) {
+            const { dayIndex, hour } = event.currentTarget.dataset;
+            const dayName = DAY_NAMES[parseInt(dayIndex)];
+            const drilldownData = getFilteredData().filter(d => d.created.getDay() === parseInt(dayIndex) && d.created.getHours() === parseInt(hour));
+            if (drilldownData.length === 0) return alert(`No hay tickets para el ${dayName} a las ${hour}:00.`);
+            showModalWithData(`Tickets del ${dayName} entre ${hour}:00 y ${hour+1}:00`, drilldownData, COMMON_TABLE_HEADERS);
+        }
+
+        function renderClientRequestTypeChart(chartData) {
+            const ctx = document.getElementById('clientRequestTypeChart');
+            if (!ctx) return;
+        
+            const { clients, requestTypes, data: nestedData } = chartData;
+
+            if (!clients || clients.length === 0) {
+                if (charts[ctx.id]) charts[ctx.id].destroy();
+                return;
+            }
+        
+            const datasets = requestTypes.map((type, index) => {
+                const colorKeys = Object.keys(PALETTE);
+                const color = PALETTE[colorKeys[index % colorKeys.length]] || PALETTE.gray;
+                
+                const seriesData = clients.map(client => (nestedData[client] && nestedData[client][type]) || 0);
+        
+                return {
+                    label: type,
+                    data: seriesData,
+                    backgroundColor: color,
+                    stack: 'clientStack'
+                };
+            });
+        
+            createChart(ctx, 'bar', {
+                labels: clients,
+                datasets: datasets
+            }, {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true, position: 'right', labels: { color: FONT_COLOR } },
+                    datalabels: { display: false }
+                },
+                scales: {
+                    x: { stacked: true, ticks: { color: FONT_COLOR, autoSkip: false, maxRotation: 45, minRotation: 45 }, grid: { display: false } },
+                    y: { stacked: true, ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR } }
+                },
+                onClick: (e, elements, chart) => {
+                    if (elements.length > 0) {
+                        const { index, datasetIndex } = elements[0];
+                        const clientLabel = chart.data.labels[index];
+                        const requestTypeLabel = chart.data.datasets[datasetIndex].label;
+                        handleChartClick('clientRequestTypeChart', 'clientAndRequestType', { client: clientLabel, requestType: requestTypeLabel });
+                    }
+                }
+            });
+        }
+        
+        function renderMonthlyComparisonChart(monthlyData) {
+            const ctx = document.getElementById('monthlyComparisonChart');
+            if (!ctx) return;
+            const { months, requestTypes, data } = monthlyData;
+            const labels = months.map(monthKey => {
+                const [year, monthIndex] = monthKey.split('-').map(Number);
+                return `${MONTH_NAMES[monthIndex]} ${year}`;
+            });
+            const datasets = requestTypes.map((type, index) => {
+                const colorKeys = Object.keys(PALETTE);
+                return {
+                    label: type,
+                    data: months.map(monthKey => data[monthKey][type] || 0),
+                    backgroundColor: PALETTE[colorKeys[index % colorKeys.length]] || PALETTE.gray,
+                };
+            });
+            createChart(ctx, 'bar', {
+                labels: labels,
+                datasets: datasets
+            }, {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: true, position: 'right', labels: { color: FONT_COLOR } }, datalabels: { display: false } },
+                scales: { x: { stacked: true, ticks: { color: FONT_COLOR }, grid: { display: false } }, y: { stacked: true, ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR } } },
+                onClick: (e, elements, chart) => {
+                    if (elements.length > 0) {
+                        const { index, datasetIndex } = elements[0];
+                        const monthLabel = chart.data.labels[index];
+                        const requestTypeLabel = chart.data.datasets[datasetIndex].label;
+                        handleChartClick('monthlyComparisonChart', 'monthAndRequestType', { month: monthLabel, requestType: requestTypeLabel });
+                    }
+                }
+            });
+        }
+
+        const modal = document.getElementById('data-modal');
+        const closeModalBtn = document.getElementById('close-modal-button');
+
+        function showModalWithData(title, content, headers) {
+            document.getElementById('modal-title').innerText = title;
+            const modalBody = document.getElementById('modal-body-container');
+
+            if (typeof content === 'string') {
+                modalBody.innerHTML = content;
+            } 
+            else {
+                const data = content;
+                let tableHTML = `
+                    <div class="overflow-x-auto">
+                        <table id="modal-table" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    ${headers.map(h => `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${h.displayName}</th>`).join('')}
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                ${data.length === 0 
+                                    ? `<tr><td colspan="${headers.length}" class="px-6 py-4 text-center text-gray-500">No hay datos.</td></tr>`
+                                    : data.map(rowObject => `
+                                        <tr>
+                                            ${headers.map(header => {
+                                                let cellValue = rowObject[header.key] || '';
+                                                if (header.key.toLowerCase().includes('time') && typeof cellValue === 'number') {
+                                                    cellValue = cellValue.toFixed(2);
+                                                } else if (cellValue instanceof Date) {
+                                                    cellValue = cellValue.toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' });
+                                                }
+                                                const p = document.createElement("p");
+                                                p.textContent = cellValue;
+                                                return `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${p.innerHTML}</td>`;
+                                            }).join('')}
+                                        </tr>
+                                    `).join('')
+                                }
+                            </tbody>
+                        </table>
+                    </div>`;
+                modalBody.innerHTML = tableHTML;
+            }
+            modal.style.display = 'flex';
+        }
+
+        closeModalBtn.onclick = () => { modal.style.display = "none"; };
+        window.onclick = (event) => { if (event.target == modal) modal.style.display = "none"; };
+        
+        function setupDrilldown() {}
+
+        // MODIFICADO: La función ahora explica cómo se calculan los promedios de tiempo
+        function setupKpiCardClickHandlers() {
+            const kpiGrid = document.getElementById('kpi-grid');
+            if (!kpiGrid) return;
+
+            kpiGrid.addEventListener('click', (event) => {
+                const kpiCard = event.target.closest('.kpi-card');
+                if (!kpiCard) return;
+
+                const kpiValueElement = kpiCard.querySelector('.kpi-value');
+                if (!kpiValueElement) return;
+
+                const kpiId = kpiValueElement.id;
+                const currentData = getFilteredData();
+                let drilldownData = [];
+                let modalTitle = 'Detalle de Datos';
+                let headers = COMMON_TABLE_HEADERS;
+
+                const escapeHTML = (str) => {
+                    const p = document.createElement("p");
+                    p.textContent = str;
+                    return p.innerHTML;
+                };
+
+                switch (kpiId) {
+                    case 'kpi-total-tickets':
+                        modalTitle = 'Detalle: Tickets Totales';
+                        drilldownData = currentData;
+                        showModalWithData(modalTitle, drilldownData.slice(0, 500), headers);
+                        break;
+                    
+                    case 'kpi-resolved-tickets':
+                        modalTitle = 'Detalle: Tickets Resueltos';
+                        drilldownData = currentData.filter(d => ['Closed', 'Resolved', 'Done', 'Cerrado', 'Resuelto'].includes(d.status));
+                        showModalWithData(modalTitle, drilldownData.slice(0, 500), headers);
+                        break;
+
+                    case 'kpi-open-tickets':
+                        modalTitle = 'Detalle: Tickets Abiertos';
+                        drilldownData = currentData.filter(d => !['Closed', 'Resolved', 'Done', 'Cerrado', 'Resuelto', 'Canceled', 'Cancelled', 'Cancelado'].includes(d.status));
+                        showModalWithData(modalTitle, drilldownData.slice(0, 500), headers);
+                        break;
+
+                    case 'kpi-avg-resolution': {
+                        modalTitle = `Cálculo de Tiempo Promedio de Resolución`;
+                        const validTickets = currentData.filter(d => d.resolutionTime > 0);
+                        if (validTickets.length === 0) {
+                            alert('No hay tickets con tiempo de resolución válido para mostrar.');
+                            return;
+                        }
+                        const totalHours = validTickets.reduce((sum, d) => sum + d.resolutionTime, 0);
+                        const avgHours = totalHours / validTickets.length;
+                        const top20Tickets = [...validTickets].sort((a,b) => b.resolutionTime - a.resolutionTime).slice(0, 20);
+
+                        let explanationHTML = `
+                            <div class="p-4 mb-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg">
+                                <p class="font-bold">Fórmula de Cálculo:</p>
+                                <p>Suma Total de Horas de Resolución / Cantidad de Tickets Válidos = Tiempo Promedio</p>
+                                <p class="mt-2 text-xl">
+                                    <strong>${totalHours.toFixed(2)}</strong> Horas / <strong>${validTickets.length}</strong> Tickets = <strong>${avgHours.toFixed(2)}</strong> Horas Promedio
+                                </p>
+                            </div>
+                            <h4 class="font-bold mt-6 mb-2 text-gray-700">Top 20 Tickets con Mayor Tiempo de Resolución:</h4>
+                            <div class="max-h-96 overflow-y-auto border rounded-lg">
+                                <table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50 sticky top-0"><tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue Key</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiempo de Resolución (Hrs)</th>
+                                </tr></thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${top20Tickets.map(t => `<tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">${escapeHTML(t.issue)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${escapeHTML(t.summary)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap font-semibold">${t.resolutionTime.toFixed(2)}</td>
+                                    </tr>`).join('')}
+                                </tbody></table>
+                            </div>
+                            <p class="mt-2 text-xs text-gray-500 italic">Nota: Solo se consideran para el cálculo los tickets que tienen un tiempo de resolución registrado y mayor a cero.</p>`;
+                        showModalWithData(modalTitle, explanationHTML);
+                        break;
+                    }
+                    
+                    case 'kpi-avg-first-response': {
+                        modalTitle = `Cálculo de Tiempo Promedio de Primera Respuesta`;
+                        const validTickets = currentData.filter(d => d.firstResponseTime > 0);
+                        if (validTickets.length === 0) {
+                            alert('No hay tickets con tiempo de primera respuesta válido para mostrar.');
+                            return;
+                        }
+                        const totalHours = validTickets.reduce((sum, d) => sum + d.firstResponseTime, 0);
+                        const avgHours = totalHours / validTickets.length;
+                        const top20Tickets = [...validTickets].sort((a,b) => b.firstResponseTime - a.firstResponseTime).slice(0, 20);
+
+                        let explanationHTML = `
+                            <div class="p-4 mb-4 bg-amber-50 border-l-4 border-amber-400 text-amber-800 rounded-r-lg">
+                                <p class="font-bold">Fórmula de Cálculo:</p>
+                                <p>Suma Total de Horas de 1ra Respuesta / Cantidad de Tickets Válidos = Tiempo Promedio</p>
+                                <p class="mt-2 text-xl">
+                                    <strong>${totalHours.toFixed(2)}</strong> Horas / <strong>${validTickets.length}</strong> Tickets = <strong>${avgHours.toFixed(2)}</strong> Horas Promedio
+                                </p>
+                            </div>
+                            <h4 class="font-bold mt-6 mb-2 text-gray-700">Top 20 Tickets con Mayor Tiempo de 1ra Respuesta:</h4>
+                            <div class="max-h-96 overflow-y-auto border rounded-lg">
+                                <table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50 sticky top-0"><tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue Key</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiempo 1ra Respuesta (Hrs)</th>
+                                </tr></thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    ${top20Tickets.map(t => `<tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">${escapeHTML(t.issue)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">${escapeHTML(t.summary)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap font-semibold">${t.firstResponseTime.toFixed(2)}</td>
+                                    </tr>`).join('')}
+                                </tbody></table>
+                            </div>
+                            <p class="mt-2 text-xs text-gray-500 italic">Nota: Solo se consideran para el cálculo los tickets que tienen un tiempo de primera respuesta registrado y mayor a cero.</p>`;
+                        showModalWithData(modalTitle, explanationHTML);
+                        break;
+                    }
+
+                    case 'kpi-unassigned-tickets':
+                        modalTitle = 'Detalle: Tickets sin Asignar';
+                        drilldownData = currentData.filter(d => !d.assignee || d.assignee.toLowerCase() === 'unassigned' || d.assignee.toLowerCase() === 'sin asignar');
+                        showModalWithData(modalTitle, drilldownData.slice(0, 500), headers);
+                        break;
+                    
+                    case 'kpi-avg-day': {
+                        const totalTicketsDay = currentData.length;
+                        const uniqueDaysSet = new Set(currentData.map(d => d.created.toISOString().split('T')[0]));
+                        const uniqueDaysCount = uniqueDaysSet.size;
+                        const avgPerDay = uniqueDaysCount > 0 ? (totalTicketsDay / uniqueDaysCount).toFixed(2) : '0.0';
+                        modalTitle = `Cálculo de Promedio de Tickets por Día`;
+                        const ticketsByDay = {};
+                        currentData.forEach(ticket => {
+                            const day = ticket.created.toISOString().split('T')[0];
+                            if (!ticketsByDay[day]) ticketsByDay[day] = 0;
+                            ticketsByDay[day]++;
+                        });
+                        const sortedDays = Object.entries(ticketsByDay).sort((a, b) => new Date(a[0]) - new Date(b[0]));
+                        let explanationHTML = `
+                            <div class="p-4 mb-4 bg-blue-50 border-l-4 border-blue-400 text-blue-800 rounded-r-lg">
+                                <p class="font-bold">Fórmula de Cálculo:</p>
+                                <p>Total de Tickets / Días con Actividad = Promedio de Tickets por Día</p>
+                                <p class="mt-2 text-xl"><strong>${totalTicketsDay}</strong> Tickets / <strong>${uniqueDaysCount}</strong> Días = <strong>${avgPerDay}</strong> Tickets/Día</p>
+                            </div>
+                            <h4 class="font-bold mt-6 mb-2 text-gray-700">Desglose de Tickets por Día:</h4>
+                            <div class="max-h-96 overflow-y-auto border rounded-lg">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50 sticky top-0"><tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad de Tickets</th>
+                                    </tr></thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        ${sortedDays.map(([day, count]) => `<tr><td class="px-6 py-4 whitespace-nowrap">${new Date(day).toLocaleDateString('es-ES', { timeZone: 'UTC', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td><td class="px-6 py-4">${count}</td></tr>`).join('')}
+                                    </tbody>
+                                </table>
+                            </div>`;
+                        showModalWithData(modalTitle, explanationHTML);
+                        break;
+                    }
+
+                    case 'kpi-avg-month': {
+                        const totalTicketsMonth = currentData.length;
+                        const uniqueMonthsSet = new Set(currentData.map(d => `${d.created.getFullYear()}-${d.created.getMonth()}`));
+                        const uniqueMonthsCount = uniqueMonthsSet.size;
+                        const avgPerMonth = uniqueMonthsCount > 0 ? (totalTicketsMonth / uniqueMonthsCount).toFixed(2) : '0.0';
+                        modalTitle = `Cálculo de Promedio de Tickets por Mes`;
+                        const ticketsByMonth = {};
+                        currentData.forEach(ticket => {
+                            const monthKey = `${ticket.created.getFullYear()}-${ticket.created.getMonth()}`;
+                            if (!ticketsByMonth[monthKey]) ticketsByMonth[monthKey] = 0;
+                            ticketsByMonth[monthKey]++;
+                        });
+                        const sortedMonths = Object.entries(ticketsByMonth).sort((a,b) => {
+                            const [yearA, monthA] = a[0].split('-'); const [yearB, monthB] = b[0].split('-');
+                            return new Date(yearA, monthA) - new Date(yearB, monthB);
+                        });
+                        let monthExplanationHTML = `
+                            <div class="p-4 mb-4 bg-teal-50 border-l-4 border-teal-400 text-teal-800 rounded-r-lg">
+                                <p class="font-bold">Fórmula de Cálculo:</p>
+                                <p>Total de Tickets / Meses con Actividad = Promedio de Tickets por Mes</p>
+                                <p class="mt-2 text-xl"><strong>${totalTicketsMonth}</strong> Tickets / <strong>${uniqueMonthsCount}</strong> Meses = <strong>${avgPerMonth}</strong> Tickets/Mes</p>
+                            </div>
+                            <h4 class="font-bold mt-6 mb-2 text-gray-700">Desglose de Tickets por Mes:</h4>
+                            <div class="max-h-96 overflow-y-auto border rounded-lg">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50 sticky top-0"><tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mes</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad de Tickets</th>
+                                    </tr></thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        ${sortedMonths.map(([monthKey, count]) => {
+                                            const [year, monthIndex] = monthKey.split('-');
+                                            return `<tr><td class="px-6 py-4 whitespace-nowrap">${MONTH_NAMES[parseInt(monthIndex)]} ${year}</td><td class="px-6 py-4">${count}</td></tr>`
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>`;
+                        showModalWithData(modalTitle, monthExplanationHTML);
+                        break;
+                    }
+                }
+            });
+        }
+
+        function handleChartClick(chartId, filterType, filterValue) {
+            const currentData = getFilteredData();
+            let drilldownData = [], modalTitle = 'Detalle de Tickets';
+
+            switch (chartId) {
+                case 'statusChart': drilldownData = currentData.filter(d => d.status === filterValue); modalTitle = `Tickets con Estado: "${filterValue}"`; break;
+                case 'priorityChart': drilldownData = currentData.filter(d => d.priority === filterValue); modalTitle = `Tickets con Prioridad: "${filterValue}"`; break;
+                case 'requestTypeChart': drilldownData = currentData.filter(d => d.requestType === filterValue); modalTitle = `Tickets con Tipo de Solicitud: "${filterValue}"`; break;
+                case 'diagnosisChart': drilldownData = currentData.filter(d => d.diagnosis === filterValue); modalTitle = `Tickets con Diagnóstico: "${filterValue}"`; break;
+                case 'problemTypeChart': drilldownData = currentData.filter(d => d.problemType === filterValue); modalTitle = `Tickets con Tipo de Problema: "${filterValue}"`; break;
+                case 'sentimentChart': drilldownData = currentData.filter(d => d.sentiment === filterValue); modalTitle = `Tickets con Sentimiento: "${filterValue}"`; break;
+                case 'topClientsChart': drilldownData = currentData.filter(d => d.client === filterValue); modalTitle = `Tickets del Cliente: "${filterValue}"`; break;
+                case 'assigneeChart': drilldownData = currentData.filter(d => d.assignee === filterValue); modalTitle = `Tickets Asignados a: "${filterValue}"`; break;
+                case 'trendChart':
+                    const clickedYear = parseInt(filterValue.substring(0, 4));
+                    const clickedMonth = parseInt(filterValue.substring(5, 7)) - 1; 
+                    const clickedDay = parseInt(filterValue.substring(8, 10));
+
+                    drilldownData = currentData.filter(d => {
+                        return d.created.getFullYear() === clickedYear &&
+                               d.created.getMonth() === clickedMonth &&
+                               d.created.getDate() === clickedDay;
+                    });
+                    modalTitle = `Tickets Creados el ${new Date(filterValue).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
+                    break;
+                case 'clientRequestTypeChart':
+                    if (filterType === 'clientAndRequestType') {
+                        drilldownData = currentData.filter(d => d.client === filterValue.client && d.requestType === filterValue.requestType);
+                        modalTitle = `Tickets de "${filterValue.client}" con Tipo: "${filterValue.requestType}"`;
+                    }
+                    break;
+                case 'monthlyComparisonChart':
+                    if (filterType === 'monthAndRequestType') {
+                        const [monthName, year] = filterValue.month.split(' ');
+                        const monthIndex = MONTH_NAMES.indexOf(monthName);
+                        drilldownData = currentData.filter(d => d.created.getFullYear() == year && d.created.getMonth() == monthIndex && d.requestType === filterValue.requestType);
+                        modalTitle = `Tickets de ${filterValue.month} con Tipo: "${filterValue.requestType}"`;
+                    }
+                    break;
+                default: console.warn("Click no manejado:", chartId); drilldownData = currentData;
+            }
+            if (drilldownData.length === 0 && chartId === 'trendChart') {
+                alert(`No se encontraron registros para la fecha seleccionada: ${modalTitle.replace('Tickets Creados el ', '')}. Esto podría deberse a un desfase de zona horaria en los datos o un error en la fecha exportada.`);
+            }
+            showModalWithData(modalTitle, drilldownData.slice(0, 200), COMMON_TABLE_HEADERS);
+        }
+
+        new Sortable(document.getElementById('dashboard-grid'), { animation: 150, ghostClass: 'sortable-ghost' });
     </script>
 </body>
 </html>
