@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.1/src/wordcloud2.js"></script>
 
@@ -255,52 +256,67 @@
             height: 20rem; /* Altura fija para gráficos */
         }
 
-        /* Modal */
+        /* Modal (ahora con cabecera para arrastrar) */
         .modal {
             display: none;
-            position: fixed;
+            position: fixed; /* Cambiado a fixed para arrastrar por toda la página */
             z-index: 1000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.6); /* Fondo más oscuro */
-            align-items: center;
-            justify-content: center;
+            overflow: hidden; /* Deshabilitar scroll en el overlay */
+            background-color: rgba(0,0,0,0.6);
+            /* align-items y justify-content eliminados para permitir posicionamiento manual */
         }
         .modal-content {
             background-color: #FFFFFF;
-            margin: auto;
-            padding: 2rem;
-            border-radius: 1rem; /* Más redondeado */
+            position: absolute; /* Para poder moverlo */
+            top: 50%; /* Centrado inicial */
+            left: 50%;
+            transform: translate(-50%, -50%); /* Centrado inicial */
+            padding: 0; /* Padding se manejará en los elementos internos */
+            border-radius: 1rem;
             width: 95%;
-            max-width: 1600px; /* Más ancho */
+            max-width: 1600px;
             max-height: 90vh;
-            overflow-y: auto;
+            display: flex; /* Para layout de cabecera y cuerpo */
+            flex-direction: column;
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            animation: fadeIn 0.3s ease-out; /* Animación de entrada */
+            animation: fadeIn 0.3s ease-out;
         }
+        .modal-header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #E5E7EB;
+            cursor: move; /* Cursor para indicar que es arrastrable */
+        }
+        .modal-body-container {
+            padding: 2rem;
+            overflow-y: auto; /* Scroll solo en el cuerpo */
+        }
+
         .close-button {
             color: #9CA3AF;
-            float: right;
-            font-size: 2.25rem; /* Más grande */
+            font-size: 2.25rem;
             font-weight: bold;
             line-height: 1;
             transition: color 0.2s ease;
+            cursor: pointer;
         }
         .close-button:hover,
         .close-button:focus {
             color: #1F2937;
             text-decoration: none;
-            cursor: pointer;
         }
         .modal-title {
             font-family: 'Montserrat', sans-serif;
             font-size: 1.75rem;
             font-weight: 700;
             color: #1E293B;
-            margin-bottom: 1.5rem;
+            margin: 0; /* Se quita el margen para alinear con el botón */
         }
 
         /* Tabla dentro del modal */
@@ -335,8 +351,8 @@
 
         /* Animación para el modal */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translate(-50%, -55%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
         }
 
         /* Placeholder y ghost class para Sortable.js */
@@ -542,11 +558,16 @@
             
             /* Ajustes al modal para una experiencia de pantalla completa en móvil */
             .modal-content {
-                padding: 1rem;
                 width: 100%;
                 height: 100%;
                 max-height: 100vh;
                 border-radius: 0;
+                top: 0;
+                left: 0;
+                transform: none;
+            }
+            .modal-header {
+                cursor: default; /* Deshabilitar arrastre en móvil */
             }
 
             .modal-title {
@@ -572,8 +593,7 @@
                     <img src="https://cardinal-systems.com/wp-content/uploads/2021/08/cardinalSystems-logo.webp" alt="Cardinal Systems Logo" class="h-14 mr-4">
                     <div class="header-text">
                         <h1 class="text-gray-900">Service Desk BI</h1>
-                        <p class="text-gray-600">Carga tu archivo CSV para un análisis profundo del rendimiento.</p>
-                    </div>
+                        </div>
                 </div>
                 <div class="header-actions">
                      <button id="clear-filters-btn" class="btn-secondary">
@@ -585,7 +605,7 @@
                         </svg>
                         Cargar Archivo CSV
                     </label>
-                    <input type="file" id="csv-file-input" class="hidden" accept=".csv, text/csv, application/vnd.ms-excel">
+                    <input type="file" id="csv-file-input" class="hidden" accept=".csv">
                 </div>
             </div>
            
@@ -682,38 +702,52 @@
                     </div>
                 </section>
 
-                <section id="kpi-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-5 mb-8">
-                    <div class="kpi-card">
+                <section id="kpi-grid" class="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-5 mb-8">
+                    <div class="kpi-card" data-kpi="total-tickets">
                         <p class="kpi-value text-indigo-600" id="kpi-total-tickets">0</p>
                         <p class="kpi-label">Tickets Totales</p>
                     </div>
-                    <div class="kpi-card">
+                    <div class="kpi-card" data-kpi="resolved-tickets">
                         <p class="kpi-value text-green-600" id="kpi-resolved-tickets">0%</p>
                         <p class="kpi-label">Tickets Resueltos</p>
                     </div>
-                    <div class="kpi-card">
+                    <div class="kpi-card" data-kpi="open-tickets">
                         <p class="kpi-value text-cyan-600" id="kpi-open-tickets">0</p>
                         <p class="kpi-label">Tickets Abiertos</p>
                     </div>
-                    <div class="kpi-card">
+                    <div class="kpi-card" data-kpi="avg-resolution">
                         <p class="kpi-value text-yellow-600" id="kpi-avg-resolution">0 hrs</p>
                         <p class="kpi-label">T.P. Resolución</p>
                     </div>
-                    <div class="kpi-card">
+                    <div class="kpi-card" data-kpi="avg-first-response">
                         <p class="kpi-value text-amber-600" id="kpi-avg-first-response">0 hrs</p>
                         <p class="kpi-label">T.P. 1ra Respuesta</p>
                     </div>
-                    <div class="kpi-card">
+                    <div class="kpi-card" data-kpi="unassigned-tickets">
                         <p class="kpi-value text-red-600" id="kpi-unassigned-tickets">0</p>
                         <p class="kpi-label">Tickets sin Asignar</p>
                     </div>
-                    <div class="kpi-card">
+                    <div class="kpi-card" data-kpi="avg-day">
                         <p class="kpi-value text-teal-600" id="kpi-avg-day">0</p>
                         <p class="kpi-label">Promedio Tickets/Día</p>
                     </div>
-                    <div class="kpi-card">
+                    <div class="kpi-card" data-kpi="avg-month">
                         <p class="kpi-value text-sky-600" id="kpi-avg-month">0</p>
                         <p class="kpi-label">Promedio Tickets/Mes</p>
+                    </div>
+					<div class="kpi-card" data-kpi="sla-first-response">
+                        <div id="kpi-sla-first-response-container">
+							<p class="kpi-value text-gray-500">-</p>
+							<p class="text-sm font-bold text-gray-500">-</p>
+						</div>
+                        <p class="kpi-label">SLA 1ra Respuesta</p>
+                    </div>
+                    <div class="kpi-card" data-kpi="sla-resolution">
+                        <div id="kpi-sla-resolution-container">
+							<p class="kpi-value text-gray-500">-</p>
+							<p class="text-sm font-bold text-gray-500">-</p>
+						</div>
+                        <p class="kpi-label">SLA Resolución</p>
                     </div>
                 </section>
 
@@ -726,7 +760,7 @@
                             Tickets por Estado
                         </h3>
                         <div class="chart-container-inner">
-                            <canvas id="statusChart"></canvas>
+                            <div id="statusChart"></div>
                         </div>
                     </div>
 
@@ -738,7 +772,7 @@
                             Tickets por Prioridad
                         </h3>
                         <div class="chart-container-inner">
-                            <canvas id="priorityChart"></canvas>
+                            <div id="priorityChart"></div>
                         </div>
                     </div>
                     
@@ -750,7 +784,7 @@
                             Tickets por Tipo de Solicitud
                         </h3>
                         <div class="chart-container-inner">
-                            <canvas id="requestTypeChart"></canvas>
+                            <div id="requestTypeChart"></div>
                         </div>
                     </div>
 
@@ -786,7 +820,7 @@
                             Análisis de Sentimiento del Cliente
                         </h3>
                         <div class="chart-container-inner">
-                            <canvas id="sentimentChart"></canvas>
+                           <div id="sentimentChart"></div>
                         </div>
                     </div>
 
@@ -881,6 +915,19 @@
                         </div>
                     </div>
 
+                    <div id="monthly-sla-card" class="chart-card lg:col-span-3" data-chart="monthlySlaChart">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-2 text-green-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-3.75-.625m3.75.625V3.375" />
+                            </svg>
+                            Evolución Mensual de Cumplimiento SLA
+                        </h3>
+                        <div class="chart-container-inner h-96">
+                            <div id="monthlySlaChart"></div>
+                        </div>
+                    </div>
+
+
                 </section>
             </div>
         </main>
@@ -888,9 +935,11 @@
 
     <div id="data-modal" class="modal">
         <div class="modal-content">
-            <span id="close-modal-button" class="close-button">&times;</span>
-            <h2 id="modal-title" class="modal-title">Datos de Origen</h2>
-            <div id="modal-body-container">
+            <div class="modal-header" id="modal-header">
+                 <h2 id="modal-title" class="modal-title">Datos de Origen</h2>
+                <span id="close-modal-button" class="close-button">&times;</span>
+            </div>
+            <div id="modal-body-container" class="modal-body-container">
                 <div class="overflow-x-auto">
                     <table id="modal-table" class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50" id="modal-table-head">
@@ -929,8 +978,20 @@
             gray: '#6B7280'    /* Gray-500 */
         };
 
-        const MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const MONTH_NAMES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+		
+		// Matriz de SLA actualizada para el cálculo de cumplimiento
+        const SLA_MATRIX = {
+            'highest': { timeToFirstResponse: 1, timeToResolution: 4 },
+            'high':    { timeToFirstResponse: 3, timeToResolution: 12 },
+            'medium':  { timeToFirstResponse: 6, timeToResolution: 18 },
+            'low':     { timeToFirstResponse: 8, timeToResolution: 72 },
+			'lowest':  { timeToFirstResponse: 16, timeToResolution: 108 }
+        };
+
+		// Umbral para determinar si el SLA general está 'Cumplido' o 'Vencido'
+		const SLA_COMPLIANCE_THRESHOLD = 90; // 90%
 
         const COMMON_TABLE_HEADERS = [
             {key: 'issue', displayName: 'Issue Key'}, {key: 'summary', displayName: 'Título'},
@@ -939,6 +1000,15 @@
             {key: 'requestType', displayName: 'Tipo Solicitud'},
             {key: 'created', displayName: 'Fecha Creación'}
         ];
+
+		const SLA_TABLE_HEADERS = [
+			{ key: 'issue', displayName: 'Issue Key' },
+			{ key: 'summary', displayName: 'Título' },
+			{ key: 'priority', displayName: 'Prioridad' },
+			{ key: 'actualTime', displayName: 'Tiempo Real (Hrs)' },
+			{ key: 'slaLimit', displayName: 'Límite SLA (Hrs)' },
+			{ key: 'slaStatus', displayName: 'Estado SLA' }
+		];
 
 
         Chart.register(ChartDataLabels, ChartZoom);
@@ -1031,6 +1101,7 @@
             updateDashboard(getFilteredData());
             setupDrilldown();
             setupKpiCardClickHandlers();
+            makeModalDraggable(); // Activar el modal arrastrable
             await triggerAIAnalysis(); 
         }
         
@@ -1054,6 +1125,7 @@
 
         function updateDashboard(data) {
             renderKPIs(data);
+			renderSLAIndicators(data);
             renderCharts(data);
         }
         
@@ -1135,21 +1207,26 @@
 
         function populateMonthFilter() {
             const monthFilter = document.getElementById('month-filter');
+            monthFilter.innerHTML = ''; // Limpiar opciones existentes
             if (!allData || allData.length === 0) {
                 monthFilter.innerHTML = '<option value="all">Filtro por Mes</option>';
                 return;
             }
-            const months = new Set(allData.map(d => `${d.created.getFullYear()}-${d.created.getMonth()}`));
+            const months = new Set(allData.map(d => {
+                return d.created.getFullYear() + '-' + d.created.getMonth();
+            }));
+
             monthFilter.innerHTML = '<option value="all">Todos los Periodos</option>';
+
             Array.from(months).sort((a,b) => {
                 const [yearA, monthA] = a.split('-').map(Number);
                 const [yearB, monthB] = b.split('-').map(Number);
-                return yearA !== yearB ? yearA - yearB : monthA - monthB;
-            }).reverse().forEach(monthStr => {
-                const [year, monthIndex] = monthStr.split('-');
+                return yearB - yearA || monthB - monthA; 
+            }).forEach(monthKey => {
+                const [year, monthIndex] = monthKey.split('-');
                 const option = document.createElement('option');
-                option.value = monthIndex;
-                option.textContent = `${MONTH_NAMES[parseInt(monthIndex)]} ${year}`;
+                option.value = monthKey;
+                option.textContent = MONTH_NAMES[parseInt(monthIndex)] + ' ' + year;
                 monthFilter.appendChild(option);
             });
         }
@@ -1157,7 +1234,7 @@
         function populateUniqueFilter(selectId, dataKey, defaultOptionText) {
             const selectElement = document.getElementById(selectId);
             if (!selectElement) return;
-            selectElement.innerHTML = `<option value="all">${defaultOptionText}</option>`;
+            selectElement.innerHTML = '<option value="all">' + defaultOptionText + '</option>';
             if (!allData || allData.length === 0) return;
             const uniqueValues = new Set(allData.map(d => d[dataKey]).filter(val => val && val !== 'N/A' && val !== 'No Asignado' && val !== 'No especificado'));
             Array.from(uniqueValues).sort().forEach(value => {
@@ -1180,7 +1257,14 @@
                 diagnosis: document.getElementById('diagnosis-filter').value,
                 problemType: document.getElementById('problem-type-filter').value
             };
-            if (filters.month !== 'all') filtered = filtered.filter(d => d.created.getMonth() == parseInt(filters.month));
+            
+            if (filters.month !== 'all') {
+                const [filterYear, filterMonth] = filters.month.split('-').map(Number);
+                filtered = filtered.filter(d => {
+                    return d.created.getFullYear() === filterYear && d.created.getMonth() === filterMonth;
+                });
+            }
+
             if (filters.assignee !== 'all') filtered = filtered.filter(d => d.assignee === filters.assignee);
             if (filters.client !== 'all') filtered = filtered.filter(d => d.client === filters.client);
             if (filters.priority !== 'all') filtered = filtered.filter(d => d.priority === filters.priority);
@@ -1203,21 +1287,15 @@
 
             const selectedMonthValue = monthFilter.value;
             const selectedPeriodText = monthFilter.options[monthFilter.selectedIndex].text;
-
-            let dataForAnalysis;
-            if (selectedMonthValue === 'all') {
-                dataForAnalysis = allData;
-            } else {
-                dataForAnalysis = allData.filter(d => d.created.getMonth() == parseInt(selectedMonthValue));
-            }
-
-            const analysisText = await generateAIAnalysis(dataForAnalysis, selectedPeriodText);
+            let dataForAnalysis = getFilteredData();
+            
+            const analysisText = await generateAIAnalysis(dataForAnalysis, selectedPeriodText, selectedMonthValue);
 
             contentP.innerHTML = analysisText;
             loadingDiv.style.display = 'none';
         }
         
-        async function generateAIAnalysis(data, periodText) {
+        async function generateAIAnalysis(data, periodText, selectedMonth) {
             await new Promise(resolve => setTimeout(resolve, 800));
 
             if (!data || data.length === 0) {
@@ -1247,8 +1325,7 @@
             };
 
             const topRequestTypes = getTopN('requestType', 1);
-            const topClients = getTopN('client', 1);
-
+            
             const heatmapData = {};
             DAY_NAMES.forEach(day => { heatmapData[day] = Array(24).fill(0); });
             data.forEach(d => {
@@ -1274,23 +1351,56 @@
                 .map(word => word.toLowerCase().replace(/[^a-záéíóúñü]/g, ''))
                 .filter(word => word.length > 4 && !['para', 'como', 'desde', 'sobre', 'este', 'esta', 'con', 'del', 'que', 'los', 'las', 'por', 'una', 'un', 'el', 'la', 'se', 'es', 'en', 'y', 'o', 'a', 'de', 'su', 'sus', 'mi', 'mis', 'tu', 'tus', 'mas', 'más', 'pero', 'ni', 'sin', 'al', 'lo', 'le', 'les', 'me', 'te', 'nos', 'os', 'si', 'no', 'para que', 'de la', 'en el', 'un de', 'y el', 'ticket', 'error', 'cliente', 'sistema', 'problema'].includes(word));
             const wordFrequencies = wordCloudData.reduce((acc, word) => { acc[word] = (acc[word] || 0) + 1; return acc; }, {});
-            const topKeywords = Object.entries(wordFrequencies).sort(([, a], [, b]) => b - a).slice(0, 5).map(item => `<strong>${item[0]}</strong>`);
+            const topKeywords = Object.entries(wordFrequencies).sort(([, a], [, b]) => b - a).slice(0, 5).map(item => '<strong>' + item[0] + '</strong>');
             
-            let narrative = `<h4>Análisis para: ${periodText}</h4>`;
-            narrative += `<p>Durante este período, se gestionaron un total de <strong>${totalTickets} tickets</strong>. A continuación, un resumen de los hallazgos clave:</p>`;
+            let narrative = '<h4>Análisis para: ' + periodText + '</h4>';
+            narrative += '<p>Durante este período, se gestionaron un total de <strong>' + totalTickets + ' tickets</strong>. A continuación, un resumen de los hallazgos clave:</p>';
             narrative += '<ul>';
 
-            narrative += `<li><strong>Rendimiento General:</strong> Se alcanzó una tasa de resolución del <strong>${resolutionRate}%</strong>, con un tiempo promedio para resolver cada ticket de <strong>${avgResolution} horas</strong>.</li>`;
+            narrative += '<li><strong>Rendimiento General:</strong> Se alcanzó una tasa de resolución del <strong>' + resolutionRate + '%</strong>, con un tiempo promedio para resolver cada ticket de <strong>' + avgResolution + ' horas</strong>.</li>';
 
             if (topRequestTypes.length > 0) {
                 const topType = topRequestTypes[0];
                 const topTypePercentage = (topType[1] / totalTickets * 100).toFixed(0);
-                narrative += `<li><strong>Categoría Principal:</strong> La solicitud más frecuente fue "<strong>${topType[0]}</strong>", constituyendo aproximadamente el <strong>${topTypePercentage}%</strong> del total de incidentes.</li>`;
+                narrative += '<li><strong>Categoría Principal:</strong> La solicitud más frecuente fue "<strong>' + topType[0] + '</strong>", constituyendo aproximadamente el <strong>' + topTypePercentage + '%</strong> del total de incidentes.</li>';
             }
 
             if (maxTicketsInPeak > 0) {
-                narrative += `<li><strong>Pico de Actividad:</strong> La mayor concentración de tickets se registró los días <strong>${peakDay}</strong>, específicamente en la franja horaria de las <strong>${peakHour}:00 hs</strong>.</li>`;
+                narrative += '<li><strong>Pico de Actividad:</strong> La mayor concentración de tickets se registró los días <strong>' + peakDay + '</strong>, específicamente en la franja horaria de las <strong>' + peakHour + ':00 hs</strong>.</li>';
             }
+
+            // NUEVA SECCIÓN: Análisis de SLA solo si se filtra por mes
+            if (selectedMonth !== 'all') {
+                let frtMetCount = 0, frtApplicableCount = 0;
+                let trtMetCount = 0, trtApplicableCount = 0;
+
+                data.forEach(ticket => {
+                    const priority = (ticket.priority || '').toLowerCase();
+                    if (SLA_MATRIX[priority]) {
+                        if (ticket.firstResponseTime > 0) {
+                            frtApplicableCount++;
+                            if (ticket.firstResponseTime <= SLA_MATRIX[priority].timeToFirstResponse) frtMetCount++;
+                        }
+                        if (ticket.resolutionTime > 0) {
+                            trtApplicableCount++;
+                            if (ticket.resolutionTime <= SLA_MATRIX[priority].timeToResolution) trtMetCount++;
+                        }
+                    }
+                });
+
+                const frtComplianceRate = frtApplicableCount > 0 ? (frtMetCount / frtApplicableCount) * 100 : NaN;
+                const trtComplianceRate = trtApplicableCount > 0 ? (trtMetCount / trtApplicableCount) * 100 : NaN;
+
+                if (!isNaN(frtComplianceRate) && !isNaN(trtComplianceRate)) {
+                    const frtStatus = frtComplianceRate >= SLA_COMPLIANCE_THRESHOLD ? "Cumplido" : "Vencido";
+                    const trtStatus = trtComplianceRate >= SLA_COMPLIANCE_THRESHOLD ? "Cumplido" : "Vencido";
+                    let slaNarrative = '<li><strong>Acuerdos de Nivel de Servicio (SLAs):</strong> Durante este período, el cumplimiento para la ';
+                    slaNarrative += '<strong>Primera Respuesta</strong> alcanzó un <strong>' + frtComplianceRate.toFixed(1) + '%</strong> (resultado: <strong>' + frtStatus + '</strong>), ';
+                    slaNarrative += 'mientras que para la <strong>Resolución</strong> final se logró un <strong>' + trtComplianceRate.toFixed(1) + '%</strong> (resultado: <strong>' + trtStatus + '</strong>).</li>';
+                    narrative += slaNarrative;
+                }
+            }
+
 
 			if (totalSentiment > 0) {
 				let predominantSentiment = 'Neutral';
@@ -1306,16 +1416,16 @@
 				}
 
 				const percent = ((maxCount / totalSentiment) * 100).toFixed(0);
-				narrative += `<li><strong>Análisis de Sentimiento:</strong> El análisis de las interacciones indica que el sentimiento predominante fue <strong>${predominantSentiment}</strong> (${percent}%).</li>`;
+				narrative += '<li><strong>Análisis de Sentimiento:</strong> El análisis de las interacciones indica que el sentimiento predominante fue <strong>' + predominantSentiment + '</strong> (' + percent + '%).</li>';
 			}
 
             if (topKeywords.length > 0) {
-                narrative += `<li><strong>Voz del Cliente:</strong> Las palabras que más resonaron en los resúmenes de los tickets fueron: ${topKeywords.join(', ')}. Estos términos son clave para entender las preocupaciones principales.</li>`;
+                narrative += '<li><strong>Voz del Cliente:</strong> Las palabras que más resonaron en los resúmenes de los tickets fueron: ' + topKeywords.join(', ') + '. Estos términos son clave para entender las preocupaciones principales.</li>';
             }
 
             narrative += '</ul>';
-            narrative += `<p class="mt-4 text-xs text-gray-500 italic"><strong>Nota sobre el Sentimiento:</strong> El sentimiento se determina mediante un analisis de palabras utilizas por el cliente en el campo "Resumen" de cada ticket, clasificándolo como positivo, negativo o neutral.</p>`;
-            narrative += `<p class="mt-2 text-sm text-gray-500 italic">Este es un análisis autogenerado. Para un detalle más profundo, explore los gráficos interactivos.</p>`;
+            narrative += '<p class="mt-4 text-xs text-gray-500 italic"><strong>Nota sobre el Sentimiento:</strong> El sentimiento se determina mediante un analisis de palabras utilizas por el cliente en el campo "Resumen" de cada ticket, clasificándolo como positivo, negativo o neutral.</p>';
+            narrative += '<p class="mt-2 text-sm text-gray-500 italic">Este es un análisis autogenerado. Para un detalle más profundo, explore los gráficos interactivos.</p>';
 
             return narrative;
         }
@@ -1420,14 +1530,103 @@
             const avgPerMonth = uniqueMonths.size > 0 ? (totalTickets / uniqueMonths.size).toFixed(1) : '0.0';
 
             document.getElementById('kpi-total-tickets').textContent = totalTickets;
-            document.getElementById('kpi-resolved-tickets').textContent = totalTickets > 0 ? `${((resolvedTickets / totalTickets) * 100).toFixed(0)}%` : '0%';
+            document.getElementById('kpi-resolved-tickets').textContent = totalTickets > 0 ? ((resolvedTickets / totalTickets) * 100).toFixed(0) + '%' : '0%';
             document.getElementById('kpi-open-tickets').textContent = openTickets;
-            document.getElementById('kpi-avg-resolution').textContent = `${avgResolution} hrs`;
-            document.getElementById('kpi-avg-first-response').textContent = `${avgFirstResponse} hrs`;
+            document.getElementById('kpi-avg-resolution').textContent = avgResolution + ' hrs';
+            document.getElementById('kpi-avg-first-response').textContent = avgFirstResponse + ' hrs';
             document.getElementById('kpi-unassigned-tickets').textContent = unassignedTickets;
             document.getElementById('kpi-avg-day').textContent = avgPerDay;
             document.getElementById('kpi-avg-month').textContent = avgPerMonth;
         }
+
+		// Función de renderizado de SLA totalmente refactorizada
+		function renderSLAIndicators(data) {
+			const frtSlaContainer = document.getElementById('kpi-sla-first-response-container');
+			const trtSlaContainer = document.getElementById('kpi-sla-resolution-container');
+			const frtCard = frtSlaContainer ? frtSlaContainer.closest('.kpi-card') : null;
+			const trtCard = trtSlaContainer ? trtSlaContainer.closest('.kpi-card') : null;
+
+			// --- Función auxiliar para actualizar la vista de una tarjeta SLA ---
+			const updateSLAView = (container, card, complianceRate, type) => {
+				if (!container || !card) return;
+
+				let statusText, statusColor, complianceText, titleText;
+				const typeText = type === 'frt' ? 'de Primera Respuesta' : 'de Resolución';
+
+				if (isNaN(complianceRate)) {
+					// Caso: No hay datos aplicables para el cálculo
+					complianceText = '-';
+					statusText = 'N/A';
+					statusColor = 'text-gray-500';
+					titleText = 'No hay tickets con SLA ' + typeText + ' aplicable en el período seleccionado.';
+				} else {
+					// Caso: Hay datos, se procede con el cálculo y la visualización
+					const isSlaMet = complianceRate >= SLA_COMPLIANCE_THRESHOLD;
+					complianceText = complianceRate.toFixed(1) + '%';
+					statusText = isSlaMet ? 'Cumplido' : 'Vencido';
+					statusColor = isSlaMet ? 'text-green-600' : 'text-red-600';
+					
+					titleText = 'Cómo se calcula el SLA ' + typeText + ':\n\n' +
+								'1. Porcentaje de Cumplimiento (%):\n' +
+								'Es el porcentaje de tickets que fueron atendidos/resueltos dentro del tiempo límite de su prioridad.\n'+
+								'Fórmula: (Tickets Dentro de SLA / Tickets Totales con SLA) * 100.\n\n' +
+								'2. Estado (Cumplido/Vencido):\n'+
+								'Se considera \'Cumplido\' si el Porcentaje de Cumplimiento es >= ' + SLA_COMPLIANCE_THRESHOLD + '%. De lo contrario, es \'Vencido\'.';
+				}
+				
+				// Actualizar el contenido HTML de la tarjeta (usando concatenación)
+				container.innerHTML = 
+					'<p class="kpi-value ' + statusColor + '">' + complianceText + '</p>' +
+					'<p class="text-sm font-bold ' + statusColor + '">' + statusText + '</p>';
+				
+				// Asignar el tooltip (leyenda) explicativo a toda la tarjeta
+				card.title = titleText;
+			};
+			
+			// --- Lógica de Cálculo de Cumplimiento ---
+			let frtMetCount = 0, frtApplicableCount = 0;
+			let trtMetCount = 0, trtApplicableCount = 0;
+
+			// Iterar sobre cada ticket en los datos filtrados
+			data.forEach(ticket => {
+				const priority = (ticket.priority || '').toLowerCase();
+				// Verificar si la prioridad del ticket tiene un SLA definido
+				if (SLA_MATRIX[priority]) {
+					// --- Cálculo para SLA de Primera Respuesta (FRT) ---
+					if (ticket.firstResponseTime > 0) {
+						frtApplicableCount++; // Este ticket es aplicable para el cálculo de FRT
+						const slaLimit = SLA_MATRIX[priority].timeToFirstResponse;
+						if (ticket.firstResponseTime <= slaLimit) {
+							frtMetCount++; // El ticket cumplió el SLA de FRT
+						}
+					}
+
+					// --- Cálculo para SLA de Tiempo de Resolución (TRT) ---
+					if (ticket.resolutionTime > 0) {
+						trtApplicableCount++; // Este ticket es aplicable para el cálculo de TRT
+						const slaLimit = SLA_MATRIX[priority].timeToResolution;
+						if (ticket.resolutionTime <= slaLimit) {
+							trtMetCount++; // El ticket cumplió el SLA de TRT
+						}
+					}
+				}
+			});
+
+			// Calcular la tasa de cumplimiento final para FRT
+			const frtComplianceRate = frtApplicableCount > 0 
+				? (frtMetCount / frtApplicableCount) * 100 
+				: NaN;
+
+			// Calcular la tasa de cumplimiento final para TRT
+			const trtComplianceRate = trtApplicableCount > 0 
+				? (trtMetCount / trtApplicableCount) * 100 
+				: NaN;
+			
+			// --- Renderizado Final de las tarjetas ---
+			updateSLAView(frtSlaContainer, frtCard, frtComplianceRate, 'frt');
+			updateSLAView(trtSlaContainer, trtCard, trtComplianceRate, 'trt');
+		}
+
 
         const createChart = (ctx, type, data, options) => {
             if (charts[ctx.id]) charts[ctx.id].destroy();
@@ -1436,8 +1635,18 @@
         
         function renderCharts(data) {
              if (data.length === 0) {
-                 Object.values(charts).forEach(chart => chart.destroy());
-                 charts = {};
+                Object.values(charts).forEach(chart => {
+                    if(chart.destroy) chart.destroy();
+                });
+                charts = {};
+                // Limpiar contenedores de ApexCharts
+                document.getElementById('statusChart').innerHTML = '';
+                document.getElementById('priorityChart').innerHTML = '';
+                document.getElementById('requestTypeChart').innerHTML = '';
+                document.getElementById('sentimentChart').innerHTML = '';
+                document.getElementById('monthlySlaChart').innerHTML = '';
+
+                // Limpiar contenedores de Chart.js y otros
                  document.getElementById('heatmap-grid').innerHTML = '';
                  document.getElementById('heatmap-day-labels').innerHTML = '';
                  document.getElementById('word-cloud-container').innerHTML = '<p class="text-gray-500">No hay datos suficientes para generar la Nube de Palabras.</p>';
@@ -1445,142 +1654,175 @@
              }
             const chartData = processData(data);
             
-            const sharedOptions = (onClickHandler) => ({
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', color: FONT_COLOR, font: { weight: 'bold' }, formatter: (value) => value > 0 ? value : '' }},
-                scales: { x: { ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR }}, y: { ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR }} },
-                onClick: onClickHandler
-            });
+            // --- Conversión a ApexCharts ---
 
-            const defaultClickHandler = (e, elements, chart) => {
-                if (elements.length > 0) handleChartClick(chart.canvas.id, chart.config.type, chart.data.labels[elements[0].index]);
+            // Gráfico de Estado (Barras Horizontales con Gradiente)
+            if (charts.statusChart) charts.statusChart.destroy();
+            const statusOptions = {
+                series: [{ data: chartData.status.values, name: 'Tickets' }],
+                chart: { type: 'bar', height: 320, toolbar: { show: false },
+                    events: {
+                        dataPointSelection: (event, chartContext, config) => {
+                            const label = config.w.globals.labels[config.dataPointIndex];
+                            handleChartClick('statusChart', 'status', label);
+                        }
+                    }
+                },
+                plotOptions: { bar: { borderRadius: 4, horizontal: true, barHeight: '60%' } },
+                dataLabels: { enabled: true, offsetX: -15, style: { colors: ['#fff'] }, formatter: val => val },
+                xaxis: { categories: chartData.status.labels, labels: { style: { colors: FONT_COLOR } } },
+                yaxis: { labels: { style: { colors: FONT_COLOR } } },
+                colors: [PALETTE.indigo],
+                grid: { borderColor: GRID_COLOR },
+                tooltip: { y: { formatter: val => val + ' tickets' } },
+                fill: {
+                    type: "gradient",
+                    gradient: {
+                        shade: 'dark', type: "horizontal", shadeIntensity: 0.5,
+                        gradientToColors: [PALETTE.blue], inverseColors: true,
+                        opacityFrom: 1, opacityTo: 1, stops: [0, 100]
+                    }
+                }
             };
-            
-            createChart(document.getElementById('statusChart'), 'bar', {
-                labels: chartData.status.labels,
-                datasets: [{ data: chartData.status.values, backgroundColor: Object.values(PALETTE) }]
-            }, { ...sharedOptions(defaultClickHandler), indexAxis: 'y' });
-            
-            createChart(document.getElementById('priorityChart'), 'doughnut', {
-                labels: chartData.priority.labels,
-                datasets: [{ data: chartData.priority.values, backgroundColor: Object.values(PALETTE) }]
-            }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: FONT_COLOR } }, datalabels: { color: '#fff', formatter: (v, ctx) => (v * 100 / ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0)) > 5 ? (v * 100 / ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0)).toFixed(0) + "%" : ''}}, onClick: defaultClickHandler });
-            
-            createChart(document.getElementById('requestTypeChart'), 'bar', {
-                labels: chartData.requestType.labels,
-                datasets: [{ data: chartData.requestType.values, backgroundColor: PALETTE.green }]
-            }, { ...sharedOptions(defaultClickHandler), indexAxis: 'y' });
+            charts.statusChart = new ApexCharts(document.querySelector("#statusChart"), statusOptions);
+            charts.statusChart.render();
 
+            // Gráfico de Prioridad (Dona con efecto 3D/sombra)
+            if (charts.priorityChart) charts.priorityChart.destroy();
+            const priorityOptions = {
+                series: chartData.priority.values,
+                labels: chartData.priority.labels,
+                chart: { type: 'donut', height: 320,
+                     events: {
+                        dataPointSelection: (event, chartContext, config) => {
+                            const label = config.w.globals.labels[config.dataPointIndex];
+                            handleChartClick('priorityChart', 'priority', label);
+                        }
+                    }
+                },
+                plotOptions: { pie: { donut: { labels: { show: true, total: { show: true, label: 'Total' } } } } },
+                dataLabels: { enabled: true, formatter: (val) => val.toFixed(1) + '%' },
+                legend: { position: 'bottom', labels: { colors: FONT_COLOR } },
+                colors: Object.values(PALETTE),
+                fill: { colors: Object.values(PALETTE) },
+                responsive: [{ breakpoint: 480, options: { chart: { width: 200 }, legend: { position: 'bottom' } } }],
+                 dropShadow: {
+                    enabled: true, top: 5, left: 2, blur: 4,
+                    color: '#000000', opacity: 0.2
+                }
+            };
+            charts.priorityChart = new ApexCharts(document.querySelector("#priorityChart"), priorityOptions);
+            charts.priorityChart.render();
+            
+            // Gráfico Tipo de Solicitud (Barras Verticales)
+            if (charts.requestTypeChart) charts.requestTypeChart.destroy();
+            const requestTypeOptions = {
+                 series: [{ data: chartData.requestType.values, name: 'Tickets' }],
+                chart: { type: 'bar', height: 320, toolbar: { show: false }, 
+                    events: {
+                        dataPointSelection: (event, chartContext, config) => {
+                            const label = config.w.globals.labels[config.dataPointIndex];
+                            handleChartClick('requestTypeChart', 'requestType', label);
+                        }
+                    }
+                 },
+                plotOptions: { bar: { borderRadius: 4, horizontal: false, columnWidth: '50%' } },
+                dataLabels: { enabled: false },
+                xaxis: { categories: chartData.requestType.labels, labels: { rotate: -45, style: { colors: FONT_COLOR } } },
+                yaxis: { labels: { style: { colors: FONT_COLOR } } },
+                colors: [PALETTE.green],
+                grid: { borderColor: GRID_COLOR },
+                tooltip: { y: { formatter: val => val + ' tickets' } }
+            };
+            charts.requestTypeChart = new ApexCharts(document.querySelector("#requestTypeChart"), requestTypeOptions);
+            charts.requestTypeChart.render();
+
+             // Gráfico de Sentimiento (Torta con efecto 3D/sombra)
+            if (charts.sentimentChart) charts.sentimentChart.destroy();
+            const sentimentColors = chartData.sentiment.labels.map(label => {
+                if (label === 'Positivo') return PALETTE.green;
+                if (label === 'Negativo') return PALETTE.red;
+                return PALETTE.slate;
+            });
+            const sentimentOptions = {
+                series: chartData.sentiment.values,
+                labels: chartData.sentiment.labels,
+                colors: sentimentColors,
+                chart: { type: 'pie', height: 320,
+                     events: {
+                        dataPointSelection: (event, chartContext, config) => {
+                             const label = config.w.globals.labels[config.dataPointIndex];
+                            handleChartClick('sentimentChart', 'sentiment', label);
+                        }
+                    }
+                },
+                legend: { position: 'bottom', labels: { colors: FONT_COLOR } },
+                dataLabels: { enabled: true, formatter: (val) => val.toFixed(1) + '%' },
+                dropShadow: {
+                    enabled: true, top: 5, left: 2, blur: 4,
+                    color: '#000000', opacity: 0.3
+                }
+            };
+            charts.sentimentChart = new ApexCharts(document.querySelector("#sentimentChart"), sentimentOptions);
+            charts.sentimentChart.render();
+
+            // --- Gráficos que permanecen con Chart.js (o son personalizados) ---
+            
             createChart(document.getElementById('diagnosisChart'), 'pie', {
                 labels: chartData.diagnosis.labels,
                 datasets: [{ data: chartData.diagnosis.values, backgroundColor: Object.values(PALETTE).reverse() }]
-            }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: FONT_COLOR } }, datalabels: { display: false } }, onClick: defaultClickHandler });
+            }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: FONT_COLOR } }, datalabels: { display: false } }, onClick: (e, el) => el.length > 0 && handleChartClick('diagnosisChart', 'diagnosis', charts.diagnosisChart.data.labels[el[0].index])});
 
             createChart(document.getElementById('problemTypeChart'), 'pie', {
                 labels: chartData.problemType.labels,
                 datasets: [{ data: chartData.problemType.values, backgroundColor: Object.values(PALETTE) }]
-            }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: FONT_COLOR } }, datalabels: { display: false } }, onClick: defaultClickHandler });
-
-			const sentimentColors = {
-				"Positivo": PALETTE.green,
-				"Neutral": PALETTE.slate,
-				"Negativo": PALETTE.red
-			};
-
-			const sentimentLabels = chartData.sentiment.labels;
-			const sentimentValues = chartData.sentiment.values;
-
-			const sentimentColorArray = sentimentLabels.map(label => sentimentColors[label] || PALETTE.gray);
-
-			createChart(document.getElementById('sentimentChart'), 'pie', {
-				labels: sentimentLabels,
-				datasets: [{
-					data: sentimentValues,
-					backgroundColor: sentimentColorArray
-				}]
-			}, {
-				responsive: true,
-				maintainAspectRatio: false,
-				plugins: {
-					legend: {
-						position: 'bottom',
-						labels: { color: FONT_COLOR }
-					},
-					datalabels: { display: false }
-				},
-				onClick: defaultClickHandler
-			});
-
-
+            }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: FONT_COLOR } }, datalabels: { display: false } }, onClick: (e, el) => el.length > 0 && handleChartClick('problemTypeChart', 'problemType', charts.problemTypeChart.data.labels[el[0].index])});
+            
             createChart(document.getElementById('topClientsChart'), 'bar', {
                 labels: chartData.topClients.labels,
                 datasets: [{ label: 'Tickets', data: chartData.topClients.values, backgroundColor: PALETTE.blue }]
-            }, { ...sharedOptions(defaultClickHandler), indexAxis: 'y' });
+            }, { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end' } }, onClick: (e, el) => el.length > 0 && handleChartClick('topClientsChart', 'client', charts.topClientsChart.data.labels[el[0].index]) });
             
             createChart(document.getElementById('assigneeChart'), 'bar', {
                 labels: chartData.topAssignees.labels,
                 datasets: [{ label: 'Tickets', data: chartData.topAssignees.values, backgroundColor: PALETTE.sky }]
-            }, { ...sharedOptions(defaultClickHandler), indexAxis: 'y' });
+            }, { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end' } }, onClick: (e, el) => el.length > 0 && handleChartClick('assigneeChart', 'assignee', charts.assigneeChart.data.labels[el[0].index]) });
             
-            const ctxTrend = document.getElementById('trendChart').getContext('2d');
-            const gradient = ctxTrend.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(234, 88, 12, 0.8)');
-            gradient.addColorStop(0.5, 'rgba(249, 115, 22, 0.6)');
-            gradient.addColorStop(1, 'rgba(251, 146, 60, 0.3)');
-
+            // CORRECCIÓN: Ajuste de datalabels en el gráfico de tendencia
             createChart(document.getElementById('trendChart'), 'line', {
                 labels: chartData.trend.labels,
                 datasets: [{ 
                     label: 'Tickets Creados', 
                     data: chartData.trend.values, 
                     borderColor: PALETTE.red,
-                    backgroundColor: gradient,
-                    fill: 'origin',
-                    tension: 0.3,
-                    borderWidth: 2, 
-                    pointRadius: 4,
-                    pointBackgroundColor: PALETTE.orange,
-                    pointBorderColor: '#fff',
-                    pointHoverRadius: 6,
-                    pointHoverBackgroundColor: PALETTE.red
+                    backgroundColor: 'rgba(234, 88, 12, 0.3)',
+                    fill: 'origin', tension: 0.3, borderWidth: 2
                 }]
             }, { 
                 responsive: true, 
                 maintainAspectRatio: false, 
+                scales: { x: { type: 'time', time: { unit: 'day' } } }, 
                 plugins: {
-                    legend: { display: false }, 
-                    datalabels: { display: false },
-                    zoom: {
-                        zoom: {
-                            wheel: { enabled: true },
-                            pinch: { enabled: true },
-                            mode: 'x',
-                            drag: { enabled: true, borderColor: PALETTE.indigo, borderWidth: 1, backgroundColor: 'rgba(79, 70, 229, 0.2)' }
-                        },
-                        pan: { enabled: true, mode: 'x' }
+                    legend: { display: false },
+                    datalabels: {
+                        display: true,
+                        align: 'top',
+                        anchor: 'end',
+                        offset: 8,
+                        backgroundColor: 'rgba(220, 38, 38, 0.75)',
+                        borderRadius: 4,
+                        color: 'white',
+                        font: { weight: 'bold' },
+                        formatter: (value, context) => context.dataset.data.length > 30 ? '' : value, // Ocultar si hay muchos puntos
                     }
-                }, 
-                scales: { 
-                    x: { 
-                        type: 'time', 
-                        time: { unit: 'day', tooltipFormat: 'dd MMM yy', displayFormats: { day: 'dd MMM' }}, 
-                        ticks: { color: FONT_COLOR }, 
-                        grid: { color: GRID_COLOR }
-                    }, 
-                    y: { ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR } } 
                 },
-                onClick: (e, elements, chart) => {
-                    if (elements.length > 0) {
-                        const index = elements[0].index;
-                        const dateValue = chart.data.labels[index];
-                        handleChartClick('trendChart', 'dateSpecific', dateValue);
-                    }
-                }
+                onClick: (e, el) => { if (el.length > 0) handleChartClick('trendChart', 'dateSpecific', charts.trendChart.data.labels[el[0].index])} 
             });
-
+            
             renderHeatmap(chartData.heatmap);
             renderClientRequestTypeChart(chartData.clientRequestType);
             renderMonthlyComparisonChart(chartData.monthlyComparison);
+            renderMonthlySlaChart(data); // Renderizar el nuevo gráfico de SLA mensual
 
             const wcContainer = document.getElementById('word-cloud-container');
             wcContainer.innerHTML = '';
@@ -1597,8 +1839,8 @@
             heatmapGrid.innerHTML = ''; dayLabelsContainer.innerHTML = '';
             let maxCount = 0;
             Object.values(heatmapData).forEach(h => h.forEach(c => { if (c > maxCount) maxCount = c; }));
-            heatmapGrid.style.gridTemplateRows = `repeat(${DAY_NAMES.length}, 1fr)`;
-            dayLabelsContainer.style.gridTemplateRows = `repeat(${DAY_NAMES.length}, 1fr)`;
+            heatmapGrid.style.gridTemplateRows = 'repeat(' + DAY_NAMES.length + ', 1fr)';
+            dayLabelsContainer.style.gridTemplateRows = 'repeat(' + DAY_NAMES.length + ', 1fr)';
             const getColorForValue = (v, max) => v === 0 ? '#F8FAFC' : `hsl(220, 80%, ${90 - (v / max) * 60}%)`;
             DAY_NAMES.forEach((day, dayIndex) => {
                 const dayLabel = document.createElement('div');
@@ -1611,7 +1853,7 @@
                     cell.className = 'heatmap-cell';
                     cell.style.backgroundColor = getColorForValue(count, maxCount);
                     cell.textContent = count > 0 ? count : '';
-                    cell.title = `${day}, ${hour}:00 - ${hour+1}:00: ${count} tickets`;
+                    cell.title = day + ', ' + hour + ':00 - ' + (hour + 1) + ':00: ' + count + ' tickets';
                     cell.dataset.dayIndex = dayIndex; cell.dataset.hour = hour;
                     cell.addEventListener('click', handleHeatmapClick);
                     heatmapGrid.appendChild(cell);
@@ -1710,12 +1952,97 @@
                 }
             });
         }
+        
+        // --- NUEVA FUNCIÓN PARA EL GRÁFICO DE EVOLUCIÓN DE SLA ---
+        function renderMonthlySlaChart(data) {
+            if (charts.monthlySlaChart) {
+                charts.monthlySlaChart.destroy();
+            }
+
+            const monthlySlaData = data.reduce((acc, ticket) => {
+                const monthKey = ticket.created.getFullYear() + '-' + ticket.created.getMonth();
+                if (!acc[monthKey]) {
+                    acc[monthKey] = { frtMet: 0, frtApplicable: 0, trtMet: 0, trtApplicable: 0 };
+                }
+
+                const priority = (ticket.priority || '').toLowerCase();
+                if (SLA_MATRIX[priority]) {
+                    if (ticket.firstResponseTime > 0) {
+                        acc[monthKey].frtApplicable++;
+                        if (ticket.firstResponseTime <= SLA_MATRIX[priority].timeToFirstResponse) {
+                            acc[monthKey].frtMet++;
+                        }
+                    }
+                    if (ticket.resolutionTime > 0) {
+                        acc[monthKey].trtApplicable++;
+                        if (ticket.resolutionTime <= SLA_MATRIX[priority].timeToResolution) {
+                            acc[monthKey].trtMet++;
+                        }
+                    }
+                }
+                return acc;
+            }, {});
+
+            const sortedMonths = Object.keys(monthlySlaData).sort((a,b) => {
+                const [yearA, monthA] = a.split('-').map(Number);
+                const [yearB, monthB] = b.split('-').map(Number);
+                return yearA - yearB || monthA - monthB;
+            });
+            
+            const categories = sortedMonths.map(monthKey => {
+                 const [year, monthIndex] = monthKey.split('-').map(Number);
+                return MONTH_NAMES[monthIndex] + ' ' + year;
+            });
+
+            const frtSeries = sortedMonths.map(month => {
+                const d = monthlySlaData[month];
+                const compliance = d.frtApplicable > 0 ? (d.frtMet / d.frtApplicable) * 100 : 0;
+                return parseFloat(compliance.toFixed(1));
+            });
+
+            const trtSeries = sortedMonths.map(month => {
+                const d = monthlySlaData[month];
+                const compliance = d.trtApplicable > 0 ? (d.trtMet / d.trtApplicable) * 100 : 0;
+                return parseFloat(compliance.toFixed(1));
+            });
+
+            const options = {
+                series: [
+                    { name: 'SLA 1ra Respuesta (%)', type: 'column', data: frtSeries },
+                    { name: 'SLA Resolución (%)', type: 'line', data: trtSeries }
+                ],
+                chart: { height: 350, type: 'line', },
+                stroke: { width: [0, 4] },
+                title: { text: '' }, // Título eliminado para un look más limpio
+                dataLabels: { 
+                    enabled: true, 
+                    enabledOnSeries: [0], // Solo en las barras
+                    formatter: function (val) {
+                        return val + "%";
+                    }
+                    // Se elimina el estilo de color fijo para que ApexCharts elija el contraste
+                },
+                labels: categories,
+                xaxis: { type: 'category', labels: { style: { colors: FONT_COLOR } } },
+                yaxis: [{ title: { text: 'Cumplimiento (%)', style: { color: FONT_COLOR } }, min: 0, max: 100, labels: { style: { colors: FONT_COLOR } } }],
+                colors: [PALETTE.blue, PALETTE.green],
+                tooltip: { y: { formatter: val => val + '%' } },
+                grid: { borderColor: GRID_COLOR },
+                legend: { labels: { colors: FONT_COLOR } }
+            };
+
+            charts.monthlySlaChart = new ApexCharts(document.querySelector("#monthlySlaChart"), options);
+            charts.monthlySlaChart.render();
+        }
+
 
         const modal = document.getElementById('data-modal');
         const closeModalBtn = document.getElementById('close-modal-button');
 
         function showModalWithData(title, content, headers) {
-            document.getElementById('modal-title').innerText = title;
+            const modalTitleEl = document.getElementById('modal-title');
+            modalTitleEl.innerText = title;
+
             const modalBody = document.getElementById('modal-body-container');
 
             if (typeof content === 'string') {
@@ -1755,15 +2082,53 @@
                     </div>`;
                 modalBody.innerHTML = tableHTML;
             }
-            modal.style.display = 'flex';
+            modal.style.display = 'block'; // Usar block para activar el CSS
         }
 
         closeModalBtn.onclick = () => { modal.style.display = "none"; };
-        window.onclick = (event) => { if (event.target == modal) modal.style.display = "none"; };
+        
+        function makeModalDraggable() {
+            const modalContent = document.querySelector('.modal-content');
+            const modalHeader = document.getElementById('modal-header');
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+            const dragMouseDown = (e) => {
+                e = e || window.event;
+                e.preventDefault();
+                // Posición inicial del cursor
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            };
+
+            const elementDrag = (e) => {
+                e = e || window.event;
+                e.preventDefault();
+                // Calcular la nueva posición del cursor
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                // Establecer la nueva posición del modal
+                modalContent.style.top = (modalContent.offsetTop - pos2) + "px";
+                modalContent.style.left = (modalContent.offsetLeft - pos1) + "px";
+            };
+
+            const closeDragElement = () => {
+                // Detener el movimiento cuando se suelta el botón del ratón
+                document.onmouseup = null;
+                document.onmousemove = null;
+            };
+
+            if (modalHeader) {
+                modalHeader.onmousedown = dragMouseDown;
+            }
+        }
         
         function setupDrilldown() {}
 
-        // MODIFICADO: La función ahora explica cómo se calculan los promedios de tiempo
+        // MODIFICADO: La función ahora maneja clics en todas las tarjetas, incluidas las nuevas de SLA
         function setupKpiCardClickHandlers() {
             const kpiGrid = document.getElementById('kpi-grid');
             if (!kpiGrid) return;
@@ -1772,10 +2137,9 @@
                 const kpiCard = event.target.closest('.kpi-card');
                 if (!kpiCard) return;
 
-                const kpiValueElement = kpiCard.querySelector('.kpi-value');
-                if (!kpiValueElement) return;
-
-                const kpiId = kpiValueElement.id;
+                const kpiId = kpiCard.dataset.kpi;
+				if (!kpiId) return;
+				
                 const currentData = getFilteredData();
                 let drilldownData = [];
                 let modalTitle = 'Detalle de Datos';
@@ -1788,26 +2152,26 @@
                 };
 
                 switch (kpiId) {
-                    case 'kpi-total-tickets':
+                    case 'total-tickets':
                         modalTitle = 'Detalle: Tickets Totales';
                         drilldownData = currentData;
                         showModalWithData(modalTitle, drilldownData.slice(0, 500), headers);
                         break;
                     
-                    case 'kpi-resolved-tickets':
+                    case 'resolved-tickets':
                         modalTitle = 'Detalle: Tickets Resueltos';
                         drilldownData = currentData.filter(d => ['Closed', 'Resolved', 'Done', 'Cerrado', 'Resuelto'].includes(d.status));
                         showModalWithData(modalTitle, drilldownData.slice(0, 500), headers);
                         break;
 
-                    case 'kpi-open-tickets':
+                    case 'open-tickets':
                         modalTitle = 'Detalle: Tickets Abiertos';
                         drilldownData = currentData.filter(d => !['Closed', 'Resolved', 'Done', 'Cerrado', 'Resuelto', 'Canceled', 'Cancelled', 'Cancelado'].includes(d.status));
                         showModalWithData(modalTitle, drilldownData.slice(0, 500), headers);
                         break;
 
-                    case 'kpi-avg-resolution': {
-                        modalTitle = `Cálculo de Tiempo Promedio de Resolución`;
+                    case 'avg-resolution': {
+                        modalTitle = 'Cálculo de Tiempo Promedio de Resolución';
                         const validTickets = currentData.filter(d => d.resolutionTime > 0);
                         if (validTickets.length === 0) {
                             alert('No hay tickets con tiempo de resolución válido para mostrar.');
@@ -1817,36 +2181,35 @@
                         const avgHours = totalHours / validTickets.length;
                         const top20Tickets = [...validTickets].sort((a,b) => b.resolutionTime - a.resolutionTime).slice(0, 20);
 
-                        let explanationHTML = `
-                            <div class="p-4 mb-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg">
-                                <p class="font-bold">Fórmula de Cálculo:</p>
-                                <p>Suma Total de Horas de Resolución / Cantidad de Tickets Válidos = Tiempo Promedio</p>
-                                <p class="mt-2 text-xl">
-                                    <strong>${totalHours.toFixed(2)}</strong> Horas / <strong>${validTickets.length}</strong> Tickets = <strong>${avgHours.toFixed(2)}</strong> Horas Promedio
-                                </p>
-                            </div>
-                            <h4 class="font-bold mt-6 mb-2 text-gray-700">Top 20 Tickets con Mayor Tiempo de Resolución:</h4>
-                            <div class="max-h-96 overflow-y-auto border rounded-lg">
-                                <table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50 sticky top-0"><tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue Key</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiempo de Resolución (Hrs)</th>
-                                </tr></thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    ${top20Tickets.map(t => `<tr>
+                        let explanationHTML = '<div class="p-4 mb-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg">' +
+                                '<p class="font-bold">Fórmula de Cálculo:</p>' +
+                                '<p>Suma Total de Horas de Resolución / Cantidad de Tickets Válidos = Tiempo Promedio</p>' +
+                                '<p class="mt-2 text-xl">' +
+                                    '<strong>' + totalHours.toFixed(2) + '</strong> Horas / <strong>' + validTickets.length + '</strong> Tickets = <strong>' + avgHours.toFixed(2) + '</strong> Horas Promedio' +
+                                '</p>' +
+                            '</div>' +
+                            '<h4 class="font-bold mt-6 mb-2 text-gray-700">Top 20 Tickets con Mayor Tiempo de Resolución:</h4>' +
+                            '<div class="max-h-96 overflow-y-auto border rounded-lg">' +
+                                '<table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50 sticky top-0"><tr>' +
+                                    '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue Key</th>' +
+                                    '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>' +
+                                    '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiempo de Resolución (Hrs)</th>' +
+                                '</tr></thead>' +
+                                '<tbody class="bg-white divide-y divide-gray-200">' +
+                                    top20Tickets.map(t => `<tr>
                                         <td class="px-6 py-4 whitespace-nowrap">${escapeHTML(t.issue)}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">${escapeHTML(t.summary)}</td>
                                         <td class="px-6 py-4 whitespace-nowrap font-semibold">${t.resolutionTime.toFixed(2)}</td>
-                                    </tr>`).join('')}
-                                </tbody></table>
-                            </div>
-                            <p class="mt-2 text-xs text-gray-500 italic">Nota: Solo se consideran para el cálculo los tickets que tienen un tiempo de resolución registrado y mayor a cero.</p>`;
+                                    </tr>`).join('') +
+                                '</tbody></table>' +
+                            '</div>' +
+                            '<p class="mt-2 text-xs text-gray-500 italic">Nota: Solo se consideran para el cálculo los tickets que tienen un tiempo de resolución registrado y mayor a cero.</p>';
                         showModalWithData(modalTitle, explanationHTML);
                         break;
                     }
                     
-                    case 'kpi-avg-first-response': {
-                        modalTitle = `Cálculo de Tiempo Promedio de Primera Respuesta`;
+                    case 'avg-first-response': {
+                        modalTitle = 'Cálculo de Tiempo Promedio de Primera Respuesta';
                         const validTickets = currentData.filter(d => d.firstResponseTime > 0);
                         if (validTickets.length === 0) {
                             alert('No hay tickets con tiempo de primera respuesta válido para mostrar.');
@@ -1856,46 +2219,45 @@
                         const avgHours = totalHours / validTickets.length;
                         const top20Tickets = [...validTickets].sort((a,b) => b.firstResponseTime - a.firstResponseTime).slice(0, 20);
 
-                        let explanationHTML = `
-                            <div class="p-4 mb-4 bg-amber-50 border-l-4 border-amber-400 text-amber-800 rounded-r-lg">
-                                <p class="font-bold">Fórmula de Cálculo:</p>
-                                <p>Suma Total de Horas de 1ra Respuesta / Cantidad de Tickets Válidos = Tiempo Promedio</p>
-                                <p class="mt-2 text-xl">
-                                    <strong>${totalHours.toFixed(2)}</strong> Horas / <strong>${validTickets.length}</strong> Tickets = <strong>${avgHours.toFixed(2)}</strong> Horas Promedio
-                                </p>
-                            </div>
-                            <h4 class="font-bold mt-6 mb-2 text-gray-700">Top 20 Tickets con Mayor Tiempo de 1ra Respuesta:</h4>
-                            <div class="max-h-96 overflow-y-auto border rounded-lg">
-                                <table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50 sticky top-0"><tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue Key</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiempo 1ra Respuesta (Hrs)</th>
-                                </tr></thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    ${top20Tickets.map(t => `<tr>
+                        let explanationHTML = '<div class="p-4 mb-4 bg-amber-50 border-l-4 border-amber-400 text-amber-800 rounded-r-lg">' +
+                                '<p class="font-bold">Fórmula de Cálculo:</p>' +
+                                '<p>Suma Total de Horas de 1ra Respuesta / Cantidad de Tickets Válidos = Tiempo Promedio</p>' +
+                                '<p class="mt-2 text-xl">' +
+                                    '<strong>' + totalHours.toFixed(2) + '</strong> Horas / <strong>' + validTickets.length + '</strong> Tickets = <strong>' + avgHours.toFixed(2) + '</strong> Horas Promedio' +
+                                '</p>' +
+                            '</div>' +
+                            '<h4 class="font-bold mt-6 mb-2 text-gray-700">Top 20 Tickets con Mayor Tiempo de 1ra Respuesta:</h4>' +
+                            '<div class="max-h-96 overflow-y-auto border rounded-lg">' +
+                                '<table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50 sticky top-0"><tr>' +
+                                    '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue Key</th>' +
+                                    '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>' +
+                                    '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiempo 1ra Respuesta (Hrs)</th>' +
+                                '</tr></thead>' +
+                                '<tbody class="bg-white divide-y divide-gray-200">' +
+                                    top20Tickets.map(t => `<tr>
                                         <td class="px-6 py-4 whitespace-nowrap">${escapeHTML(t.issue)}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">${escapeHTML(t.summary)}</td>
                                         <td class="px-6 py-4 whitespace-nowrap font-semibold">${t.firstResponseTime.toFixed(2)}</td>
-                                    </tr>`).join('')}
-                                </tbody></table>
-                            </div>
-                            <p class="mt-2 text-xs text-gray-500 italic">Nota: Solo se consideran para el cálculo los tickets que tienen un tiempo de primera respuesta registrado y mayor a cero.</p>`;
+                                    </tr>`).join('') +
+                                '</tbody></table>' +
+                            '</div>' +
+                            '<p class="mt-2 text-xs text-gray-500 italic">Nota: Solo se consideran para el cálculo los tickets que tienen un tiempo de primera respuesta registrado y mayor a cero.</p>';
                         showModalWithData(modalTitle, explanationHTML);
                         break;
                     }
 
-                    case 'kpi-unassigned-tickets':
+                    case 'unassigned-tickets':
                         modalTitle = 'Detalle: Tickets sin Asignar';
                         drilldownData = currentData.filter(d => !d.assignee || d.assignee.toLowerCase() === 'unassigned' || d.assignee.toLowerCase() === 'sin asignar');
                         showModalWithData(modalTitle, drilldownData.slice(0, 500), headers);
                         break;
                     
-                    case 'kpi-avg-day': {
+                    case 'avg-day': {
                         const totalTicketsDay = currentData.length;
                         const uniqueDaysSet = new Set(currentData.map(d => d.created.toISOString().split('T')[0]));
                         const uniqueDaysCount = uniqueDaysSet.size;
                         const avgPerDay = uniqueDaysCount > 0 ? (totalTicketsDay / uniqueDaysCount).toFixed(2) : '0.0';
-                        modalTitle = `Cálculo de Promedio de Tickets por Día`;
+                        modalTitle = 'Cálculo de Promedio de Tickets por Día';
                         const ticketsByDay = {};
                         currentData.forEach(ticket => {
                             const day = ticket.created.toISOString().split('T')[0];
@@ -1925,12 +2287,12 @@
                         break;
                     }
 
-                    case 'kpi-avg-month': {
+                    case 'avg-month': {
                         const totalTicketsMonth = currentData.length;
                         const uniqueMonthsSet = new Set(currentData.map(d => `${d.created.getFullYear()}-${d.created.getMonth()}`));
                         const uniqueMonthsCount = uniqueMonthsSet.size;
                         const avgPerMonth = uniqueMonthsCount > 0 ? (totalTicketsMonth / uniqueMonthsCount).toFixed(2) : '0.0';
-                        modalTitle = `Cálculo de Promedio de Tickets por Mes`;
+                        modalTitle = 'Cálculo de Promedio de Tickets por Mes';
                         const ticketsByMonth = {};
                         currentData.forEach(ticket => {
                             const monthKey = `${ticket.created.getFullYear()}-${ticket.created.getMonth()}`;
@@ -1965,6 +2327,46 @@
                         showModalWithData(modalTitle, monthExplanationHTML);
                         break;
                     }
+
+					case 'sla-first-response': {
+						modalTitle = 'Detalle de Tickets: SLA de Primera Respuesta';
+						const relevantTickets = currentData.filter(d => SLA_MATRIX[d.priority.toLowerCase()] && d.firstResponseTime > 0);
+						const modalData = relevantTickets.map(d => {
+							const priorityKey = d.priority.toLowerCase();
+							const slaLimit = SLA_MATRIX[priorityKey].timeToFirstResponse;
+							const actualTime = d.firstResponseTime;
+							return {
+								issue: d.issue,
+								summary: d.summary,
+								priority: d.priority,
+								actualTime: actualTime,
+								slaLimit: slaLimit,
+								slaStatus: actualTime <= slaLimit ? 'Cumplido' : 'Vencido'
+							};
+						}).sort((a,b) => b.actualTime - a.actualTime); // Ordenar por los que más tardaron
+						showModalWithData(modalTitle, modalData, SLA_TABLE_HEADERS);
+						break;
+					}
+
+					case 'sla-resolution': {
+						modalTitle = 'Detalle de Tickets: SLA de Resolución';
+						const relevantTickets = currentData.filter(d => SLA_MATRIX[d.priority.toLowerCase()] && d.resolutionTime > 0);
+						const modalData = relevantTickets.map(d => {
+							const priorityKey = d.priority.toLowerCase();
+							const slaLimit = SLA_MATRIX[priorityKey].timeToResolution;
+							const actualTime = d.resolutionTime;
+							return {
+								issue: d.issue,
+								summary: d.summary,
+								priority: d.priority,
+								actualTime: actualTime,
+								slaLimit: slaLimit,
+								slaStatus: actualTime <= slaLimit ? 'Cumplido' : 'Vencido'
+							};
+						}).sort((a,b) => b.actualTime - a.actualTime); // Ordenar por los que más tardaron
+						showModalWithData(modalTitle, modalData, SLA_TABLE_HEADERS);
+						break;
+					}
                 }
             });
         }
@@ -1972,49 +2374,64 @@
         function handleChartClick(chartId, filterType, filterValue) {
             const currentData = getFilteredData();
             let drilldownData = [], modalTitle = 'Detalle de Tickets';
+            let headers = COMMON_TABLE_HEADERS;
 
-            switch (chartId) {
-                case 'statusChart': drilldownData = currentData.filter(d => d.status === filterValue); modalTitle = `Tickets con Estado: "${filterValue}"`; break;
-                case 'priorityChart': drilldownData = currentData.filter(d => d.priority === filterValue); modalTitle = `Tickets con Prioridad: "${filterValue}"`; break;
-                case 'requestTypeChart': drilldownData = currentData.filter(d => d.requestType === filterValue); modalTitle = `Tickets con Tipo de Solicitud: "${filterValue}"`; break;
-                case 'diagnosisChart': drilldownData = currentData.filter(d => d.diagnosis === filterValue); modalTitle = `Tickets con Diagnóstico: "${filterValue}"`; break;
-                case 'problemTypeChart': drilldownData = currentData.filter(d => d.problemType === filterValue); modalTitle = `Tickets con Tipo de Problema: "${filterValue}"`; break;
-                case 'sentimentChart': drilldownData = currentData.filter(d => d.sentiment === filterValue); modalTitle = `Tickets con Sentimiento: "${filterValue}"`; break;
-                case 'topClientsChart': drilldownData = currentData.filter(d => d.client === filterValue); modalTitle = `Tickets del Cliente: "${filterValue}"`; break;
-                case 'assigneeChart': drilldownData = currentData.filter(d => d.assignee === filterValue); modalTitle = `Tickets Asignados a: "${filterValue}"`; break;
-                case 'trendChart':
-                    const clickedYear = parseInt(filterValue.substring(0, 4));
-                    const clickedMonth = parseInt(filterValue.substring(5, 7)) - 1; 
-                    const clickedDay = parseInt(filterValue.substring(8, 10));
-
-                    drilldownData = currentData.filter(d => {
-                        return d.created.getFullYear() === clickedYear &&
-                               d.created.getMonth() === clickedMonth &&
-                               d.created.getDate() === clickedDay;
-                    });
-                    modalTitle = `Tickets Creados el ${new Date(filterValue).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
+            switch (filterType) {
+                case 'status':
+                    drilldownData = currentData.filter(d => d.status === filterValue);
+                    modalTitle = 'Tickets con Estado: "' + filterValue + '"';
                     break;
-                case 'clientRequestTypeChart':
-                    if (filterType === 'clientAndRequestType') {
-                        drilldownData = currentData.filter(d => d.client === filterValue.client && d.requestType === filterValue.requestType);
-                        modalTitle = `Tickets de "${filterValue.client}" con Tipo: "${filterValue.requestType}"`;
-                    }
+                case 'priority':
+                    drilldownData = currentData.filter(d => d.priority === filterValue);
+                    modalTitle = 'Tickets con Prioridad: "' + filterValue + '"';
                     break;
-                case 'monthlyComparisonChart':
-                    if (filterType === 'monthAndRequestType') {
-                        const [monthName, year] = filterValue.month.split(' ');
-                        const monthIndex = MONTH_NAMES.indexOf(monthName);
-                        drilldownData = currentData.filter(d => d.created.getFullYear() == year && d.created.getMonth() == monthIndex && d.requestType === filterValue.requestType);
-                        modalTitle = `Tickets de ${filterValue.month} con Tipo: "${filterValue.requestType}"`;
-                    }
+                case 'requestType':
+                    drilldownData = currentData.filter(d => d.requestType === filterValue);
+                    modalTitle = 'Tickets con Tipo de Solicitud: "' + filterValue + '"';
                     break;
-                default: console.warn("Click no manejado:", chartId); drilldownData = currentData;
+                 case 'sentiment':
+                    drilldownData = currentData.filter(d => d.sentiment === filterValue);
+                    modalTitle = 'Tickets con Sentimiento: "' + filterValue + '"';
+                    break;
+                case 'diagnosis':
+                    drilldownData = currentData.filter(d => d.diagnosis === filterValue);
+                    modalTitle = 'Tickets con Diagnóstico: "' + filterValue + '"';
+                    break;
+                case 'problemType':
+                    drilldownData = currentData.filter(d => d.problemType === filterValue);
+                    modalTitle = 'Tickets con Tipo de Problema: "' + filterValue + '"';
+                    break;
+                case 'client':
+                    drilldownData = currentData.filter(d => d.client === filterValue);
+                    modalTitle = 'Tickets del Cliente: "' + filterValue + '"';
+                    break;
+                case 'assignee':
+                    drilldownData = currentData.filter(d => d.assignee === filterValue);
+                    modalTitle = 'Tickets Asignados a: "' + filterValue + '"';
+                    break;
+                case 'dateSpecific':
+                    const clickedDate = new Date(filterValue);
+                    drilldownData = currentData.filter(d => d.created.toISOString().startsWith(clickedDate.toISOString().substring(0, 10)));
+                    modalTitle = 'Tickets Creados el ' + clickedDate.toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    break;
+                 case 'clientAndRequestType':
+                    drilldownData = currentData.filter(d => d.client === filterValue.client && d.requestType === filterValue.requestType);
+                    modalTitle = 'Tickets de "' + filterValue.client + '" con Tipo: "' + filterValue.requestType + '"';
+                    break;
+                case 'monthAndRequestType':
+                    const [monthName, year] = filterValue.month.split(' ');
+                    const monthIndex = MONTH_NAMES.indexOf(monthName);
+                    drilldownData = currentData.filter(d => d.created.getFullYear() == year && d.created.getMonth() == monthIndex && d.requestType === filterValue.requestType);
+                    modalTitle = 'Tickets de ' + filterValue.month + ' con Tipo: "' + filterValue.requestType + '"';
+                    break;
+                default:
+                    console.warn("Click no manejado:", chartId, filterType);
+                    return;
             }
-            if (drilldownData.length === 0 && chartId === 'trendChart') {
-                alert(`No se encontraron registros para la fecha seleccionada: ${modalTitle.replace('Tickets Creados el ', '')}. Esto podría deberse a un desfase de zona horaria en los datos o un error en la fecha exportada.`);
-            }
-            showModalWithData(modalTitle, drilldownData.slice(0, 200), COMMON_TABLE_HEADERS);
+            
+            showModalWithData(modalTitle, drilldownData.slice(0, 500), headers);
         }
+
 
         new Sortable(document.getElementById('dashboard-grid'), { animation: 150, ghostClass: 'sortable-ghost' });
     </script>
