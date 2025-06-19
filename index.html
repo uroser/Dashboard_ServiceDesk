@@ -228,8 +228,9 @@
             justify-content: space-between;
             overflow: hidden;
             border: 1px solid #E2E8F0;
+            position: relative; /* Necesario para posicionar el ícono de zoom */
             cursor: grab;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: all 0.3s ease-in-out;
         }
         .chart-card:active {
             cursor: grabbing;
@@ -242,6 +243,7 @@
             font-weight: 600;
             color: #1E293B;
             margin-bottom: 1rem;
+            padding-right: 2.5rem; /* Espacio para el ícono de zoom */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -254,6 +256,12 @@
         .chart-container-inner {
             position: relative;
             height: 20rem; /* Altura fija para gráficos */
+        }
+        
+        /* Regla de CSS específica para la altura del heatmap */
+        #heatmap-card .chart-container-inner {
+            height: auto;
+            min-height: 22rem; /* Altura mínima para que no se vea mal si hay pocos datos */
         }
 
         /* Modal (ahora con cabecera para arrastrar) */
@@ -354,6 +362,50 @@
             from { opacity: 0; transform: translate(-50%, -55%); }
             to { opacity: 1; transform: translate(-50%, -50%); }
         }
+        
+        /* --- ESTILOS PARA EL ZOOM DE GRÁFICOS --- */
+        #zoom-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 40; /* Por debajo de la tarjeta ampliada */
+            cursor: zoom-out;
+        }
+
+        .chart-card.is-zoomed {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            width: 80vw !important;
+            height: 80vh !important;
+            max-width: 1000px;
+            transform: translate(-50%, -50%) !important;
+            z-index: 50 !important;
+            cursor: default !important; /* El cursor de agarre ya no es necesario */
+        }
+        
+        .is-zoomed .chart-container-inner {
+            height: calc(100% - 4rem) !important;
+        }
+
+        .zoom-icon-container {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem;
+            cursor: zoom-in;
+            color: #9CA3AF; /* Gris */
+            border-radius: 9999px;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+        .zoom-icon-container:hover {
+            background-color: #F3F4F6; /* Gris más claro */
+            color: #4F46E5; /* Indigo */
+        }
+
 
         /* Placeholder y ghost class para Sortable.js */
         .sortable-ghost {
@@ -648,6 +700,12 @@
                             <option value="all">Todos los Tipos de Solicitud</option>
                         </select>
                     </div>
+                     <div>
+                        <label for="client-type-filter" class="sr-only">Filtrar por Tipo de Cliente:</label>
+                        <select id="client-type-filter" class="filter-select">
+                            <option value="all">Todos los Tipos de Cliente</option>
+                        </select>
+                    </div>
                     <div>
                         <label for="diagnosis-filter" class="sr-only">Filtrar por Diagnóstico:</label>
                         <select id="diagnosis-filter" class="filter-select">
@@ -702,7 +760,7 @@
                     </div>
                 </section>
 
-                <section id="kpi-grid" class="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-5 mb-8">
+                <section id="kpi-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5 mb-8">
                     <div class="kpi-card" data-kpi="total-tickets">
                         <p class="kpi-value text-indigo-600" id="kpi-total-tickets">0</p>
                         <p class="kpi-label">Tickets Totales</p>
@@ -715,14 +773,6 @@
                         <p class="kpi-value text-cyan-600" id="kpi-open-tickets">0</p>
                         <p class="kpi-label">Tickets Abiertos</p>
                     </div>
-                    <div class="kpi-card" data-kpi="avg-resolution">
-                        <p class="kpi-value text-yellow-600" id="kpi-avg-resolution">0 hrs</p>
-                        <p class="kpi-label">T.P. Resolución</p>
-                    </div>
-                    <div class="kpi-card" data-kpi="avg-first-response">
-                        <p class="kpi-value text-amber-600" id="kpi-avg-first-response">0 hrs</p>
-                        <p class="kpi-label">T.P. 1ra Respuesta</p>
-                    </div>
                     <div class="kpi-card" data-kpi="unassigned-tickets">
                         <p class="kpi-value text-red-600" id="kpi-unassigned-tickets">0</p>
                         <p class="kpi-label">Tickets sin Asignar</p>
@@ -731,9 +781,9 @@
                         <p class="kpi-value text-teal-600" id="kpi-avg-day">0</p>
                         <p class="kpi-label">Promedio Tickets/Día</p>
                     </div>
-                    <div class="kpi-card" data-kpi="avg-month">
-                        <p class="kpi-value text-sky-600" id="kpi-avg-month">0</p>
-                        <p class="kpi-label">Promedio Tickets/Mes</p>
+                    <div class="kpi-card" data-kpi="avg-first-response">
+                        <p class="kpi-value text-amber-600" id="kpi-avg-first-response">0 hrs</p>
+                        <p class="kpi-label">T.P. 1ra Respuesta</p>
                     </div>
 					<div class="kpi-card" data-kpi="sla-first-response">
                         <div id="kpi-sla-first-response-container">
@@ -742,12 +792,20 @@
 						</div>
                         <p class="kpi-label">SLA 1ra Respuesta</p>
                     </div>
+                     <div class="kpi-card" data-kpi="avg-resolution">
+                        <p class="kpi-value text-yellow-600" id="kpi-avg-resolution">0 hrs</p>
+                        <p class="kpi-label">T.P. Resolución</p>
+                    </div>
                     <div class="kpi-card" data-kpi="sla-resolution">
                         <div id="kpi-sla-resolution-container">
 							<p class="kpi-value text-gray-500">-</p>
 							<p class="text-sm font-bold text-gray-500">-</p>
 						</div>
                         <p class="kpi-label">SLA Resolución</p>
+                    </div>
+                    <div class="kpi-card" data-kpi="avg-month">
+                        <p class="kpi-value text-sky-600" id="kpi-avg-month">0</p>
+                        <p class="kpi-label">Promedio Tickets/Mes</p>
                     </div>
                 </section>
 
@@ -758,6 +816,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v2.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             Tickets por Estado
+                            <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
                         </h3>
                         <div class="chart-container-inner">
                             <div id="statusChart"></div>
@@ -770,6 +829,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.102 3.377 1.912 3.377H19.94c1.81 0 2.773-1.876 1.913-3.377L13.94 2.887c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                             </svg>
                             Tickets por Prioridad
+                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
                         </h3>
                         <div class="chart-container-inner">
                             <div id="priorityChart"></div>
@@ -782,9 +842,49 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
                             </svg>
                             Tickets por Tipo de Solicitud
+                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
                         </h3>
                         <div class="chart-container-inner">
                             <div id="requestTypeChart"></div>
+                        </div>
+                    </div>
+
+                    <div id="client-type-card" class="chart-card" data-chart="clientTypeChart">
+                        <h3>
+                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-purple-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM6 18.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" />
+                            </svg>
+                            Distribución por Tipo de Cliente
+                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                        </h3>
+                        <div class="chart-container-inner">
+                           <div id="clientTypeChart"></div>
+                        </div>
+                    </div>
+
+                    <div id="satisfaction-card" class="chart-card" data-chart="satisfactionChart">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 mr-2 text-amber-500">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                            </svg>
+                            Satisfacción del Cliente (CSAT)
+                            <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                        </h3>
+                        <div class="chart-container-inner">
+                           <div id="satisfactionChart"></div>
+                        </div>
+                    </div>
+
+                    <div id="sentiment-card" class="chart-card" data-chart="sentimentChart">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-2 text-lime-600">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c.414 0 .75.336.75.75s-.336.75-.75.75-.75-.336-.75-.75.336-.75.75-.75zm0 0H9.563c-.324 0-.472.402-.18.68l1.72 1.72c.594.594 1.536.657 2.187.119l5.05-4.42" />
+                            </svg>
+                            Análisis de Sentimiento del Cliente
+                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                        </h3>
+                        <div class="chart-container-inner">
+                           <div id="sentimentChart"></div>
                         </div>
                     </div>
 
@@ -794,6 +894,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712L12 16.5l-2.121-2.121m4.242 0a2.25 2.25 0 00.75-1.659V7.5m-6.118 4.215a2.25 2.25 0 01-.75-1.659V7.5M12 2.25a.75.75 0 00-.75.75v6.75m-4.5 0a2.25 2.25 0 00-1.659.75L2.25 12l2.121 2.121a2.25 2.25 0 00.75 1.659m0 0V21a.75.75 0 00.75.75h4.5a.75.75 0 00.75-.75V15m-1.5 0l-3.033.033A1.5 1.5 0 019.03 13.5H7.5" />
                             </svg>
                             Tickets por Diagnóstico
+                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
                         </h3>
                         <div class="chart-container-inner">
                             <canvas id="diagnosisChart"></canvas>
@@ -806,25 +907,14 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
                             </svg>
                             Tickets por Tipo de Problema
+                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
                         </h3>
                         <div class="chart-container-inner">
                             <canvas id="problemTypeChart"></canvas>
                         </div>
                     </div>
 
-                    <div id="sentiment-card" class="chart-card" data-chart="sentimentChart">
-                        <h3>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-2 text-lime-600">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c.414 0 .75.336.75.75s-.336.75-.75.75-.75-.336-.75-.75.336-.75.75-.75zm0 0H9.563c-.324 0-.472.402-.18.68l1.72 1.72c.594.594 1.536.657 2.187.119l5.05-4.42" />
-                            </svg>
-                            Análisis de Sentimiento del Cliente
-                        </h3>
-                        <div class="chart-container-inner">
-                           <div id="sentimentChart"></div>
-                        </div>
-                    </div>
-
-                    <div id="word-cloud-card" class="chart-card lg:col-span-3">
+                    <div id="word-cloud-card" class="chart-card lg:col-span-3" title="Este gráfico muestra las palabras más frecuentes en los resúmenes de los tickets. Se excluyen palabras comunes (como 'el', 'la', 'un'). El tamaño de cada palabra es directamente proporcional a la cantidad de veces que aparece, ayudando a identificar los temas principales.">
                         <h3>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-2 text-purple-500">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.458 3.024 2.625 6.75 2.625s6.75-1.167 6.75-2.625V6.75c0-1.458-3.024-2.625-6.75-2.625S3.75 5.292 3.75 6.75v6.009z" />
@@ -840,6 +930,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                             </svg>
                             Top 10 Clientes por Volumen de Tickets
+                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
                         </h3>
                         <div class="chart-container-inner h-96">
                             <canvas id="topClientsChart"></canvas>
@@ -852,6 +943,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM18 20.25v2.25m-1.5-3.75h3m-12-1.5H5.625c-.621 0-1.125.504-1.125 1.125v9.75c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18" />
                             </svg>
                             Top 10 Asignados por Carga de Trabajo
+                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
                         </h3>
                         <div class="chart-container-inner h-96">
                             <canvas id="assigneeChart"></canvas>
@@ -864,6 +956,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9m1.5 1.5L7.5 7.5M4.5 19.5v-4.5m0 4.5h4.5m-4.5 0L9 15m1.5 1.5L7.5 18M19.5 4.5v4.5m0-4.5h-4.5m4.5 0L15 9m1.5 1.5L19.5 7.5M19.5 19.5v-4.5m0 4.5h-4.5m4.5 0L15 15m1.5 1.5L19.5 18" />
                             </svg>
                             Tendencia de Creación de Tickets
+                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
                         </h3>
                         <div class="chart-container-inner h-96">
                             <canvas id="trendChart"></canvas>
@@ -897,6 +990,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 21.75c-3.75 0-7.5-1.385-9.375-3.66c-.163-.207-.152-.465.009-.672.317-.4.67-.783 1.054-1.133L12 18.75l7.92-.72c.384.35.737.733 1.054 1.133.161.207.172.465.009.672C19.5 20.365 15.75 21.75 12 21.75zm0 0a9.75 9.75 0 007.472-3.242M12 21.75a9.75 9.75 0 01-7.472-3.242m7.472 3.242V21.75" />
                             </svg>
                             Top 10 Clientes por Tipo de Solicitud
+                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
                         </h3>
                         <div class="chart-container-inner h-96">
                             <canvas id="clientRequestTypeChart"></canvas>
@@ -909,6 +1003,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 20.25h12m-7.5-3.75v3.75m3.75-3.75v3.75M3 13.5l3 3m0 0l3-3m-3 3v-6m1.5 6H12m6-13.5l-3 3m0 0l-3-3m3 3V12" />
                             </svg>
                             Comparación Mensual por Tipo de Solicitud
+                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
                         </h3>
                         <div class="chart-container-inner h-96">
                             <canvas id="monthlyComparisonChart"></canvas>
@@ -921,6 +1016,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-3.75-.625m3.75.625V3.375" />
                             </svg>
                             Evolución Mensual de Cumplimiento SLA
+                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
                         </h3>
                         <div class="chart-container-inner h-96">
                             <div id="monthlySlaChart"></div>
@@ -952,6 +1048,8 @@
         </div>
     </div>
 
+    <div id="zoom-overlay" class="hidden"></div>
+
     <script>
         let allData = [];
         let charts = {};
@@ -977,6 +1075,16 @@
             slate: '#64748B',  /* Slate-500 */
             gray: '#6B7280'    /* Gray-500 */
         };
+
+        // --- CONFIGURACIÓN DE TIPO DE CLIENTE ---
+        const CLIENT_TYPE_FIELD = 'clientType'; 
+        const CLIENT_TYPE_CONFIG = {
+            preferencial: 'Preferencial',
+            normal: 'Normal',
+            unassigned: 'Sin Asignar'
+        };
+        // NUEVO: Nombre del campo de CSAT. ¡Verificar que coincida con el encabezado del CSV!
+        const SATISFACTION_FIELD_NAME = 'Satisfaction rating';
 
         const MONTH_NAMES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
@@ -1015,6 +1123,32 @@
 
         document.getElementById('csv-file-input').addEventListener('change', handleFileSelect, false);
         document.getElementById('clear-filters-btn').addEventListener('click', clearAllFilters);
+
+        // --- NUEVA FUNCIÓN AUXILIAR: PARSEO INTELIGENTE DE SATISFACCIÓN ---
+        function parseSatisfactionRating(value) {
+            if (value === null || value === undefined) return 0;
+            
+            const s_value = String(value);
+
+            // Si es un número, devolverlo directamente.
+            if (!isNaN(s_value) && s_value.trim() !== '') {
+                return parseInt(s_value, 10);
+            }
+            // Si es texto, intentar extraer el primer dígito que encuentre.
+            if (typeof s_value === 'string') {
+                const digitMatch = s_value.match(/\d/);
+                if (digitMatch) {
+                    return parseInt(digitMatch[0], 10);
+                }
+                // Si no hay dígitos, contar los caracteres de estrella.
+                const starMatch = s_value.match(/★/g); // Estrella unicode: ★
+                if (starMatch) {
+                    return starMatch.length;
+                }
+            }
+            // Si no se puede determinar la calificación, devolver 0.
+            return 0;
+        }
 
 
         async function handleFileSelect(event) {
@@ -1077,7 +1211,8 @@
                     diagnosis: d['Custom field (Diagnosis (MDA))'] || 'No especificado',
                     requestType: d['Custom field (Request Type)'] || 'No especificado',
                     problemType: d['Custom field (Problem Type (MDA))'] || 'N/A',
-                    taskType: d['Custom field (Task Type (MDA))'] || 'N/A',
+                    clientType: d['Custom field (Tipo Cliente (MDA))'] || 'N/A',
+                    satisfaction: parseSatisfactionRating(d[SATISFACTION_FIELD_NAME]),
                     summary: d['Summary'] || '',
                     created: createdDate,
                     resolutionTime: hmsToHours(d['Custom field (Time to resolution)']),
@@ -1102,6 +1237,7 @@
             setupDrilldown();
             setupKpiCardClickHandlers();
             makeModalDraggable(); // Activar el modal arrastrable
+            setupChartZoom(); // Activar el zoom de gráficos
             await triggerAIAnalysis(); 
         }
         
@@ -1186,6 +1322,8 @@
             populateUniqueFilter('request-type-filter', 'requestType', 'Todos los Tipos de Solicitud');
             populateUniqueFilter('diagnosis-filter', 'diagnosis', 'Todos los Diagnósticos');
             populateUniqueFilter('problem-type-filter', 'problemType', 'Todos los Tipos de Problema');
+            // NUEVO: Popular el filtro de tipo de cliente
+            populateUniqueFilter('client-type-filter', 'clientType', 'Todos los Tipos de Cliente');
             
             document.getElementById('month-filter').addEventListener('change', handleMonthFilterChange);
             document.querySelectorAll('.filter-select:not(#month-filter)').forEach(selectElement => {
@@ -1255,7 +1393,8 @@
                 status: document.getElementById('status-filter').value,
                 requestType: document.getElementById('request-type-filter').value,
                 diagnosis: document.getElementById('diagnosis-filter').value,
-                problemType: document.getElementById('problem-type-filter').value
+                problemType: document.getElementById('problem-type-filter').value,
+                clientType: document.getElementById('client-type-filter').value
             };
             
             if (filters.month !== 'all') {
@@ -1272,6 +1411,9 @@
             if (filters.requestType !== 'all') filtered = filtered.filter(d => d.requestType === filters.requestType);
             if (filters.diagnosis !== 'all') filtered = filtered.filter(d => d.diagnosis === filters.diagnosis);
             if (filters.problemType !== 'all') filtered = filtered.filter(d => d.problemType === filters.problemType);
+            // Aplicar el nuevo filtro de tipo de cliente
+            if (filters.clientType !== 'all') filtered = filtered.filter(d => d.clientType === filters.clientType);
+            
             return filtered;
         }
         
@@ -1353,6 +1495,7 @@
             const wordFrequencies = wordCloudData.reduce((acc, word) => { acc[word] = (acc[word] || 0) + 1; return acc; }, {});
             const topKeywords = Object.entries(wordFrequencies).sort(([, a], [, b]) => b - a).slice(0, 5).map(item => '<strong>' + item[0] + '</strong>');
             
+            // Reemplazo de template literals por concatenación de strings para máxima compatibilidad
             let narrative = '<h4>Análisis para: ' + periodText + '</h4>';
             narrative += '<p>Durante este período, se gestionaron un total de <strong>' + totalTickets + ' tickets</strong>. A continuación, un resumen de los hallazgos clave:</p>';
             narrative += '<ul>';
@@ -1629,14 +1772,23 @@
 
 
         const createChart = (ctx, type, data, options) => {
-            if (charts[ctx.id]) charts[ctx.id].destroy();
+            // FIX: Añadir una guarda para prevenir el error si ctx es null.
+            if (!ctx) {
+                console.error("El contexto para el gráfico es nulo. Verifique que el elemento HTML con el ID '" + (options.canvasId || '[unknown]') + "' exista.");
+                return;
+            }
+            if (charts[ctx.id]) {
+                charts[ctx.id].destroy();
+            }
             charts[ctx.id] = new Chart(ctx, { type, data, options });
         }
         
         function renderCharts(data) {
              if (data.length === 0) {
                 Object.values(charts).forEach(chart => {
-                    if(chart.destroy) chart.destroy();
+                    if(chart && typeof chart.destroy === 'function') {
+                        chart.destroy();
+                    }
                 });
                 charts = {};
                 // Limpiar contenedores de ApexCharts
@@ -1644,7 +1796,9 @@
                 document.getElementById('priorityChart').innerHTML = '';
                 document.getElementById('requestTypeChart').innerHTML = '';
                 document.getElementById('sentimentChart').innerHTML = '';
+                document.getElementById('clientTypeChart').innerHTML = '';
                 document.getElementById('monthlySlaChart').innerHTML = '';
+                document.getElementById('satisfactionChart').innerHTML = '';
 
                 // Limpiar contenedores de Chart.js y otros
                  document.getElementById('heatmap-grid').innerHTML = '';
@@ -1662,19 +1816,19 @@
                 series: [{ data: chartData.status.values, name: 'Tickets' }],
                 chart: { type: 'bar', height: 320, toolbar: { show: false },
                     events: {
-                        dataPointSelection: (event, chartContext, config) => {
+                        dataPointSelection: function(event, chartContext, config) {
                             const label = config.w.globals.labels[config.dataPointIndex];
                             handleChartClick('statusChart', 'status', label);
                         }
                     }
                 },
                 plotOptions: { bar: { borderRadius: 4, horizontal: true, barHeight: '60%' } },
-                dataLabels: { enabled: true, offsetX: -15, style: { colors: ['#fff'] }, formatter: val => val },
+                dataLabels: { enabled: true, offsetX: -15, style: { colors: ['#fff'] }, formatter: function(val) { return val } },
                 xaxis: { categories: chartData.status.labels, labels: { style: { colors: FONT_COLOR } } },
                 yaxis: { labels: { style: { colors: FONT_COLOR } } },
                 colors: [PALETTE.indigo],
                 grid: { borderColor: GRID_COLOR },
-                tooltip: { y: { formatter: val => val + ' tickets' } },
+                tooltip: { y: { formatter: function(val) { return val + ' tickets' } } },
                 fill: {
                     type: "gradient",
                     gradient: {
@@ -1694,14 +1848,14 @@
                 labels: chartData.priority.labels,
                 chart: { type: 'donut', height: 320,
                      events: {
-                        dataPointSelection: (event, chartContext, config) => {
+                        dataPointSelection: function(event, chartContext, config) {
                             const label = config.w.globals.labels[config.dataPointIndex];
                             handleChartClick('priorityChart', 'priority', label);
                         }
                     }
                 },
                 plotOptions: { pie: { donut: { labels: { show: true, total: { show: true, label: 'Total' } } } } },
-                dataLabels: { enabled: true, formatter: (val) => val.toFixed(1) + '%' },
+                dataLabels: { enabled: true, formatter: function(val) { return val.toFixed(1) + '%' } },
                 legend: { position: 'bottom', labels: { colors: FONT_COLOR } },
                 colors: Object.values(PALETTE),
                 fill: { colors: Object.values(PALETTE) },
@@ -1720,7 +1874,7 @@
                  series: [{ data: chartData.requestType.values, name: 'Tickets' }],
                 chart: { type: 'bar', height: 320, toolbar: { show: false }, 
                     events: {
-                        dataPointSelection: (event, chartContext, config) => {
+                        dataPointSelection: function(event, chartContext, config) {
                             const label = config.w.globals.labels[config.dataPointIndex];
                             handleChartClick('requestTypeChart', 'requestType', label);
                         }
@@ -1732,14 +1886,14 @@
                 yaxis: { labels: { style: { colors: FONT_COLOR } } },
                 colors: [PALETTE.green],
                 grid: { borderColor: GRID_COLOR },
-                tooltip: { y: { formatter: val => val + ' tickets' } }
+                tooltip: { y: { formatter: function(val) { return val + ' tickets' } } }
             };
             charts.requestTypeChart = new ApexCharts(document.querySelector("#requestTypeChart"), requestTypeOptions);
             charts.requestTypeChart.render();
 
              // Gráfico de Sentimiento (Torta con efecto 3D/sombra)
             if (charts.sentimentChart) charts.sentimentChart.destroy();
-            const sentimentColors = chartData.sentiment.labels.map(label => {
+            const sentimentColors = chartData.sentiment.labels.map(function(label) {
                 if (label === 'Positivo') return PALETTE.green;
                 if (label === 'Negativo') return PALETTE.red;
                 return PALETTE.slate;
@@ -1750,14 +1904,14 @@
                 colors: sentimentColors,
                 chart: { type: 'pie', height: 320,
                      events: {
-                        dataPointSelection: (event, chartContext, config) => {
+                        dataPointSelection: function(event, chartContext, config) {
                              const label = config.w.globals.labels[config.dataPointIndex];
                             handleChartClick('sentimentChart', 'sentiment', label);
                         }
                     }
                 },
                 legend: { position: 'bottom', labels: { colors: FONT_COLOR } },
-                dataLabels: { enabled: true, formatter: (val) => val.toFixed(1) + '%' },
+                dataLabels: { enabled: true, formatter: function(val) { return val.toFixed(1) + '%' } },
                 dropShadow: {
                     enabled: true, top: 5, left: 2, blur: 4,
                     color: '#000000', opacity: 0.3
@@ -1771,22 +1925,23 @@
             createChart(document.getElementById('diagnosisChart'), 'pie', {
                 labels: chartData.diagnosis.labels,
                 datasets: [{ data: chartData.diagnosis.values, backgroundColor: Object.values(PALETTE).reverse() }]
-            }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: FONT_COLOR } }, datalabels: { display: false } }, onClick: (e, el) => el.length > 0 && handleChartClick('diagnosisChart', 'diagnosis', charts.diagnosisChart.data.labels[el[0].index])});
-
+            }, { canvasId: 'diagnosisChart', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: FONT_COLOR } }, datalabels: { display: false } }, onClick: (e, el) => el.length > 0 && handleChartClick('diagnosisChart', 'diagnosis', charts.diagnosisChart.data.labels[el[0].index])});
+            
+            // CORRECCIÓN: Llamada a createChart para problemTypeChart, que fue restaurado.
             createChart(document.getElementById('problemTypeChart'), 'pie', {
                 labels: chartData.problemType.labels,
                 datasets: [{ data: chartData.problemType.values, backgroundColor: Object.values(PALETTE) }]
-            }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: FONT_COLOR } }, datalabels: { display: false } }, onClick: (e, el) => el.length > 0 && handleChartClick('problemTypeChart', 'problemType', charts.problemTypeChart.data.labels[el[0].index])});
+            }, { canvasId: 'problemTypeChart', responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: FONT_COLOR } }, datalabels: { display: false } }, onClick: (e, el) => el.length > 0 && handleChartClick('problemTypeChart', 'problemType', charts.problemTypeChart.data.labels[el[0].index])});
             
             createChart(document.getElementById('topClientsChart'), 'bar', {
                 labels: chartData.topClients.labels,
                 datasets: [{ label: 'Tickets', data: chartData.topClients.values, backgroundColor: PALETTE.blue }]
-            }, { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end' } }, onClick: (e, el) => el.length > 0 && handleChartClick('topClientsChart', 'client', charts.topClientsChart.data.labels[el[0].index]) });
+            }, { canvasId: 'topClientsChart', responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end' } }, onClick: (e, el) => el.length > 0 && handleChartClick('topClientsChart', 'client', charts.topClientsChart.data.labels[el[0].index]) });
             
             createChart(document.getElementById('assigneeChart'), 'bar', {
                 labels: chartData.topAssignees.labels,
                 datasets: [{ label: 'Tickets', data: chartData.topAssignees.values, backgroundColor: PALETTE.sky }]
-            }, { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end' } }, onClick: (e, el) => el.length > 0 && handleChartClick('assigneeChart', 'assignee', charts.assigneeChart.data.labels[el[0].index]) });
+            }, { canvasId: 'assigneeChart', responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end' } }, onClick: (e, el) => el.length > 0 && handleChartClick('assigneeChart', 'assignee', charts.assigneeChart.data.labels[el[0].index]) });
             
             // CORRECCIÓN: Ajuste de datalabels en el gráfico de tendencia
             createChart(document.getElementById('trendChart'), 'line', {
@@ -1799,6 +1954,7 @@
                     fill: 'origin', tension: 0.3, borderWidth: 2
                 }]
             }, { 
+                canvasId: 'trendChart',
                 responsive: true, 
                 maintainAspectRatio: false, 
                 scales: { x: { type: 'time', time: { unit: 'day' } } }, 
@@ -1813,7 +1969,9 @@
                         borderRadius: 4,
                         color: 'white',
                         font: { weight: 'bold' },
-                        formatter: (value, context) => context.dataset.data.length > 30 ? '' : value, // Ocultar si hay muchos puntos
+                        formatter: function(value, context) {
+                           return context.dataset.data.length > 30 ? '' : value; // Ocultar si hay muchos puntos
+                        }
                     }
                 },
                 onClick: (e, el) => { if (el.length > 0) handleChartClick('trendChart', 'dateSpecific', charts.trendChart.data.labels[el[0].index])} 
@@ -1822,7 +1980,9 @@
             renderHeatmap(chartData.heatmap);
             renderClientRequestTypeChart(chartData.clientRequestType);
             renderMonthlyComparisonChart(chartData.monthlyComparison);
-            renderMonthlySlaChart(data); // Renderizar el nuevo gráfico de SLA mensual
+            renderMonthlySlaChart(data); 
+            renderClientTypeChart(data); 
+            renderSatisfactionChart(data); // Renderizar el nuevo gráfico de satisfacción
 
             const wcContainer = document.getElementById('word-cloud-container');
             wcContainer.innerHTML = '';
@@ -1841,7 +2001,7 @@
             Object.values(heatmapData).forEach(h => h.forEach(c => { if (c > maxCount) maxCount = c; }));
             heatmapGrid.style.gridTemplateRows = 'repeat(' + DAY_NAMES.length + ', 1fr)';
             dayLabelsContainer.style.gridTemplateRows = 'repeat(' + DAY_NAMES.length + ', 1fr)';
-            const getColorForValue = (v, max) => v === 0 ? '#F8FAFC' : `hsl(220, 80%, ${90 - (v / max) * 60}%)`;
+            const getColorForValue = (v, max) => v === 0 ? '#F8FAFC' : 'hsl(220, 80%, ' + (90 - (v / max) * 60) + '%)';
             DAY_NAMES.forEach((day, dayIndex) => {
                 const dayLabel = document.createElement('div');
                 dayLabel.className = 'heatmap-day-label'; dayLabel.textContent = day;
@@ -1865,8 +2025,8 @@
             const { dayIndex, hour } = event.currentTarget.dataset;
             const dayName = DAY_NAMES[parseInt(dayIndex)];
             const drilldownData = getFilteredData().filter(d => d.created.getDay() === parseInt(dayIndex) && d.created.getHours() === parseInt(hour));
-            if (drilldownData.length === 0) return alert(`No hay tickets para el ${dayName} a las ${hour}:00.`);
-            showModalWithData(`Tickets del ${dayName} entre ${hour}:00 y ${hour+1}:00`, drilldownData, COMMON_TABLE_HEADERS);
+            if (drilldownData.length === 0) return alert('No hay tickets para el ' + dayName + ' a las ' + hour + ':00.');
+            showModalWithData('Tickets del ' + dayName + ' entre ' + hour + ':00 y ' + (parseInt(hour)+1) + ':00', drilldownData, COMMON_TABLE_HEADERS);
         }
 
         function renderClientRequestTypeChart(chartData) {
@@ -1898,6 +2058,7 @@
                 labels: clients,
                 datasets: datasets
             }, {
+                canvasId: 'clientRequestTypeChart',
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
@@ -1925,7 +2086,7 @@
             const { months, requestTypes, data } = monthlyData;
             const labels = months.map(monthKey => {
                 const [year, monthIndex] = monthKey.split('-').map(Number);
-                return `${MONTH_NAMES[monthIndex]} ${year}`;
+                return MONTH_NAMES[monthIndex] + ' ' + year;
             });
             const datasets = requestTypes.map((type, index) => {
                 const colorKeys = Object.keys(PALETTE);
@@ -1939,6 +2100,7 @@
                 labels: labels,
                 datasets: datasets
             }, {
+                canvasId: 'monthlyComparisonChart',
                 responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: true, position: 'right', labels: { color: FONT_COLOR } }, datalabels: { display: false } },
                 scales: { x: { stacked: true, ticks: { color: FONT_COLOR }, grid: { display: false } }, y: { stacked: true, ticks: { color: FONT_COLOR }, grid: { color: GRID_COLOR } } },
@@ -2020,19 +2182,175 @@
                     formatter: function (val) {
                         return val + "%";
                     }
-                    // Se elimina el estilo de color fijo para que ApexCharts elija el contraste
                 },
                 labels: categories,
                 xaxis: { type: 'category', labels: { style: { colors: FONT_COLOR } } },
                 yaxis: [{ title: { text: 'Cumplimiento (%)', style: { color: FONT_COLOR } }, min: 0, max: 100, labels: { style: { colors: FONT_COLOR } } }],
                 colors: [PALETTE.blue, PALETTE.green],
-                tooltip: { y: { formatter: val => val + '%' } },
+                tooltip: { y: { formatter: function(val) { return val + '%' } } },
                 grid: { borderColor: GRID_COLOR },
                 legend: { labels: { colors: FONT_COLOR } }
             };
 
             charts.monthlySlaChart = new ApexCharts(document.querySelector("#monthlySlaChart"), options);
             charts.monthlySlaChart.render();
+        }
+
+        // --- NUEVA FUNCIÓN PARA EL GRÁFICO DE TIPO DE CLIENTE ---
+        function renderClientTypeChart(data) {
+            if (charts.clientTypeChart) {
+                charts.clientTypeChart.destroy();
+            }
+
+            const preferencialValue = CLIENT_TYPE_CONFIG.preferencial.toLowerCase();
+            const normalValue = CLIENT_TYPE_CONFIG.normal.toLowerCase();
+
+            let preferencialCount = 0;
+            let normalCount = 0;
+            
+            data.forEach(d => {
+                const type = (d[CLIENT_TYPE_FIELD] || '').toLowerCase();
+                if (type === preferencialValue) {
+                    preferencialCount++;
+                } else if (type === normalValue) {
+                    normalCount++;
+                }
+            });
+
+            const unassignedCount = data.length - preferencialCount - normalCount;
+            
+            const options = {
+                series: [preferencialCount, normalCount, unassignedCount],
+                labels: [CLIENT_TYPE_CONFIG.preferencial, CLIENT_TYPE_CONFIG.normal, CLIENT_TYPE_CONFIG.unassigned],
+                colors: [PALETTE.purple, PALETTE.slate, PALETTE.gray],
+                chart: {
+                    type: 'donut',
+                    height: 320,
+                    events: {
+                        dataPointSelection: function(event, chartContext, config) {
+                            const label = config.w.globals.labels[config.dataPointIndex];
+                            handleChartClick('clientTypeChart', 'clientType', label);
+                        }
+                    }
+                },
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            labels: {
+                                show: true,
+                                total: {
+                                    show: true,
+                                    label: 'Total Tickets'
+                                }
+                            }
+                        }
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function(val) { return val.toFixed(1) + '%' }
+                },
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        colors: FONT_COLOR
+                    }
+                },
+                dropShadow: {
+                    enabled: true,
+                    top: 5,
+                    left: 2,
+                    blur: 4,
+                    color: '#000000',
+                    opacity: 0.2
+                }
+            };
+            
+            charts.clientTypeChart = new ApexCharts(document.querySelector("#clientTypeChart"), options);
+            charts.clientTypeChart.render();
+        }
+
+        // --- NUEVA FUNCIÓN PARA EL GRÁFICO DE SATISFACCIÓN (CSAT) ---
+        function renderSatisfactionChart(data) {
+            if (charts.satisfactionChart) {
+                charts.satisfactionChart.destroy();
+            }
+
+            const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+            let totalRatedTickets = 0;
+            let sumOfRatings = 0;
+
+            data.forEach(ticket => {
+                const rating = ticket.satisfaction;
+                if (rating >= 1 && rating <= 5) {
+                    ratingCounts[rating]++;
+                    totalRatedTickets++;
+                    sumOfRatings += rating;
+                }
+            });
+
+            const averageRating = totalRatedTickets > 0 ? (sumOfRatings / totalRatedTickets) : 0;
+
+            const options = {
+                series: [{
+                    name: 'Nº de Tickets',
+                    data: Object.values(ratingCounts)
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 350,
+                    toolbar: { show: false },
+                    events: {
+                        dataPointSelection: function(event, chartContext, config) {
+                            // El label es "1 Estrella", "2 Estrellas", etc. Extraemos el número.
+                            const ratingValue = parseInt(config.w.globals.labels[config.dataPointIndex]);
+                            handleChartClick('satisfactionChart', 'satisfaction', ratingValue);
+                        }
+                    }
+                },
+                plotOptions: {
+                    bar: {
+                        distributed: true, // Cada barra tendrá un color diferente
+                        borderRadius: 4,
+                        horizontal: false,
+                    }
+                },
+                colors: [PALETTE.red, PALETTE.orange, PALETTE.yellow, PALETTE.lime, PALETTE.green],
+                dataLabels: {
+                    enabled: true,
+                },
+                legend: {
+                    show: false
+                },
+                title: {
+                    text: 'Distribución de Calificaciones',
+                    align: 'center',
+                },
+                subtitle: {
+                    text: 'Promedio: ' + averageRating.toFixed(2) + ' Estrellas',
+                    align: 'center',
+                    style: {
+                        fontSize: '16px',
+                        color: FONT_COLOR
+                    }
+                },
+                xaxis: {
+                    categories: ['1 Estrella', '2 Estrellas', '3 Estrellas', '4 Estrellas', '5 Estrellas'],
+                    labels: {
+                        style: {
+                            colors: FONT_COLOR,
+                        }
+                    }
+                },
+                yaxis: {
+                    title: {
+                        text: 'Cantidad de Votos'
+                    }
+                }
+            };
+
+            charts.satisfactionChart = new ApexCharts(document.querySelector("#satisfactionChart"), options);
+            charts.satisfactionChart.render();
         }
 
 
@@ -2050,36 +2368,42 @@
             } 
             else {
                 const data = content;
-                let tableHTML = `
-                    <div class="overflow-x-auto">
-                        <table id="modal-table" class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    ${headers.map(h => `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${h.displayName}</th>`).join('')}
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                ${data.length === 0 
-                                    ? `<tr><td colspan="${headers.length}" class="px-6 py-4 text-center text-gray-500">No hay datos.</td></tr>`
-                                    : data.map(rowObject => `
-                                        <tr>
-                                            ${headers.map(header => {
-                                                let cellValue = rowObject[header.key] || '';
-                                                if (header.key.toLowerCase().includes('time') && typeof cellValue === 'number') {
-                                                    cellValue = cellValue.toFixed(2);
-                                                } else if (cellValue instanceof Date) {
-                                                    cellValue = cellValue.toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' });
-                                                }
-                                                const p = document.createElement("p");
-                                                p.textContent = cellValue;
-                                                return `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">${p.innerHTML}</td>`;
-                                            }).join('')}
-                                        </tr>
-                                    `).join('')
+                // CORRECCIÓN: Lógica para hipervínculos en Issue Key
+                let tableHTML = '<div class="overflow-x-auto"><table id="modal-table" class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr>';
+                
+                headers.forEach(h => {
+                    tableHTML += '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">' + h.displayName + '</th>';
+                });
+                
+                tableHTML += '</tr></thead><tbody class="bg-white divide-y divide-gray-200">';
+
+                if (data.length === 0) {
+                    tableHTML += '<tr><td colspan="' + headers.length + '" class="px-6 py-4 text-center text-gray-500">No hay datos.</td></tr>';
+                } else {
+                    data.forEach(rowObject => {
+                        tableHTML += '<tr>';
+                        headers.forEach(header => {
+                            let cellValue = rowObject[header.key] || '';
+                            const p = document.createElement("p");
+
+                            if (header.key === 'issue' && cellValue !== 'N/A') {
+                                const url = 'https://cardinalecm.atlassian.net/browse/' + cellValue;
+                                p.innerHTML = '<a href="' + url + '" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">' + cellValue + '</a>';
+                            } else {
+                                if (header.key.toLowerCase().includes('time') && typeof cellValue === 'number') {
+                                    cellValue = cellValue.toFixed(2);
+                                } else if (cellValue instanceof Date) {
+                                    cellValue = cellValue.toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' });
                                 }
-                            </tbody>
-                        </table>
-                    </div>`;
+                                p.textContent = cellValue;
+                            }
+                            tableHTML += '<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">' + p.innerHTML + '</td>';
+                        });
+                        tableHTML += '</tr>';
+                    });
+                }
+                
+                tableHTML += '</tbody></table></div>';
                 modalBody.innerHTML = tableHTML;
             }
             modal.style.display = 'block'; // Usar block para activar el CSS
@@ -2128,7 +2452,6 @@
         
         function setupDrilldown() {}
 
-        // MODIFICADO: La función ahora maneja clics en todas las tarjetas, incluidas las nuevas de SLA
         function setupKpiCardClickHandlers() {
             const kpiGrid = document.getElementById('kpi-grid');
             if (!kpiGrid) return;
@@ -2144,12 +2467,6 @@
                 let drilldownData = [];
                 let modalTitle = 'Detalle de Datos';
                 let headers = COMMON_TABLE_HEADERS;
-
-                const escapeHTML = (str) => {
-                    const p = document.createElement("p");
-                    p.textContent = str;
-                    return p.innerHTML;
-                };
 
                 switch (kpiId) {
                     case 'total-tickets':
@@ -2169,164 +2486,12 @@
                         drilldownData = currentData.filter(d => !['Closed', 'Resolved', 'Done', 'Cerrado', 'Resuelto', 'Canceled', 'Cancelled', 'Cancelado'].includes(d.status));
                         showModalWithData(modalTitle, drilldownData.slice(0, 500), headers);
                         break;
-
-                    case 'avg-resolution': {
-                        modalTitle = 'Cálculo de Tiempo Promedio de Resolución';
-                        const validTickets = currentData.filter(d => d.resolutionTime > 0);
-                        if (validTickets.length === 0) {
-                            alert('No hay tickets con tiempo de resolución válido para mostrar.');
-                            return;
-                        }
-                        const totalHours = validTickets.reduce((sum, d) => sum + d.resolutionTime, 0);
-                        const avgHours = totalHours / validTickets.length;
-                        const top20Tickets = [...validTickets].sort((a,b) => b.resolutionTime - a.resolutionTime).slice(0, 20);
-
-                        let explanationHTML = '<div class="p-4 mb-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg">' +
-                                '<p class="font-bold">Fórmula de Cálculo:</p>' +
-                                '<p>Suma Total de Horas de Resolución / Cantidad de Tickets Válidos = Tiempo Promedio</p>' +
-                                '<p class="mt-2 text-xl">' +
-                                    '<strong>' + totalHours.toFixed(2) + '</strong> Horas / <strong>' + validTickets.length + '</strong> Tickets = <strong>' + avgHours.toFixed(2) + '</strong> Horas Promedio' +
-                                '</p>' +
-                            '</div>' +
-                            '<h4 class="font-bold mt-6 mb-2 text-gray-700">Top 20 Tickets con Mayor Tiempo de Resolución:</h4>' +
-                            '<div class="max-h-96 overflow-y-auto border rounded-lg">' +
-                                '<table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50 sticky top-0"><tr>' +
-                                    '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue Key</th>' +
-                                    '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>' +
-                                    '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiempo de Resolución (Hrs)</th>' +
-                                '</tr></thead>' +
-                                '<tbody class="bg-white divide-y divide-gray-200">' +
-                                    top20Tickets.map(t => `<tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">${escapeHTML(t.issue)}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">${escapeHTML(t.summary)}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap font-semibold">${t.resolutionTime.toFixed(2)}</td>
-                                    </tr>`).join('') +
-                                '</tbody></table>' +
-                            '</div>' +
-                            '<p class="mt-2 text-xs text-gray-500 italic">Nota: Solo se consideran para el cálculo los tickets que tienen un tiempo de resolución registrado y mayor a cero.</p>';
-                        showModalWithData(modalTitle, explanationHTML);
-                        break;
-                    }
                     
-                    case 'avg-first-response': {
-                        modalTitle = 'Cálculo de Tiempo Promedio de Primera Respuesta';
-                        const validTickets = currentData.filter(d => d.firstResponseTime > 0);
-                        if (validTickets.length === 0) {
-                            alert('No hay tickets con tiempo de primera respuesta válido para mostrar.');
-                            return;
-                        }
-                        const totalHours = validTickets.reduce((sum, d) => sum + d.firstResponseTime, 0);
-                        const avgHours = totalHours / validTickets.length;
-                        const top20Tickets = [...validTickets].sort((a,b) => b.firstResponseTime - a.firstResponseTime).slice(0, 20);
-
-                        let explanationHTML = '<div class="p-4 mb-4 bg-amber-50 border-l-4 border-amber-400 text-amber-800 rounded-r-lg">' +
-                                '<p class="font-bold">Fórmula de Cálculo:</p>' +
-                                '<p>Suma Total de Horas de 1ra Respuesta / Cantidad de Tickets Válidos = Tiempo Promedio</p>' +
-                                '<p class="mt-2 text-xl">' +
-                                    '<strong>' + totalHours.toFixed(2) + '</strong> Horas / <strong>' + validTickets.length + '</strong> Tickets = <strong>' + avgHours.toFixed(2) + '</strong> Horas Promedio' +
-                                '</p>' +
-                            '</div>' +
-                            '<h4 class="font-bold mt-6 mb-2 text-gray-700">Top 20 Tickets con Mayor Tiempo de 1ra Respuesta:</h4>' +
-                            '<div class="max-h-96 overflow-y-auto border rounded-lg">' +
-                                '<table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50 sticky top-0"><tr>' +
-                                    '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue Key</th>' +
-                                    '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Título</th>' +
-                                    '<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiempo 1ra Respuesta (Hrs)</th>' +
-                                '</tr></thead>' +
-                                '<tbody class="bg-white divide-y divide-gray-200">' +
-                                    top20Tickets.map(t => `<tr>
-                                        <td class="px-6 py-4 whitespace-nowrap">${escapeHTML(t.issue)}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">${escapeHTML(t.summary)}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap font-semibold">${t.firstResponseTime.toFixed(2)}</td>
-                                    </tr>`).join('') +
-                                '</tbody></table>' +
-                            '</div>' +
-                            '<p class="mt-2 text-xs text-gray-500 italic">Nota: Solo se consideran para el cálculo los tickets que tienen un tiempo de primera respuesta registrado y mayor a cero.</p>';
-                        showModalWithData(modalTitle, explanationHTML);
-                        break;
-                    }
-
                     case 'unassigned-tickets':
                         modalTitle = 'Detalle: Tickets sin Asignar';
                         drilldownData = currentData.filter(d => !d.assignee || d.assignee.toLowerCase() === 'unassigned' || d.assignee.toLowerCase() === 'sin asignar');
                         showModalWithData(modalTitle, drilldownData.slice(0, 500), headers);
                         break;
-                    
-                    case 'avg-day': {
-                        const totalTicketsDay = currentData.length;
-                        const uniqueDaysSet = new Set(currentData.map(d => d.created.toISOString().split('T')[0]));
-                        const uniqueDaysCount = uniqueDaysSet.size;
-                        const avgPerDay = uniqueDaysCount > 0 ? (totalTicketsDay / uniqueDaysCount).toFixed(2) : '0.0';
-                        modalTitle = 'Cálculo de Promedio de Tickets por Día';
-                        const ticketsByDay = {};
-                        currentData.forEach(ticket => {
-                            const day = ticket.created.toISOString().split('T')[0];
-                            if (!ticketsByDay[day]) ticketsByDay[day] = 0;
-                            ticketsByDay[day]++;
-                        });
-                        const sortedDays = Object.entries(ticketsByDay).sort((a, b) => new Date(a[0]) - new Date(b[0]));
-                        let explanationHTML = `
-                            <div class="p-4 mb-4 bg-blue-50 border-l-4 border-blue-400 text-blue-800 rounded-r-lg">
-                                <p class="font-bold">Fórmula de Cálculo:</p>
-                                <p>Total de Tickets / Días con Actividad = Promedio de Tickets por Día</p>
-                                <p class="mt-2 text-xl"><strong>${totalTicketsDay}</strong> Tickets / <strong>${uniqueDaysCount}</strong> Días = <strong>${avgPerDay}</strong> Tickets/Día</p>
-                            </div>
-                            <h4 class="font-bold mt-6 mb-2 text-gray-700">Desglose de Tickets por Día:</h4>
-                            <div class="max-h-96 overflow-y-auto border rounded-lg">
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50 sticky top-0"><tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad de Tickets</th>
-                                    </tr></thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
-                                        ${sortedDays.map(([day, count]) => `<tr><td class="px-6 py-4 whitespace-nowrap">${new Date(day).toLocaleDateString('es-ES', { timeZone: 'UTC', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</td><td class="px-6 py-4">${count}</td></tr>`).join('')}
-                                    </tbody>
-                                </table>
-                            </div>`;
-                        showModalWithData(modalTitle, explanationHTML);
-                        break;
-                    }
-
-                    case 'avg-month': {
-                        const totalTicketsMonth = currentData.length;
-                        const uniqueMonthsSet = new Set(currentData.map(d => `${d.created.getFullYear()}-${d.created.getMonth()}`));
-                        const uniqueMonthsCount = uniqueMonthsSet.size;
-                        const avgPerMonth = uniqueMonthsCount > 0 ? (totalTicketsMonth / uniqueMonthsCount).toFixed(2) : '0.0';
-                        modalTitle = 'Cálculo de Promedio de Tickets por Mes';
-                        const ticketsByMonth = {};
-                        currentData.forEach(ticket => {
-                            const monthKey = `${ticket.created.getFullYear()}-${ticket.created.getMonth()}`;
-                            if (!ticketsByMonth[monthKey]) ticketsByMonth[monthKey] = 0;
-                            ticketsByMonth[monthKey]++;
-                        });
-                        const sortedMonths = Object.entries(ticketsByMonth).sort((a,b) => {
-                            const [yearA, monthA] = a[0].split('-'); const [yearB, monthB] = b[0].split('-');
-                            return new Date(yearA, monthA) - new Date(yearB, monthB);
-                        });
-                        let monthExplanationHTML = `
-                            <div class="p-4 mb-4 bg-teal-50 border-l-4 border-teal-400 text-teal-800 rounded-r-lg">
-                                <p class="font-bold">Fórmula de Cálculo:</p>
-                                <p>Total de Tickets / Meses con Actividad = Promedio de Tickets por Mes</p>
-                                <p class="mt-2 text-xl"><strong>${totalTicketsMonth}</strong> Tickets / <strong>${uniqueMonthsCount}</strong> Meses = <strong>${avgPerMonth}</strong> Tickets/Mes</p>
-                            </div>
-                            <h4 class="font-bold mt-6 mb-2 text-gray-700">Desglose de Tickets por Mes:</h4>
-                            <div class="max-h-96 overflow-y-auto border rounded-lg">
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50 sticky top-0"><tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mes</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cantidad de Tickets</th>
-                                    </tr></thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
-                                        ${sortedMonths.map(([monthKey, count]) => {
-                                            const [year, monthIndex] = monthKey.split('-');
-                                            return `<tr><td class="px-6 py-4 whitespace-nowrap">${MONTH_NAMES[parseInt(monthIndex)]} ${year}</td><td class="px-6 py-4">${count}</td></tr>`
-                                        }).join('')}
-                                    </tbody>
-                                </table>
-                            </div>`;
-                        showModalWithData(modalTitle, monthExplanationHTML);
-                        break;
-                    }
 
 					case 'sla-first-response': {
 						modalTitle = 'Detalle de Tickets: SLA de Primera Respuesta';
@@ -2424,12 +2589,76 @@
                     drilldownData = currentData.filter(d => d.created.getFullYear() == year && d.created.getMonth() == monthIndex && d.requestType === filterValue.requestType);
                     modalTitle = 'Tickets de ' + filterValue.month + ' con Tipo: "' + filterValue.requestType + '"';
                     break;
+                case 'clientType':
+                    modalTitle = 'Detalle: Tickets para ' + filterValue;
+                    const prefValue = CLIENT_TYPE_CONFIG.preferencial.toLowerCase();
+                    const normValue = CLIENT_TYPE_CONFIG.normal.toLowerCase();
+
+                    if (filterValue === CLIENT_TYPE_CONFIG.preferencial) {
+                        drilldownData = currentData.filter(d => (d[CLIENT_TYPE_FIELD] || '').toLowerCase() === prefValue);
+                    } else if (filterValue === CLIENT_TYPE_CONFIG.normal) {
+                        drilldownData = currentData.filter(d => (d[CLIENT_TYPE_FIELD] || '').toLowerCase() === normValue);
+                    } else if (filterValue === CLIENT_TYPE_CONFIG.unassigned) {
+                        drilldownData = currentData.filter(d => {
+                            const type = (d[CLIENT_TYPE_FIELD] || '').toLowerCase();
+                            return type !== prefValue && type !== normValue;
+                        });
+                    }
+                    break;
+                case 'satisfaction':
+                    modalTitle = 'Detalle: Tickets con ' + filterValue + ' Estrella(s)';
+                    drilldownData = currentData.filter(d => d.satisfaction === filterValue);
+                    break;
                 default:
                     console.warn("Click no manejado:", chartId, filterType);
                     return;
             }
             
             showModalWithData(modalTitle, drilldownData.slice(0, 500), headers);
+        }
+
+        // --- NUEVA FUNCIÓN PARA EL ZOOM DE GRÁFICOS ---
+        function setupChartZoom() {
+            const grid = document.getElementById('dashboard-grid');
+            const overlay = document.getElementById('zoom-overlay');
+            if (!grid || !overlay) return;
+
+            const closeZoom = () => {
+                const zoomedCard = document.querySelector('.chart-card.is-zoomed');
+                if (zoomedCard) {
+                    zoomedCard.classList.remove('is-zoomed');
+                }
+                overlay.classList.add('hidden');
+            };
+
+            grid.addEventListener('click', function(e) {
+                // El objetivo es el ícono de zoom, no toda la tarjeta
+                const zoomIcon = e.target.closest('.zoom-icon-container');
+                if (!zoomIcon) return;
+
+                const card = zoomIcon.closest('.chart-card');
+                
+                // Asegurarse de que no se active el zoom si ya hay un modal abierto.
+                if (card && document.getElementById('data-modal').style.display !== 'block') {
+                    // Prevenir que el evento de arrastre del SortableJS interfiera.
+                    if (card.classList.contains('sortable-ghost') || card.classList.contains('sortable-chosen')) {
+                        return;
+                    }
+                    if (card.classList.contains('is-zoomed')) {
+                        closeZoom();
+                    } else {
+                        // Cerrar cualquier otra tarjeta que ya esté ampliada
+                        const currentlyZoomed = document.querySelector('.chart-card.is-zoomed');
+                        if (currentlyZoomed) {
+                            currentlyZoomed.classList.remove('is-zoomed');
+                        }
+                        card.classList.add('is-zoomed');
+                        overlay.classList.remove('hidden');
+                    }
+                }
+            });
+
+            overlay.addEventListener('click', closeZoom);
         }
 
 
