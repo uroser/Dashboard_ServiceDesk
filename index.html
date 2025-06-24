@@ -1,9 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard: Análisis de Tickets Service Desk</title>
+    <title>Dashboard: Análisis de Tickets Service Desk (Corregido)</title>
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
@@ -12,645 +19,39 @@
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.1/src/wordcloud2.js"></script>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        /* Estilos base del cuerpo */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #F8FAFC; /* Un blanco muy suave */
-            color: #334155; /* Texto principal más oscuro */
-        }
-
-        /* Contenedor principal del dashboard */
-        .container {
-            max-width: 1500px; /* Un poco más ancho */
-            margin: 0 auto;
-            padding: 2.5rem 1.5rem; /* Más padding para aire */
-        }
-
-        /* Header de la aplicación */
-        header {
-            background-color: #FFFFFF;
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
-            margin-bottom: 2rem; /* Más espacio */
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem; /* Espacio entre los elementos del header */
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap; /* Para responsividad */
-            gap: 1rem;
-        }
-
-        .logo-section {
-            display: flex;
-            align-items: center;
-            flex-grow: 1; /* Permite que crezca */
-        }
-
-        .logo-section img {
-            height: 3.5rem; /* Logo un poco más grande */
-            margin-right: 1rem;
-        }
-
-        .header-text h1 {
-            font-family: 'Montserrat', sans-serif; /* Fuente diferente para el título */
-            font-size: 2.25rem; /* Más grande */
-            font-weight: 700;
-            color: #1A202C; /* Color más profundo */
-        }
-
-        .header-text p {
-            font-size: 1rem;
-            color: #64748B;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem; /* Espacio entre botones */
-        }
-
-        /* Estilos de botones */
-        .btn-primary {
-            background-color: #4F46E5; /* Indigo */
-            color: white;
-            padding: 0.65rem 1.25rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -2px rgba(79, 70, 229, 0.1);
-        }
-        .btn-primary:hover {
-            background-color: #4338CA;
-            transform: translateY(-1px);
-        }
-        .btn-secondary {
-            background-color: #FFFFFF;
-            color: #4B5563;
-            border: 1px solid #D1D5DB;
-            padding: 0.65rem 1.25rem;
-            border-radius: 0.5rem;
-            font-weight: 500;
-            transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        }
-        .btn-secondary:hover {
-            background-color: #F9FAFB;
-            border-color: #9CA3AF;
-            transform: translateY(-1px);
-        }
-        .btn-primary:focus, .btn-secondary:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.3); /* Anillo de foco */
-        }
-
-        /* Estilos para la sección de filtros */
-        .filter-section {
-            background-color: #F8FAFC;
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            border: 1px dashed #CBD5E1; /* Borde más sutil */
-        }
-        .filter-section p {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #4B5563;
-            margin-bottom: 1rem;
-        }
-        .filter-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); /* Columnas más flexibles y pequeñas */
-            gap: 1rem; /* Espacio entre filtros */
-        }
-        .filter-select {
-            display: block;
-            width: 100%;
-            padding: 0.65rem 1.15rem; /* Padding ajustado */
-            font-size: 0.875rem; /* Fuente un poco más pequeña */
-            border: 1px solid #D1D5DB;
-            border-radius: 0.5rem;
-            background-color: white;
-            appearance: none; /* Quita el estilo nativo del select */
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%236B7280'%3E%3Cpath d='M7 7l3 3 3-3m0 6l-3 3-3-3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3C/path%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-            background-size: 0.8em 0.8em;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-            white-space: nowrap; /* Evita que el texto se rompa */
-            overflow: hidden; /* Oculta el texto que se desborda */
-            text-overflow: ellipsis; /* Añade puntos suspensivos si el texto es muy largo */
-            max-width: 100%; /* Asegura que no desborde su contenedor */
-        }
-        .filter-select:focus {
-            border-color: #4F46E5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
-            outline: none;
-        }
-
-        /* Mensajes de inicio/carga */
-        #initial-message {
-            background-color: #FFFFFF;
-            border-radius: 0.75rem;
-            padding: 3rem 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.025);
-            text-align: center;
-            margin-top: 2rem;
-            border: 1px solid #E2E8F0;
-        }
-        #initial-message svg {
-            color: #94A3B8;
-        }
-        #initial-message h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #1E293B;
-            margin-top: 0.75rem;
-        }
-        #initial-message p {
-            color: #64748B;
-            margin-top: 0.25rem;
-        }
-        #loading-message {
-            color: #4F46E5;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        /* KPI Cards */
-        .kpi-card {
-            background-color: #FFFFFF;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.025);
-            padding: 1.5rem;
-            text-align: center;
-            border: 1px solid #E2E8F0;
-            transition: all 0.2s ease-in-out;
-            cursor: pointer; /* AÑADIDO: Indica que la tarjeta es clickeable */
-        }
-        .kpi-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
-        }
-        .kpi-value {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 2.5rem; /* Más grande y audaz */
-            font-weight: 700;
-            line-height: 1;
-            margin-bottom: 0.5rem;
-        }
-        .kpi-label {
-            font-size: 0.9rem;
-            color: #64748B;
-            font-weight: 500;
-        }
-
-        /* Chart Cards (arrastrables) */
-        .chart-card {
-            background-color: #FFFFFF;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.025);
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            overflow: hidden;
-            border: 1px solid #E2E8F0;
-            position: relative; /* Necesario para posicionar el ícono de zoom */
-            cursor: grab;
-            transition: all 0.3s ease-in-out;
-        }
-        .chart-card:active {
-            cursor: grabbing;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
-            transform: scale(1.01); /* Un poco más grande al arrastrar */
-        }
-        .chart-card h3 {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 1.25rem; /* Títulos de gráficos más grandes */
-            font-weight: 600;
-            color: #1E293B;
-            margin-bottom: 1rem;
-            padding-right: 2.5rem; /* Espacio para el ícono de zoom */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-        .chart-card h3 svg {
-            margin-right: 0.75rem;
-            color: #4F46E5; /* Color del icono por defecto */
-        }
-        .chart-container-inner {
-            position: relative;
-            height: 20rem; /* Altura fija para gráficos */
-        }
-        
-        /* Regla de CSS específica para la altura del heatmap */
-        #heatmap-card .chart-container-inner {
-            height: auto;
-            min-height: 22rem; /* Altura mínima para que no se vea mal si hay pocos datos */
-        }
-
-        /* Modal (ahora con cabecera para arrastrar) */
-        .modal {
-            display: none;
-            position: fixed; /* Cambiado a fixed para arrastrar por toda la página */
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; /* Deshabilitar scroll en el overlay */
-            background-color: rgba(0,0,0,0.6);
-            /* align-items y justify-content eliminados para permitir posicionamiento manual */
-        }
-        .modal-content {
-            background-color: #FFFFFF;
-            position: absolute; /* Para poder moverlo */
-            top: 50%; /* Centrado inicial */
-            left: 50%;
-            transform: translate(-50%, -50%); /* Centrado inicial */
-            padding: 0; /* Padding se manejará en los elementos internos */
-            border-radius: 1rem;
-            width: 95%;
-            max-width: 1600px;
-            max-height: 90vh;
-            display: flex; /* Para layout de cabecera y cuerpo */
-            flex-direction: column;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            animation: fadeIn 0.3s ease-out;
-        }
-        .modal-header {
-            padding: 1.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #E5E7EB;
-            cursor: move; /* Cursor para indicar que es arrastrable */
-        }
-        .modal-body-container {
-            padding: 2rem;
-            overflow-y: auto; /* Scroll solo en el cuerpo */
-        }
-
-        .close-button {
-            color: #9CA3AF;
-            font-size: 2.25rem;
-            font-weight: bold;
-            line-height: 1;
-            transition: color 0.2s ease;
-            cursor: pointer;
-        }
-        .close-button:hover,
-        .close-button:focus {
-            color: #1F2937;
-            text-decoration: none;
-        }
-        .modal-title {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: #1E293B;
-            margin: 0; /* Se quita el margen para alinear con el botón */
-        }
-
-        /* Tabla dentro del modal */
-        #modal-table {
-            min-width: 100%; /* Asegura que la tabla ocupe todo el ancho */
-            border-collapse: separate; /* Permite border-radius en celdas */
-            border-spacing: 0; /* Elimina espacio entre celdas */
-        }
-        #modal-table thead th {
-            background-color: #F1F5F9; /* Fondo de cabecera más elegante */
-            color: #475569;
-            font-weight: 600;
-            font-size: 0.85rem;
-            padding: 1rem 1.25rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            border-bottom: 2px solid #E2E8F0;
-        }
-        #modal-table tbody td {
-            background-color: #FFFFFF;
-            padding: 1rem 1.25rem;
-            font-size: 0.9rem;
-            color: #4B5563;
-            border-bottom: 1px solid #F1F5F9;
-        }
-        #modal-table tbody tr:last-child td {
-            border-bottom: none;
-        }
-        #modal-table tbody tr:hover {
-            background-color: #F8FAFC;
-        }
-
-        /* Animación para el modal */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translate(-50%, -55%); }
-            to { opacity: 1; transform: translate(-50%, -50%); }
-        }
-        
-        /* --- ESTILOS PARA EL ZOOM DE GRÁFICOS --- */
-        #zoom-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 40; /* Por debajo de la tarjeta ampliada */
-            cursor: zoom-out;
-        }
-
-        .chart-card.is-zoomed {
-            position: fixed !important;
-            top: 50% !important;
-            left: 50% !important;
-            width: 80vw !important;
-            height: 80vh !important;
-            max-width: 1000px;
-            transform: translate(-50%, -50%) !important;
-            z-index: 50 !important;
-            cursor: default !important; /* El cursor de agarre ya no es necesario */
-        }
-        
-        .is-zoomed .chart-container-inner {
-            height: calc(100% - 4rem) !important;
-        }
-
-        .zoom-icon-container {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            padding: 0.5rem;
-            cursor: zoom-in;
-            color: #9CA3AF; /* Gris */
-            border-radius: 9999px;
-            transition: background-color 0.2s ease, color 0.2s ease;
-        }
-        .zoom-icon-container:hover {
-            background-color: #F3F4F6; /* Gris más claro */
-            color: #4F46E5; /* Indigo */
-        }
-
-
-        /* Placeholder y ghost class para Sortable.js */
-        .sortable-ghost {
-            opacity: 0.4;
-            background: #EFF6FF; /* Fondo suave para el elemento arrastrado */
-            border: 2px dashed #93C5FD;
-        }
-
-        /* Word Cloud Specifics */
-        #word-cloud-container {
-            min-height: 320px;
-            width: 100%;
-            height: 100%; /* Asegura que ocupe el espacio */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #FFFFFF;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.025);
-            padding: 1.5rem;
-            border: 1px solid #E2E8F0;
-        }
-
-        /* Heatmap Specifics */
-        #heatmap-wrapper {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            grid-template-rows: auto 1fr;
-            gap: 2px; /* Reducir el gap para un aspecto más denso */
-            height: 100%;
-            overflow: auto;
-            padding: 5px;
-            background-color: #E2E8F0; /* Fondo del wrapper */
-            border-radius: 0.75rem;
-        }
-        #heatmap-corner {
-            grid-column: 1;
-            grid-row: 1;
-            background-color: #CBD5E1; /* Un gris más oscuro */
-            border-radius: 0.25rem;
-        }
-        #heatmap-hour-labels {
-            grid-column: 2;
-            grid-row: 1;
-            display: grid;
-            grid-template-columns: repeat(24, 1fr);
-            gap: 2px;
-            background-color: #E2E8F0;
-            border-radius: 0.25rem;
-        }
-        .heatmap-hour-label {
-            background-color: #CBD5E1;
-            font-weight: 600;
-            color: #334155;
-            padding: 5px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.65rem; /* Más pequeño para que quepa */
-            text-align: center;
-            border-radius: 0.25rem;
-        }
-        #heatmap-day-labels {
-            grid-column: 1;
-            grid-row: 2;
-            display: grid;
-            grid-template-rows: repeat(7, 1fr);
-            gap: 2px;
-            background-color: #E2E8F0;
-            border-radius: 0.25rem;
-        }
-        .heatmap-day-label {
-            background-color: #CBD5E1;
-            font-weight: 600;
-            color: #334155;
-            padding: 5px 2px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            writing-mode: vertical-lr; /* Texto vertical */
-            text-orientation: mixed;
-            font-size: 0.65rem;
-            text-align: center;
-            border-radius: 0.25rem;
-        }
-        #heatmap-grid {
-            grid-column: 2;
-            grid-row: 2;
-            display: grid;
-            grid-template-columns: repeat(24, 1fr);
-            grid-template-rows: repeat(7, 1fr);
-            gap: 2px;
-            background-color: #E2E8F0;
-            border-radius: 0.5rem;
-        }
-        .heatmap-cell {
-            background-color: #F8FAFC; /* Fondo muy claro por defecto */
-            width: auto;
-            height: 30px; /* Altura fija para celdas */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            color: #64748B;
-            font-weight: 600;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-            border-radius: 0.25rem;
-            cursor: pointer;
-        }
-        .heatmap-cell:hover {
-            transform: scale(1.05); /* Ligeramente más grande al pasar el ratón */
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            z-index: 10; /* Para que no se corte por otras celdas */
-        }
-
-        /* AI Analysis Box Styles */
-        #ai-analysis-section ul {
-            list-style-type: disc;
-            padding-left: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem; /* Aumentar espacio entre puntos */
-        }
-        #ai-analysis-section h4 {
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 600;
-            color: #4F46E5;
-            margin-bottom: 0.75rem;
-        }
-    </style>
-
-    <style>
-        @media (max-width: 768px) {
-            /* Ajustar el contenedor principal y el header para móviles */
-            .container {
-                padding: 1rem;
-            }
-
-            .header-content {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1.5rem;
-            }
-
-            .header-actions {
-                width: 100%;
-                flex-direction: column;
-                align-items: stretch; /* Botones ocupan todo el ancho */
-            }
-            
-            .header-actions .btn-primary, .header-actions .btn-secondary {
-                justify-content: center; /* Centrar texto del botón */
-                width: 100%;
-            }
-            
-            .logo-section img {
-                height: 2.5rem; /* Logo más pequeño en móvil */
-            }
-
-            /* Reducir tamaño del título principal en móvil */
-            .header-text h1 {
-                font-size: 1.75rem; /* Reducido de 2.25rem */
-            }
-
-            /* Reducir tamaño de los valores de KPI en móvil para evitar desbordamiento */
-            .kpi-value {
-                font-size: 2rem; /* Reducido de 2.5rem */
-            }
-            
-            /* Los KPIs ya son 2 columnas en la base, así que está bien */
-            #kpi-grid {
-                gap: 0.75rem; /* Espacio reducido entre KPIs */
-            }
-            
-            /* La grilla de gráficos ya es de 1 columna en la base, lo que es correcto para móvil */
-            #dashboard-grid {
-                gap: 1rem; /* Espacio reducido entre gráficos */
-            }
-
-            .chart-card h3 {
-                font-size: 1.1rem; /* Títulos de gráficos ligeramente más pequeños */
-            }
-
-            /* Contenedor de gráficos con altura ajustada para móvil */
-            .chart-container-inner {
-                 height: 22rem; 
-            }
-             .chart-container-inner.h-96 {
-                height: 24rem; /* Ajustar las alturas fijas también */
-             }
-
-            /* Hacer que el contenedor del heatmap sea desplazable horizontalmente */
-            #heatmap-card .chart-container-inner {
-                 overflow-x: auto;
-                 padding-bottom: 1rem; /* Espacio para la barra de scroll */
-            }
-
-            #heatmap-wrapper {
-                /* Se asegura que el contenido no se encoja y pueda ser desplazado */
-                min-width: 900px; 
-            }
-            
-            /* Ajustes al modal para una experiencia de pantalla completa en móvil */
-            .modal-content {
-                width: 100%;
-                height: 100%;
-                max-height: 100vh;
-                border-radius: 0;
-                top: 0;
-                left: 0;
-                transform: none;
-            }
-            .modal-header {
-                cursor: default; /* Deshabilitar arrastre en móvil */
-            }
-
-            .modal-title {
-                font-size: 1.25rem;
-            }
-
-            /* Tabla del modal con padding reducido para caber más información */
-            #modal-table thead th,
-            #modal-table tbody td {
-                padding: 0.75rem 0.5rem; 
-                font-size: 0.8rem; /* Fuente más pequeña para la tabla en móvil */
-            }
-        }
-    </style>
 </head>
+
 <body class="text-gray-800">
 
     <div class="container">
-        
+
         <header class="mb-8">
             <div class="header-content">
-                 <div class="logo-section">
+                <div class="logo-section">
                     <img src="https://cardinal-systems.com/wp-content/uploads/2021/08/cardinalSystems-logo.webp" alt="Cardinal Systems Logo" class="h-14 mr-4">
                     <div class="header-text">
                         <h1 class="text-gray-900">Service Desk BI</h1>
-                        </div>
+                    </div>
                 </div>
+
                 <div class="header-actions">
-                     <button id="clear-filters-btn" class="btn-secondary">
+                    <div class="theme-switcher flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <label class="switch relative inline-block w-11 h-6">
+                            <input type="checkbox" id="theme-toggle" class="opacity-0 w-0 h-0">
+                            <span class="slider absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-gray-300 transition rounded-full"></span>
+                        </label>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                    </div>
+
+                    <button id="clear-filters-btn" class="btn-secondary">
                         Limpiar Filtros
                     </button>
+
                     <label for="csv-file-input" class="btn-primary cursor-pointer flex items-center justify-center">
                         <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -658,65 +59,62 @@
                         Cargar Archivo CSV
                     </label>
                     <input type="file" id="csv-file-input" class="hidden" accept=".csv">
+
+                    <p class="text-xs text-gray-500 mt-2 flex items-center">
+                        <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
+                        </svg>
+                        <a href="https://cardinalecm.atlassian.net/issues/?filter=10305&atlOrigin=eyJpIjoiYmU3MGM0NDM0NWI0NDdkOTgyODRkMDQwN2Y0NDI1OWMiLCJwIjoiaiJ9" class="text-blue-600 hover:text-blue-800 ml-1 underline" target="_blank">
+                            Hacé clic acá para obtenerlo
+                        </a>
+                    </p>
                 </div>
             </div>
-           
+
             <div class="filter-section">
-                <p class="text-sm font-semibold mb-3">Filtros Avanzados</p>
-                <div class="filter-grid">
+                <div class="flex justify-between items-center cursor-pointer" onclick="toggleCollapse('filter-grid-content', 'filter-arrow')">
+                    <p class="title mb-0">Filtros Avanzados</p>
+                    <svg id="filter-arrow" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </div>
+
+                <div id="filter-grid-content" class="filter-grid collapsible-content mt-4">
                     <div>
-                        <label for="month-filter" class="sr-only">Filtrar por Mes:</label>
-                        <select id="month-filter" class="filter-select">
-                            <option value="all">Filtro por Mes</option>
-                        </select>
+                        <label for="month-filter" class="filter-label">Mes</label>
+                        <select id="month-filter" class="filter-select" multiple></select>
                     </div>
                     <div>
-                        <label for="assignee-filter" class="sr-only">Filtrar por Asignado:</label>
-                        <select id="assignee-filter" class="filter-select">
-                            <option value="all">Todos los Asignados</option>
-                        </select>
+                        <label for="assignee-filter" class="filter-label">Asignado</label>
+                        <select id="assignee-filter" class="filter-select" multiple></select>
                     </div>
                     <div>
-                        <label for="client-filter" class="sr-only">Filtrar por Cliente:</label>
-                        <select id="client-filter" class="filter-select">
-                            <option value="all">Todos los Clientes</option>
-                        </select>
+                        <label for="client-filter" class="filter-label">Cliente</label>
+                        <select id="client-filter" class="filter-select" multiple></select>
                     </div>
                     <div>
-                        <label for="priority-filter" class="sr-only">Filtrar por Prioridad:</label>
-                        <select id="priority-filter" class="filter-select">
-                            <option value="all">Todas las Prioridades</option>
-                        </select>
+                        <label for="priority-filter" class="filter-label">Prioridad</label>
+                        <select id="priority-filter" class="filter-select" multiple></select>
                     </div>
                     <div>
-                        <label for="status-filter" class="sr-only">Filtrar por Estado:</label>
-                        <select id="status-filter" class="filter-select">
-                            <option value="all">Todos los Estados</option>
-                        </select>
+                        <label for="status-filter" class="filter-label">Estado</label>
+                        <select id="status-filter" class="filter-select" multiple></select>
                     </div>
                     <div>
-                        <label for="request-type-filter" class="sr-only">Filtrar por Tipo de Solicitud:</label>
-                        <select id="request-type-filter" class="filter-select">
-                            <option value="all">Todos los Tipos de Solicitud</option>
-                        </select>
-                    </div>
-                     <div>
-                        <label for="client-type-filter" class="sr-only">Filtrar por Tipo de Cliente:</label>
-                        <select id="client-type-filter" class="filter-select">
-                            <option value="all">Todos los Tipos de Cliente</option>
-                        </select>
+                        <label for="request-type-filter" class="filter-label">Tipo de Solicitud</label>
+                        <select id="request-type-filter" class="filter-select" multiple></select>
                     </div>
                     <div>
-                        <label for="diagnosis-filter" class="sr-only">Filtrar por Diagnóstico:</label>
-                        <select id="diagnosis-filter" class="filter-select">
-                            <option value="all">Todos los Diagnósticos</option>
-                        </select>
+                        <label for="client-type-filter" class="filter-label">Tipo de Cliente</label>
+                        <select id="client-type-filter" class="filter-select" multiple></select>
                     </div>
                     <div>
-                        <label for="problem-type-filter" class="sr-only">Filtrar por Tipo de Problema:</label>
-                        <select id="problem-type-filter" class="filter-select">
-                            <option value="all">Todos los Tipos de Problema</option>
-                        </select>
+                        <label for="diagnosis-filter" class="filter-label">Diagnóstico</label>
+                        <select id="diagnosis-filter" class="filter-select" multiple></select>
+                    </div>
+                    <div>
+                        <label for="problem-type-filter" class="filter-label">Tipo de Problema</label>
+                        <select id="problem-type-filter" class="filter-select" multiple></select>
                     </div>
                 </div>
             </div>
@@ -729,36 +127,139 @@
                 </svg>
                 <h2 class="mt-4 text-2xl font-bold text-gray-900">Bienvenido al Dashboard Interactivo de Service Desk</h2>
                 <p class="mt-2 text-md text-gray-600">Por favor, carga un archivo CSV para comenzar el análisis.</p>
-                <div id="loading-message" class="hidden mt-6 text-blue-600 flex items-center justify-center">
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <p>Analizando sentimientos del cliente, por favor espera...</p>
+
+                <div id="loading-message" class="hidden mt-6 w-full max-w-md mx-auto">
+                    <div class="flex items-center justify-center gap-3 text-blue-600 dark:text-blue-400">
+                        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p id="loading-text" class="font-semibold">Iniciando proceso...</p>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-3">
+                        <div id="progress-bar" class="h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
-            
+
             <div id="dashboard-content" class="hidden">
-                <section id="ai-analysis-section" class="mb-8 hidden">
-                    <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500">
-                        <h2 class="text-xl font-bold text-gray-800 mb-3 flex items-center font-montserrat">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-3 text-purple-500">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 01-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 013.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 013.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 01-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.562L16.25 21.75l-.648-1.188a2.25 2.25 0 01-1.423-1.423L13.5 18.75l1.188-.648a2.25 2.25 0 011.423-1.423L16.25 15l.648 1.188a2.25 2.25 0 011.423 1.423L18.5 18.75l-1.188.648a2.25 2.25 0 01-1.423 1.423z" />
-                            </svg>
-                            Insights Estratégicos
-                        </h2>
-                        <div id="ai-analysis-loading" class="text-center py-4" style="display: none;">
-                             <p class="text-gray-600 flex items-center justify-center">
-                                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+
+                    <section id="ai-analysis-section">
+                        <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500 h-full">
+                            <h2 class="text-xl font-bold text-gray-800 mb-3 flex items-center justify-between font-montserrat cursor-pointer" onclick="toggleCollapse('ai-content', 'ai-arrow')">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-3 text-purple-500">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 01-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 013.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 013.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 01-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.898 20.562L16.25 21.75l-.648-1.188a2.25 2.25 0 01-1.423-1.423L13.5 18.75l1.188-.648a2.25 2.25 0 011.423-1.423L16.25 15l.648 1.188a2.25 2.25 0 011.423 1.423L18.5 18.75l-1.188.648a2.25 2.25 0 01-1.423 1.423z" />
+                                    </svg>
+                                    Insights Estratégicos
+                                </div>
+                                <svg id="ai-arrow" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
-                                Generando análisis para el período seleccionado...
-                            </p>
+                            </h2>
+                            <div id="ai-content" class="collapsible-content" style="max-height: 0px; overflow: hidden; transition: max-height 0.5s ease-out;">
+                                <div id="ai-analysis-loading" class="text-center py-4" style="display: none;">
+                                    <p class="text-gray-600 flex items-center justify-center">
+                                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-purple-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Generando análisis para el período seleccionado...
+                                    </p>
+                                </div>
+                                <div id="ai-analysis-content" class="text-gray-700 leading-relaxed pt-3"></div>
+                            </div>
                         </div>
-                        <div id="ai-analysis-content" class="text-gray-700 leading-relaxed"></div>
-                    </div>
-                </section>
+                    </section>
+
+                    <section id="sla-priority-matrix">
+                        <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-indigo-500 h-full">
+                            <h2 class="text-xl font-bold text-gray-800 mb-3 flex items-center justify-between font-montserrat cursor-pointer" onclick="toggleCollapse('sla-content', 'sla-arrow')">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6 1a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Matriz de Prioridades SLA
+                                </div>
+                                <svg id="sla-arrow" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </h2>
+                            <div id="sla-content" class="collapsible-content" style="max-height: 0px; overflow: hidden; transition: max-height 0.5s ease-out;">
+                                <div class="overflow-x-auto pt-3">
+                                    <table class="min-w-full text-center border text-sm text-gray-700">
+                                        <thead class="bg-gray-100 font-semibold">
+                                            <tr>
+                                                <th class="py-2 px-4 border-b">Priority</th>
+                                                <th class="py-2 px-4 border-b">Time to First Response</th>
+                                                <th class="py-2 px-4 border-b">Time to Resolution</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="py-2 px-4 border-b font-bold text-red-600">HIGHEST</td>
+                                                <td class="py-2 px-4 border-b">1 h</td>
+                                                <td class="py-2 px-4 border-b">4 h</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="py-2 px-4 border-b font-bold text-orange-500">HIGH</td>
+                                                <td class="py-2 px-4 border-b">3 h</td>
+                                                <td class="py-2 px-4 border-b">12 h</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="py-2 px-4 border-b font-bold text-yellow-500">MEDIUM</td>
+                                                <td class="py-2 px-4 border-b">6 h</td>
+                                                <td class="py-2 px-4 border-b">18 h</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="py-2 px-4 border-b font-bold text-green-600">LOW</td>
+                                                <td class="py-2 px-4 border-b">8 h</td>
+                                                <td class="py-2 px-4 border-b">72 h</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="py-2 px-4 font-bold text-gray-500">LOWEST</td>
+                                                <td class="py-2 px-4">16 h</td>
+                                                <td class="py-2 px-4">108 h</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p class="mt-3 text-xs text-gray-500 italic">
+                                    <span class="text-base leading-relaxed">
+                                        🛠️ <strong>Los tiempos de respuesta</strong> en esta matriz son valores estándar y pueden adaptarse según los <em>acuerdos de nivel de servicio (SLA)</em> vigentes. <br><br>
+                                        ❗ <strong>Problemas técnicos:</strong> Los tickets con la opción <em>"I need help with a problem"</em> utilizan toda la matriz de prioridades (de HIGHEST a LOWEST). <br>
+                                        📦 <strong>Pedidos o cambios:</strong> Los tickets con la opción <em>"I want to place an order or a change"</em> solo aplican los tiempos definidos para la prioridad <strong>LOWEST</strong>. <br><br>
+                                        📄 Estos tiempos están definidos en los
+                                        <strong>
+                                            <a href="https://cardinalsystems.sharepoint.com/:w:/s/Legal/Ecy7PNHC2y9NqlHbiMnVZg8BsolZO4YcFbjdVd2b-ef8ig?e=EUfeGr" target="_blank" class="text-blue-600 hover:text-blue-800 underline">
+                                                Términos y Condiciones Particulares
+                                            </a>
+                                        </strong>
+                                        de Cardinal Systems.
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <script>
+                    function toggleCollapse(contentId, arrowId) {
+                        const content = document.getElementById(contentId);
+                        const arrow = document.getElementById(arrowId);
+                        if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                            // Colapsar
+                            content.style.maxHeight = '0px';
+                            arrow.style.transform = 'rotate(0deg)';
+                        } else {
+                            // Expandir
+                            content.style.maxHeight = content.scrollHeight + 'px';
+                            arrow.style.transform = 'rotate(180deg)';
+                        }
+                    }
+                </script>
 
                 <section id="kpi-grid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5 mb-8">
                     <div class="kpi-card" data-kpi="total-tickets">
@@ -785,22 +286,22 @@
                         <p class="kpi-value text-amber-600" id="kpi-avg-first-response">0 hrs</p>
                         <p class="kpi-label">T.P. 1ra Respuesta</p>
                     </div>
-					<div class="kpi-card" data-kpi="sla-first-response">
+                    <div class="kpi-card" data-kpi="sla-first-response">
                         <div id="kpi-sla-first-response-container">
-							<p class="kpi-value text-gray-500">-</p>
-							<p class="text-sm font-bold text-gray-500">-</p>
-						</div>
+                            <p class="kpi-value text-gray-500">-</p>
+                            <p class="text-sm font-bold text-gray-500">-</p>
+                        </div>
                         <p class="kpi-label">SLA 1ra Respuesta</p>
                     </div>
-                     <div class="kpi-card" data-kpi="avg-resolution">
+                    <div class="kpi-card" data-kpi="avg-resolution">
                         <p class="kpi-value text-yellow-600" id="kpi-avg-resolution">0 hrs</p>
                         <p class="kpi-label">T.P. Resolución</p>
                     </div>
                     <div class="kpi-card" data-kpi="sla-resolution">
                         <div id="kpi-sla-resolution-container">
-							<p class="kpi-value text-gray-500">-</p>
-							<p class="text-sm font-bold text-gray-500">-</p>
-						</div>
+                            <p class="kpi-value text-gray-500">-</p>
+                            <p class="text-sm font-bold text-gray-500">-</p>
+                        </div>
                         <p class="kpi-label">SLA Resolución</p>
                     </div>
                     <div class="kpi-card" data-kpi="avg-month">
@@ -816,7 +317,11 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v2.25M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             Tickets por Estado
-                            <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                            <div class="zoom-icon-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
                         </h3>
                         <div class="chart-container-inner">
                             <div id="statusChart"></div>
@@ -829,20 +334,28 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.102 3.377 1.912 3.377H19.94c1.81 0 2.773-1.876 1.913-3.377L13.94 2.887c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                             </svg>
                             Tickets por Prioridad
-                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                            <div class="zoom-icon-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
                         </h3>
                         <div class="chart-container-inner">
                             <div id="priorityChart"></div>
                         </div>
                     </div>
-                    
+
                     <div id="request-type-card" class="chart-card" data-chart="requestTypeChart">
                         <h3>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-green-500">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
                             </svg>
                             Tickets por Tipo de Solicitud
-                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                            <div class="zoom-icon-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
                         </h3>
                         <div class="chart-container-inner">
                             <div id="requestTypeChart"></div>
@@ -851,14 +364,18 @@
 
                     <div id="client-type-card" class="chart-card" data-chart="clientTypeChart">
                         <h3>
-                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-purple-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-purple-500">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM12 15.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM6 18.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5z" />
                             </svg>
                             Distribución por Tipo de Cliente
-                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                            <div class="zoom-icon-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
                         </h3>
                         <div class="chart-container-inner">
-                           <div id="clientTypeChart"></div>
+                            <div id="clientTypeChart"></div>
                         </div>
                     </div>
 
@@ -868,10 +385,14 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
                             </svg>
                             Satisfacción del Cliente (CSAT)
-                            <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                            <div class="zoom-icon-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
                         </h3>
                         <div class="chart-container-inner">
-                           <div id="satisfactionChart"></div>
+                            <div id="satisfactionChart"></div>
                         </div>
                     </div>
 
@@ -881,10 +402,14 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c.414 0 .75.336.75.75s-.336.75-.75.75-.75-.336-.75-.75.336-.75.75-.75zm0 0H9.563c-.324 0-.472.402-.18.68l1.72 1.72c.594.594 1.536.657 2.187.119l5.05-4.42" />
                             </svg>
                             Análisis de Sentimiento del Cliente
-                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                            <div class="zoom-icon-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
                         </h3>
                         <div class="chart-container-inner">
-                           <div id="sentimentChart"></div>
+                            <div id="sentimentChart"></div>
                         </div>
                     </div>
 
@@ -894,7 +419,11 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712L12 16.5l-2.121-2.121m4.242 0a2.25 2.25 0 00.75-1.659V7.5m-6.118 4.215a2.25 2.25 0 01-.75-1.659V7.5M12 2.25a.75.75 0 00-.75.75v6.75m-4.5 0a2.25 2.25 0 00-1.659.75L2.25 12l2.121 2.121a2.25 2.25 0 00.75 1.659m0 0V21a.75.75 0 00.75.75h4.5a.75.75 0 00.75-.75V15m-1.5 0l-3.033.033A1.5 1.5 0 019.03 13.5H7.5" />
                             </svg>
                             Tickets por Diagnóstico
-                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                            <div class="zoom-icon-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
                         </h3>
                         <div class="chart-container-inner">
                             <canvas id="diagnosisChart"></canvas>
@@ -907,7 +436,11 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
                             </svg>
                             Tickets por Tipo de Problema
-                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                            <div class="zoom-icon-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
                         </h3>
                         <div class="chart-container-inner">
                             <canvas id="problemTypeChart"></canvas>
@@ -923,27 +456,35 @@
                         </h3>
                         <div id="word-cloud-container"></div>
                     </div>
-                    
+
                     <div id="clients-card" class="chart-card lg:col-span-3" data-chart="topClientsChart">
                         <h3>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-2 text-blue-800">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                             </svg>
                             Top 10 Clientes por Volumen de Tickets
-                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                            <div class="zoom-icon-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
                         </h3>
                         <div class="chart-container-inner h-96">
                             <canvas id="topClientsChart"></canvas>
                         </div>
                     </div>
-                    
+
                     <div id="assignees-card" class="chart-card lg:col-span-3" data-chart="assigneeChart">
                         <h3>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-2 text-sky-500">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.75a3.75 3.75 0 100-7.5 3.75 3.75 0 000 7.5zM18 20.25v2.25m-1.5-3.75h3m-12-1.5H5.625c-.621 0-1.125.504-1.125 1.125v9.75c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18" />
                             </svg>
                             Top 10 Asignados por Carga de Trabajo
-                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                            <div class="zoom-icon-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
                         </h3>
                         <div class="chart-container-inner h-96">
                             <canvas id="assigneeChart"></canvas>
@@ -956,7 +497,11 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9m1.5 1.5L7.5 7.5M4.5 19.5v-4.5m0 4.5h4.5m-4.5 0L9 15m1.5 1.5L7.5 18M19.5 4.5v4.5m0-4.5h-4.5m4.5 0L15 9m1.5 1.5L19.5 7.5M19.5 19.5v-4.5m0 4.5h-4.5m4.5 0L15 15m1.5 1.5L19.5 18" />
                             </svg>
                             Tendencia de Creación de Tickets
-                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                            <div class="zoom-icon-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
                         </h3>
                         <div class="chart-container-inner h-96">
                             <canvas id="trendChart"></canvas>
@@ -974,12 +519,33 @@
                             <div id="heatmap-wrapper" class="h-full">
                                 <div id="heatmap-corner"></div>
                                 <div id="heatmap-hour-labels">
-                                    <div class="heatmap-hour-label">0</div><div class="heatmap-hour-label">1</div><div class="heatmap-hour-label">2</div><div class="heatmap-hour-label">3</div><div class="heatmap-hour-label">4</div><div class="heatmap-hour-label">5</div><div class="heatmap-hour-label">6</div><div class="heatmap-hour-label">7</div><div class="heatmap-hour-label">8</div><div class="heatmap-hour-label">9</div><div class="heatmap-hour-label">10</div><div class="heatmap-hour-label">11</div><div class="heatmap-hour-label">12</div><div class="heatmap-hour-label">13</div><div class="heatmap-hour-label">14</div><div class="heatmap-hour-label">15</div><div class="heatmap-hour-label">16</div><div class="heatmap-hour-label">17</div><div class="heatmap-hour-label">18</div><div class="heatmap-hour-label">19</div><div class="heatmap-hour-label">20</div><div class="heatmap-hour-label">21</div><div class="heatmap-hour-label">22</div><div class="heatmap-hour-label">23</div>
+                                    <div class="heatmap-hour-label">0</div>
+                                    <div class="heatmap-hour-label">1</div>
+                                    <div class="heatmap-hour-label">2</div>
+                                    <div class="heatmap-hour-label">3</div>
+                                    <div class="heatmap-hour-label">4</div>
+                                    <div class="heatmap-hour-label">5</div>
+                                    <div class="heatmap-hour-label">6</div>
+                                    <div class="heatmap-hour-label">7</div>
+                                    <div class="heatmap-hour-label">8</div>
+                                    <div class="heatmap-hour-label">9</div>
+                                    <div class="heatmap-hour-label">10</div>
+                                    <div class="heatmap-hour-label">11</div>
+                                    <div class="heatmap-hour-label">12</div>
+                                    <div class="heatmap-hour-label">13</div>
+                                    <div class="heatmap-hour-label">14</div>
+                                    <div class="heatmap-hour-label">15</div>
+                                    <div class="heatmap-hour-label">16</div>
+                                    <div class="heatmap-hour-label">17</div>
+                                    <div class="heatmap-hour-label">18</div>
+                                    <div class="heatmap-hour-label">19</div>
+                                    <div class="heatmap-hour-label">20</div>
+                                    <div class="heatmap-hour-label">21</div>
+                                    <div class="heatmap-hour-label">22</div>
+                                    <div class="heatmap-hour-label">23</div>
                                 </div>
-                                <div id="heatmap-day-labels">
-                                    </div>
-                                <div id="heatmap-grid">
-                                    </div>
+                                <div id="heatmap-day-labels"></div>
+                                <div id="heatmap-grid"></div>
                             </div>
                         </div>
                     </div>
@@ -990,20 +556,28 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 21.75c-3.75 0-7.5-1.385-9.375-3.66c-.163-.207-.152-.465.009-.672.317-.4.67-.783 1.054-1.133L12 18.75l7.92-.72c.384.35.737.733 1.054 1.133.161.207.172.465.009.672C19.5 20.365 15.75 21.75 12 21.75zm0 0a9.75 9.75 0 007.472-3.242M12 21.75a9.75 9.75 0 01-7.472-3.242m7.472 3.242V21.75" />
                             </svg>
                             Top 10 Clientes por Tipo de Solicitud
-                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                            <div class="zoom-icon-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
                         </h3>
                         <div class="chart-container-inner h-96">
                             <canvas id="clientRequestTypeChart"></canvas>
                         </div>
                     </div>
-                    
+
                     <div id="monthly-comparison-card" class="chart-card lg:col-span-3" data-chart="monthlyComparisonChart">
                         <h3>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-2 text-fuchsia-500">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 20.25h12m-7.5-3.75v3.75m3.75-3.75v3.75M3 13.5l3 3m0 0l3-3m-3 3v-6m1.5 6H12m6-13.5l-3 3m0 0l-3-3m3 3V12" />
                             </svg>
                             Comparación Mensual por Tipo de Solicitud
-                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                            <div class="zoom-icon-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
                         </h3>
                         <div class="chart-container-inner h-96">
                             <canvas id="monthlyComparisonChart"></canvas>
@@ -1016,14 +590,33 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-3.75-.625m3.75.625V3.375" />
                             </svg>
                             Evolución Mensual de Cumplimiento SLA
-                             <div class="zoom-icon-container"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" /></svg></div>
+                            <div class="zoom-icon-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
                         </h3>
                         <div class="chart-container-inner h-96">
                             <div id="monthlySlaChart"></div>
                         </div>
                     </div>
 
-
+                    <div id="topSlowTickets-card" class="chart-card lg:col-span-3" data-chart="topSlowTicketsChart">
+                        <h3>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6 1a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Top 10 Tickets Cerrados con Mayor Tiempo de Resolución
+                            <div class="zoom-icon-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                        </h3>
+                        <div class="chart-container-inner h-96">
+                            <div id="topSlowTicketsChart"></div>
+                        </div>
+                    </div>
                 </section>
             </div>
         </main>
@@ -1032,7 +625,7 @@
     <div id="data-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header" id="modal-header">
-                 <h2 id="modal-title" class="modal-title">Datos de Origen</h2>
+                <h2 id="modal-title" class="modal-title">Datos de Origen</h2>
                 <span id="close-modal-button" class="close-button">&times;</span>
             </div>
             <div id="modal-body-container" class="modal-body-container">
@@ -1050,8 +643,8 @@
 
     <div id="zoom-overlay" class="hidden"></div>
 
-    <script>
-        const _0x3fd8b0=_0x4e06;(function(_0x71d6ae,_0x71f08b){const _0x3cac7b=_0x4e06,_0x3aa24b=_0x71d6ae();while(!![]){try{const _0x1e079c=parseInt(_0x3cac7b(0x231))/0x1*(-parseInt(_0x3cac7b(0x2c3))/0x2)+parseInt(_0x3cac7b(0x257))/0x3+-parseInt(_0x3cac7b(0x206))/0x4*(-parseInt(_0x3cac7b(0x145))/0x5)+-parseInt(_0x3cac7b(0x1f8))/0x6*(parseInt(_0x3cac7b(0x2a6))/0x7)+parseInt(_0x3cac7b(0x285))/0x8*(-parseInt(_0x3cac7b(0x159))/0x9)+-parseInt(_0x3cac7b(0x1e8))/0xa+-parseInt(_0x3cac7b(0x2e8))/0xb*(-parseInt(_0x3cac7b(0x22d))/0xc);if(_0x1e079c===_0x71f08b)break;else _0x3aa24b['push'](_0x3aa24b['shift']());}catch(_0x2e2a49){_0x3aa24b['push'](_0x3aa24b['shift']());}}}(_0x5465,0xc49f1));let allData=[],charts={};function _0x5465(){const _0x309388=['csv-file-input','line','problemTypeChart','Cerrado','clientRequestType','bold','y\x20el','kpi-resolved-tickets','toLocaleDateString','hidden','que','preferencial','solicitud','Tiempo\x20Real\x20(Hrs)','Oct','pero','frtMet','ingreso','getDay','kpi','normal','diagnosisChart','SLA\x201ra\x20Respuesta\x20(%)','Satisfaction\x20rating','Total','sus','problemType','labels','status-filter',':00','timeToResolution','donut','candidato','creación','loading-message','red','getElementById','no\x20carga','Tipo\x20Solicitud','\x20aplicable\x20en\x20el\x20período\x20seleccionado.','0.0','dataset','unassigned-tickets','firstResponseTime','como','dark','configurar','Promedio:\x20','bottom','ai-analysis-section','created','offsetTop','heatmap-day-label','trtApplicable','result','Error\x20al\x20leer\x20el\x20archivo.\x20Asegúrate\x20de\x20que\x20sea\x20un\x20archivo\x20CSV\x20válido.','Resolved','las','warn','<p\x20class=\x22text-gray-500\x22>No\x20hay\x20datos\x20suficientes\x20para\x20generar\x20la\x20Nube\x20de\x20Palabras.</p>','error',':\x0a\x0a','style','</h4>','duplicado','Detalle:\x20Tickets\x20para\x20','%</strong>\x20(resultado:\x20<strong>','toFixed','long','modal-title','Distribución\x20de\x20Calificaciones','onmousemove','classList','Estado','display','statusChart','className','forEach','getHours','numeric','.chart-card','Issue\x20key','Issue\x20Key','purple','getMonth','assignee-filter','white','</strong>','number','Priority','satisfaction','Todos\x20los\x20Tipos\x20de\x20Cliente','3\x20Estrellas','Fórmula:\x20(Tickets\x20Dentro\x20de\x20SLA\x20/\x20Tickets\x20Totales\x20con\x20SLA)\x20*\x20100.\x0a\x0a','Created','%</strong>,\x20con\x20un\x20tiempo\x20promedio\x20para\x20resolver\x20cada\x20ticket\x20de\x20<strong>','initial-message','más','#EA580C','kpi-avg-day','9034890NTJdaa','#000000','diagnosis','Neutral','cliente','actualización','\x20tickets','assignee','expirada','selectedIndex','map','Detalle:\x20Tickets\x20Abiertos','Negativo','values','Parsing\x20CSV\x20data...','value','120hQwURC','#475569','Detalle\x20de\x20Tickets','mas','SLA\x20Resolución\x20(%)','los','empleado','\x22\x20class=\x22px-6\x20py-4\x20text-center\x20text-gray-500\x22>No\x20hay\x20datos.</td></tr>','topClients','Tickets\x20de\x20','option','#fff','requestTypeChart','Custom\x20field\x20(Problem\x20Type\x20(MDA))','33592VZPMdr','is-zoomed','sla-resolution','#4F46E5','clientY','flat','requestType','satisfactionChart','Título','short','Resuelto','client-type-filter','length','Cómo\x20se\x20calcula\x20el\x20SLA\x20','no\x20se\x20ven','join','gray','data','add','Fecha\x20Creación','este','</tr>','<li><strong>Rendimiento\x20General:</strong>\x20Se\x20alcanzó\x20una\x20tasa\x20de\x20resolución\x20del\x20<strong>','clientAndRequestType','Todos\x20los\x20Estados','column','2.\x20Estado\x20(Cumplido/Vencido):\x0a','.zoom-icon-container','problema','para','<ul>','clientStack','random','#059669','push','Summary','toISOString','<li><strong>Voz\x20del\x20Cliente:</strong>\x20Las\x20palabras\x20que\x20más\x20resonaron\x20en\x20los\x20resúmenes\x20de\x20los\x20tickets\x20fueron:\x20','Nº\x20de\x20Tickets','16776696gKapiD','offsetLeft','innerHTML','mientras\x20que\x20para\x20la\x20<strong>Resolución</strong>\x20final\x20se\x20logró\x20un\x20<strong>','4biRbqD','dayIndex','para\x20que','Detalle:\x20Tickets\x20Totales','slate',':00.','Detalle\x20de\x20Datos','invalido','onmousedown','Jueves','rgba(220,\x2038,\x2038,\x200.75)','en\x20el','createElement','total-tickets','no\x20avanza','Prioridad','Detalle:\x20Tickets\x20Resueltos','blue','cambio','Tickets','summary','habilitación','toLocaleString','Canceled','modificación','N/A','Después\x20de\x20procesar,\x20no\x20se\x20encontraron\x20datos\x20válidos.\x20Revisa\x20las\x20cabeceras\x20de\x20columna\x20y\x20el\x20formato\x20de\x20las\x20fechas\x20(\x27Created\x27\x20en\x20particular).','</strong>,\x20específicamente\x20en\x20la\x20franja\x20horaria\x20de\x20las\x20<strong>','\x20a\x20las\x20','.modal-content','log','no\x20se\x20pueden','#E2E8F0','Positivo','El\x20contexto\x20para\x20el\x20gráfico\x20es\x20nulo.\x20Verifique\x20que\x20el\x20elemento\x20HTML\x20con\x20el\x20ID\x20\x27','Todos\x20los\x20Diagnósticos','sentimentChart','#65A30D','2591025QUoYLz','title','frt','target','repeat(','unassigned','kpi-avg-first-response','</strong>\x22,\x20constituyendo\x20aproximadamente\x20el\x20<strong>','block','con','gridTemplateRows','contains','Dic','UTF-8','.filter-select:not(#month-filter)','kpi-total-tickets','kpi-sla-first-response-container','reverse','.\x20Estos\x20términos\x20son\x20clave\x20para\x20entender\x20las\x20preocupaciones\x20principales.</li>','Jun','visualización\x20correcta','</ul>','monthAndRequestType','getFullYear','bar','[unknown]','https://cardinalecm.atlassian.net/browse/','sin','%</strong>\x20del\x20total\x20de\x20incidentes.</li>','displayName','<strong>Primera\x20Respuesta</strong>\x20alcanzó\x20un\x20<strong>','de\x20Resolución','text-red-600','clear-filters-btn','#satisfactionChart','de\x20Primera\x20Respuesta','function','trend','files','#F8FAFC','center','sort','word-cloud-container','textContent','</p>','#CA8A04','8XyhMjk','vencido','del','firma\x20exitosa','<p\x20class=\x22mt-2\x20text-sm\x20text-gray-500\x20italic\x22>Este\x20es\x20un\x20análisis\x20autogenerado.\x20Para\x20un\x20detalle\x20más\x20profundo,\x20explore\x20los\x20gráficos\x20interactivos.</p>','clientX','topAssignees','kpi-sla-resolution-container','presentación','formulario','Detalle\x20de\x20Tickets:\x20SLA\x20de\x20Resolución','canvasId','<th\x20class=\x22px-6\x20py-3\x20text-left\x20text-xs\x20font-medium\x20text-gray-500\x20uppercase\x20tracking-wider\x22>','Tickets\x20con\x20Tipo\x20de\x20Problema:\x20\x22','#0D9488','category','2\x20Estrellas','kpi-unassigned-tickets','label','esta','origin','Tickets\x20con\x20Prioridad:\x20\x22','heatmap-day-labels','remove','green','\x20con\x20Tipo:\x20\x22','cancelar','priorityChart','#D97706','from','index','ai-analysis-content','click','317184WLRsKN','end','May','dashboard-grid','revisión','Límite\x20SLA\x20(Hrs)','proceso','%).</li>','dashboard-content','1.\x20Porcentaje\x20de\x20Cumplimiento\x20(%):\x0a','Sábado','top','sortable-ghost','trim','gradient','instrucciones','querySelectorAll','clientType','<option\x20value=\x22all\x22>Filtro\x20por\x20Mes</option>','includes','#C026D3','Estado\x20SLA','Closed','pie','querySelector','\x20Estrellas','No\x20Asignado','.kpi-card','Custom\x20field\x20(Diagnosis\x20(MDA))','259526goLXcM','Domingo','left','sin\x20asignar','readAsText','nos','onclick','reduce','sentiment','documentación','Cumplido','onload','1\x20Estrella','Todos\x20los\x20Clientes','Total\x20Tickets','month-filter','50%','globals','kpi-avg-resolution','Inter','#E11D48','size','Cancelled','monthlyComparison',',\x201fr)','indigo','priority','<option\x20value=\x22all\x22>','Tickets\x20de\x20\x22','Custom\x20field\x20(Time\x20to\x20resolution)','</option>','Sep','\x20horas</strong>.</li>','\x20hrs','entries','backgroundColor','<tr>','11ZnMvCd','<li><strong>Análisis\x20de\x20Sentimiento:</strong>\x20El\x20análisis\x20de\x20las\x20interacciones\x20indica\x20que\x20el\x20sentimiento\x20predominante\x20fue\x20<strong>','substring','rgba(234,\x2088,\x2012,\x200.3)','Vencido','</strong>),\x20','Preferencial','assigneeChart','Sin\x20Asignar','</tbody></table></div>','monthlySlaChart','onmouseup','dataPointIndex','Martes','topClientsChart','Tickets\x20Creados\x20el\x20','trt','\x22\x20con\x20Tipo:\x20\x22','urgente','subio\x20mal','notificación','closest','slice','datasets','liquidación','Jul','\x20Estrella(s)','fill','sistema','fallo','destroy','request-type-filter','demora','floor','filter','asignación','16px','<a\x20href=\x22','sky','div','Detalle\x20de\x20Tickets:\x20SLA\x20de\x20Primera\x20Respuesta','client','client-filter','traba','</td>','day','issue','Custom\x20field\x20(OU\x20Grupo\x20(MDA))','<p\x20class=\x22kpi-value\x20','una','change','Done','Error\x20reading\x20file:','CSV\x20file\x20loaded.\x20Initiating\x20dashboard.','#2563EB','text','close-modal-button','Tickets\x20con\x20Estado:\x20\x22','wordCloud','right','<td\x20class=\x22px-6\x20py-4\x20whitespace-nowrap\x20text-sm\x20text-gray-700\x22>','de\x20la','5\x20Estrellas','ai-analysis-loading','#DC2626','#64748B','render','hour','es-ES','dateSpecific','addEventListener','%.\x20De\x20lo\x20contrario,\x20es\x20\x27Vencido\x27.','diagnosis-filter','por',':00\x20-\x20','horizontal','#requestTypeChart','yellow','</th>','resolutionTime','event','heatmap-grid','time','none','trendChart','problem-type-filter','un\x20de','slaStatus','695BtNpRr','Todos\x20los\x20Tipos\x20de\x20Solicitud','Tickets\x20con\x20Sentimiento:\x20\x22','incidente','timeToFirstResponse','monthlyComparisonChart','no\x20se\x20firma','appendChild','innerText','split','cambio\x20exitoso','trtMet','Feb','clientRequestTypeChart','no\x20se\x20visualiza','<option\x20value=\x22all\x22>Todos\x20los\x20Periodos</option>','sobre','indexOf','Abr','<tr><td\x20colspan=\x22','2654217EUEqEE','Custom\x20field\x20(Tipo\x20Cliente\x20(MDA))','les','<p>No\x20se\x20encontraron\x20datos\x20para\x20el\x20período\x20seleccionado.\x20No\x20es\x20posible\x20generar\x20un\x20análisis.</p>','status','month','Unassigned','Ago','60%','orange','all','Tickets\x20Asignados\x20a:\x20\x22','clientTypeChart','Lunes','sortable-chosen','toLowerCase','mis','Todos\x20los\x20Tipos\x20de\x20Problema','frtApplicable','<li><strong>Pico\x20de\x20Actividad:</strong>\x20La\x20mayor\x20concentración\x20de\x20tickets\x20se\x20registró\x20los\x20días\x20<strong>','currentTarget','falla',':00\x20y\x20','string','Cumplimiento\x20(%)','match','keys','El\x20archivo\x20CSV\x20está\x20vacío\x20o\x20no\x20se\x20pudo\x20parsear\x20correctamente.\x20Por\x20favor,\x20revisa\x20el\x20formato\x20y\x20asegúrate\x20que\x20no\x20esté\x20vacío.','Detalle:\x20Tickets\x20sin\x20Asignar','#sentimentChart','replace','getTime','ticket','No\x20especificado','actualTime','#0891B2','Detalle:\x20Tickets\x20con\x20','Status','Cantidad\x20de\x20Votos','priority-filter','key','options','<h4>Análisis\x20para:\x20'];_0x5465=function(){return _0x309388;};return _0x5465();}const FONT_COLOR=_0x3fd8b0(0x1f9),GRID_COLOR=_0x3fd8b0(0x251),PALETTE={'indigo':_0x3fd8b0(0x209),'blue':_0x3fd8b0(0x31e),'cyan':_0x3fd8b0(0x17c),'teal':_0x3fd8b0(0x293),'emerald':_0x3fd8b0(0x227),'green':'#16A34A','lime':_0x3fd8b0(0x256),'yellow':_0x3fd8b0(0x284),'amber':_0x3fd8b0(0x2a1),'orange':_0x3fd8b0(0x1e6),'red':_0x3fd8b0(0x328),'purple':'#7C3AED','rose':_0x3fd8b0(0x2d7),'fuchsia':_0x3fd8b0(0x2ba),'slate':_0x3fd8b0(0x329),'gray':'#6B7280'},CLIENT_TYPE_FIELD=_0x3fd8b0(0x2b7),CLIENT_TYPE_CONFIG={'preferencial':_0x3fd8b0(0x2ee),'normal':'Normal','unassigned':_0x3fd8b0(0x2f0)},SATISFACTION_FIELD_NAME=_0x3fd8b0(0x19b),MONTH_NAMES=['Ene',_0x3fd8b0(0x151),'Mar',_0x3fd8b0(0x157),_0x3fd8b0(0x2a8),_0x3fd8b0(0x26a),_0x3fd8b0(0x301),_0x3fd8b0(0x160),_0x3fd8b0(0x2e2),_0x3fd8b0(0x192),'Nov',_0x3fd8b0(0x263)],DAY_NAMES=[_0x3fd8b0(0x2c4),_0x3fd8b0(0x166),_0x3fd8b0(0x2f5),'Miércoles',_0x3fd8b0(0x23a),'Viernes',_0x3fd8b0(0x2b0)],SLA_MATRIX={'highest':{'timeToFirstResponse':0x1,'timeToResolution':0x4},'high':{'timeToFirstResponse':0x3,'timeToResolution':0xc},'medium':{'timeToFirstResponse':0x6,'timeToResolution':0x12},'low':{'timeToFirstResponse':0x8,'timeToResolution':0x48},'lowest':{'timeToFirstResponse':0x10,'timeToResolution':0x6c}},SLA_COMPLIANCE_THRESHOLD=0x5a,COMMON_TABLE_HEADERS=[{'key':_0x3fd8b0(0x316),'displayName':_0x3fd8b0(0x1d6)},{'key':_0x3fd8b0(0x245),'displayName':_0x3fd8b0(0x20e)},{'key':_0x3fd8b0(0x2dd),'displayName':_0x3fd8b0(0x240)},{'key':_0x3fd8b0(0x15d),'displayName':_0x3fd8b0(0x1cd)},{'key':_0x3fd8b0(0x1ef),'displayName':'Asignado'},{'key':_0x3fd8b0(0x311),'displayName':'Cliente'},{'key':_0x3fd8b0(0x20c),'displayName':_0x3fd8b0(0x1aa)},{'key':'created','displayName':_0x3fd8b0(0x219)}],SLA_TABLE_HEADERS=[{'key':_0x3fd8b0(0x316),'displayName':'Issue\x20Key'},{'key':'summary','displayName':_0x3fd8b0(0x20e)},{'key':_0x3fd8b0(0x2dd),'displayName':_0x3fd8b0(0x240)},{'key':_0x3fd8b0(0x17b),'displayName':_0x3fd8b0(0x191)},{'key':'slaLimit','displayName':_0x3fd8b0(0x2ab)},{'key':_0x3fd8b0(0x144),'displayName':_0x3fd8b0(0x2bb)}];Chart['register'](ChartDataLabels,ChartZoom),document['getElementById'](_0x3fd8b0(0x184))['addEventListener'](_0x3fd8b0(0x31a),handleFileSelect,![]),document[_0x3fd8b0(0x1a8)](_0x3fd8b0(0x278))[_0x3fd8b0(0x133)]('click',clearAllFilters);function parseSatisfactionRating(_0x4b9fe1){const _0xe05da9=_0x3fd8b0;if(_0x4b9fe1===null||_0x4b9fe1===undefined)return 0x0;const _0x4dcc60=String(_0x4b9fe1);if(!isNaN(_0x4dcc60)&&_0x4dcc60[_0xe05da9(0x2b3)]()!=='')return parseInt(_0x4dcc60,0xa);if(typeof _0x4dcc60==='string'){const _0x438477=_0x4dcc60[_0xe05da9(0x172)](/\d/);if(_0x438477)return parseInt(_0x438477[0x0],0xa);const _0x216c84=_0x4dcc60[_0xe05da9(0x172)](/★/g);if(_0x216c84)return _0x216c84[_0xe05da9(0x212)];}return 0x0;}function _0x4e06(_0x1b3c1f,_0x11f7c0){const _0x54656e=_0x5465();return _0x4e06=function(_0x4e06b2,_0x497f8b){_0x4e06b2=_0x4e06b2-0x12f;let _0x1961b2=_0x54656e[_0x4e06b2];return _0x1961b2;},_0x4e06(_0x1b3c1f,_0x11f7c0);}async function handleFileSelect(_0x5a6a5c){const _0x28d429=_0x3fd8b0,_0x437c2a=_0x5a6a5c['target'][_0x28d429(0x27d)][0x0];if(!_0x437c2a){console[_0x28d429(0x24f)]('No\x20file\x20selected.');return;}const _0x4bbd5c=new FileReader();_0x4bbd5c[_0x28d429(0x2ce)]=async function(_0x4a8581){const _0x5c62db=_0x28d429,_0x3109d1=_0x4a8581[_0x5c62db(0x25a)][_0x5c62db(0x1ba)];console[_0x5c62db(0x24f)](_0x5c62db(0x31d)),await initializeDashboard(_0x3109d1);},_0x4bbd5c['onerror']=_0x301e07=>{const _0x1d74e8=_0x28d429;console[_0x1d74e8(0x1c0)](_0x1d74e8(0x31c),_0x301e07),alert(_0x1d74e8(0x1bb));},_0x4bbd5c[_0x28d429(0x2c7)](_0x437c2a,_0x28d429(0x264));}async function initializeDashboard(_0x50d35c){const _0x167578=_0x3fd8b0,_0x14ff2f=document[_0x167578(0x1a8)](_0x167578(0x1a6));document[_0x167578(0x1a8)](_0x167578(0x1e4))[_0x167578(0x1cc)][_0x167578(0x29c)](_0x167578(0x18d)),_0x14ff2f[_0x167578(0x1cc)][_0x167578(0x29c)](_0x167578(0x18d)),console['log'](_0x167578(0x1f6));const _0x6ac607=parseCSV(_0x50d35c);if(_0x6ac607[_0x167578(0x212)]===0x0||Object['keys'](_0x6ac607[0x0])['length']===0x0){alert(_0x167578(0x174)),_0x14ff2f['classList'][_0x167578(0x218)](_0x167578(0x18d)),document['getElementById']('initial-message')[_0x167578(0x1cc)][_0x167578(0x29c)](_0x167578(0x18d)),document[_0x167578(0x1a8)](_0x167578(0x2ae))[_0x167578(0x1cc)]['add'](_0x167578(0x18d));return;}allData=_0x6ac607[_0x167578(0x1f2)](_0x35c541=>{const _0x26f005=_0x167578;let _0x44c510;const _0xfbaafb=_0xe159d4=>{const _0x2d0a87=_0x4e06;if(!_0xe159d4||typeof _0xe159d4!=='string')return null;let _0x1603a5=_0xe159d4[_0x2d0a87(0x172)](/(\d{1,2})\/(\d{1,2})\/(\d{4})\s(\d{1,2}):(\d{1,2})/);if(_0x1603a5)return new Date(_0x1603a5[0x3],_0x1603a5[0x2]-0x1,_0x1603a5[0x1],_0x1603a5[0x4],_0x1603a5[0x5]);_0x1603a5=_0xe159d4['match'](/(\d{4})-(\d{1,2})-(\d{1,2})\s(\d{1,2}):(\d{1,2}):(\d{1,2})/);if(_0x1603a5)return new Date(_0x1603a5[0x1],_0x1603a5[0x2]-0x1,_0x1603a5[0x3],_0x1603a5[0x4],_0x1603a5[0x5],_0x1603a5[0x6]);try{const _0x5413c6=new Date(_0xe159d4);if(!isNaN(_0x5413c6['getTime']()))return _0x5413c6;}catch(_0x14ca9d){}return null;};_0x44c510=_0xfbaafb(_0x35c541[_0x26f005(0x1e2)]);if(!_0x44c510||isNaN(_0x44c510[_0x26f005(0x178)]()))return null;return{'issue':_0x35c541[_0x26f005(0x1d5)]||'N/A','priority':_0x35c541[_0x26f005(0x1dd)]||_0x26f005(0x24a),'status':_0x35c541[_0x26f005(0x17e)]||_0x26f005(0x24a),'assignee':_0x35c541['Assignee']||_0x26f005(0x15f),'client':_0x35c541[_0x26f005(0x317)]||_0x26f005(0x2c0),'diagnosis':_0x35c541[_0x26f005(0x2c2)]||_0x26f005(0x17a),'requestType':_0x35c541['Custom\x20field\x20(Request\x20Type)']||_0x26f005(0x17a),'problemType':_0x35c541[_0x26f005(0x205)]||_0x26f005(0x24a),'clientType':_0x35c541[_0x26f005(0x15a)]||'N/A','satisfaction':parseSatisfactionRating(_0x35c541[SATISFACTION_FIELD_NAME]),'summary':_0x35c541[_0x26f005(0x229)]||'','created':_0x44c510,'resolutionTime':hmsToHours(_0x35c541[_0x26f005(0x2e0)]),'firstResponseTime':hmsToHours(_0x35c541['Custom\x20field\x20(Time\x20to\x20first\x20response)'])};})[_0x167578(0x30a)](_0x2a33f5=>_0x2a33f5!==null);if(allData['length']===0x0){alert(_0x167578(0x24b)),_0x14ff2f['classList'][_0x167578(0x218)](_0x167578(0x18d)),document[_0x167578(0x1a8)](_0x167578(0x1e4))[_0x167578(0x1cc)][_0x167578(0x29c)](_0x167578(0x18d)),document[_0x167578(0x1a8)](_0x167578(0x2ae))[_0x167578(0x1cc)]['add']('hidden');return;}await simulateSentimentAnalysis(allData),_0x14ff2f[_0x167578(0x1cc)][_0x167578(0x218)](_0x167578(0x18d)),document[_0x167578(0x1a8)](_0x167578(0x1e4))[_0x167578(0x1cc)][_0x167578(0x218)](_0x167578(0x18d)),document[_0x167578(0x1a8)](_0x167578(0x2ae))[_0x167578(0x1cc)]['remove']('hidden'),populateFilters(),updateDashboard(getFilteredData()),setupDrilldown(),setupKpiCardClickHandlers(),makeModalDraggable(),setupChartZoom(),await triggerAIAnalysis();}async function simulateSentimentAnalysis(_0x57874b){const _0x2517e9=_0x3fd8b0,_0x1c673d=[_0x2517e9(0x249),_0x2517e9(0x30b),_0x2517e9(0x1a5),'descarga',_0x2517e9(0x288),_0x2517e9(0x2b5),_0x2517e9(0x1ed),'configuración',_0x2517e9(0x14f),_0x2517e9(0x246),_0x2517e9(0x28d),_0x2517e9(0x26b)],_0xc27548=['error',_0x2517e9(0x2fa),'inconveniente',_0x2517e9(0x153),_0x2517e9(0x1a9),'no\x20puedo',_0x2517e9(0x222),_0x2517e9(0x148),'no\x20aparece',_0x2517e9(0x286),_0x2517e9(0x1c4),'incompleto',_0x2517e9(0x14b),'no\x20llega',_0x2517e9(0x1f0),_0x2517e9(0x29f),_0x2517e9(0x305),_0x2517e9(0x313),_0x2517e9(0x308),_0x2517e9(0x2fb),_0x2517e9(0x23f),'token',_0x2517e9(0x238),_0x2517e9(0x16e),_0x2517e9(0x214),_0x2517e9(0x250),_0x2517e9(0x153)],_0x1bbecd=[_0x2517e9(0x243),_0x2517e9(0x190),_0x2517e9(0x2cc),_0x2517e9(0x28e),_0x2517e9(0x300),_0x2517e9(0x2fc),_0x2517e9(0x1a4),_0x2517e9(0x1fe),'certificado',_0x2517e9(0x2ac),_0x2517e9(0x2aa),_0x2517e9(0x195),_0x2517e9(0x1ed),_0x2517e9(0x1b2)];for(let _0x196a1d=0x0;_0x196a1d<_0x57874b['length'];_0x196a1d++){const _0x341990=(_0x57874b[_0x196a1d][_0x2517e9(0x245)]||'')['toLowerCase'](),_0x1c54db=_0x1a5c45=>_0x1a5c45['some'](_0x520b48=>_0x341990[_0x2517e9(0x2b9)](_0x520b48));if(_0x1c54db(_0xc27548))_0x57874b[_0x196a1d][_0x2517e9(0x2cb)]='Negativo';else{if(_0x1c54db(_0x1c673d))_0x57874b[_0x196a1d][_0x2517e9(0x2cb)]=_0x2517e9(0x252);else{if(_0x1c54db(_0x1bbecd))_0x57874b[_0x196a1d]['sentiment']=_0x2517e9(0x1eb);else _0x57874b[_0x196a1d]['sentiment']=_0x2517e9(0x1eb);}}}}function updateDashboard(_0x557ae2){renderKPIs(_0x557ae2),renderSLAIndicators(_0x557ae2),renderCharts(_0x557ae2);}function parseCSV(_0x1242a9){const _0x24dc76=_0x3fd8b0,_0x2ac972=_0x1242a9[_0x24dc76(0x2b3)]()['split']('\x0a');if(_0x2ac972[_0x24dc76(0x212)]===0x0)return[];let _0x23447e=(_0x2ac972[0x0][_0x24dc76(0x172)](/;/g)||[])[_0x24dc76(0x212)]>(_0x2ac972[0x0][_0x24dc76(0x172)](/,/g)||[])[_0x24dc76(0x212)]?';':',';const _0x2690d6=_0x1587fc=>{const _0x30cf4b=_0x24dc76,_0x18a365=[];let _0xdf1b68=![],_0x54506a='';for(let _0x3fa701=0x0;_0x3fa701<_0x1587fc[_0x30cf4b(0x212)];_0x3fa701++){const _0x4d9a36=_0x1587fc[_0x3fa701];if(_0x4d9a36==='\x22')_0xdf1b68=!_0xdf1b68;else{if(_0x4d9a36===_0x23447e&&!_0xdf1b68)_0x18a365[_0x30cf4b(0x228)](_0x54506a[_0x30cf4b(0x2b3)]()),_0x54506a='';else _0x54506a+=_0x4d9a36;}}return _0x18a365[_0x30cf4b(0x228)](_0x54506a[_0x30cf4b(0x2b3)]()),_0x18a365[_0x30cf4b(0x1f2)](_0x3eed69=>_0x3eed69['replace'](/^"|"$/g,''));},_0x289fd5=_0x2690d6(_0x2ac972[0x0]);return _0x2ac972['slice'](0x1)[_0x24dc76(0x1f2)](_0x435d5a=>{const _0x5bbe56=_0x24dc76,_0x53716e=_0x2690d6(_0x435d5a);let _0x438b43={};return _0x289fd5[_0x5bbe56(0x1d1)]((_0x45f88e,_0x1ae729)=>{_0x438b43[_0x45f88e]=_0x53716e[_0x1ae729]!==undefined?_0x53716e[_0x1ae729]:'';}),_0x438b43;});}function hmsToHours(_0xbd410a){const _0x201315=_0x3fd8b0;if(!_0xbd410a||typeof _0xbd410a!==_0x201315(0x170))return 0x0;_0xbd410a=_0xbd410a[_0x201315(0x2b3)]()['toLowerCase']();const _0x336edf=_0xbd410a[_0x201315(0x172)](/(\d+)d/),_0x421abd=_0xbd410a[_0x201315(0x172)](/(\d+)h/),_0x294115=_0xbd410a[_0x201315(0x172)](/(\d+)m/);let _0x38e2c9=0x0;if(_0x336edf)_0x38e2c9+=parseInt(_0x336edf[0x1])*0x18;if(_0x421abd)_0x38e2c9+=parseInt(_0x421abd[0x1]);if(_0x294115)_0x38e2c9+=parseInt(_0x294115[0x1])/0x3c;if(_0x38e2c9>0x0)return parseFloat(_0x38e2c9[_0x201315(0x1c7)](0x2));const _0x26363d=_0xbd410a['split'](':');if(_0x26363d['length']>=0x2){const _0x3742e5=parseInt(_0x26363d[0x0],0xa)||0x0,_0x5edf76=parseInt(_0x26363d[0x1],0xa)||0x0;return parseFloat((_0x3742e5+_0x5edf76/0x3c)['toFixed'](0x2));}return 0x0;}function populateFilters(){const _0x1b7d3e=_0x3fd8b0;populateMonthFilter(),populateUniqueFilter(_0x1b7d3e(0x1d9),'assignee','Todos\x20los\x20Asignados'),populateUniqueFilter(_0x1b7d3e(0x312),_0x1b7d3e(0x311),_0x1b7d3e(0x2d0)),populateUniqueFilter(_0x1b7d3e(0x180),_0x1b7d3e(0x2dd),'Todas\x20las\x20Prioridades'),populateUniqueFilter(_0x1b7d3e(0x1a0),_0x1b7d3e(0x15d),_0x1b7d3e(0x21e)),populateUniqueFilter(_0x1b7d3e(0x307),_0x1b7d3e(0x20c),_0x1b7d3e(0x146)),populateUniqueFilter(_0x1b7d3e(0x135),_0x1b7d3e(0x1ea),_0x1b7d3e(0x254)),populateUniqueFilter(_0x1b7d3e(0x142),_0x1b7d3e(0x19e),_0x1b7d3e(0x16a)),populateUniqueFilter('client-type-filter',_0x1b7d3e(0x2b7),_0x1b7d3e(0x1df)),document[_0x1b7d3e(0x1a8)](_0x1b7d3e(0x2d2))[_0x1b7d3e(0x133)](_0x1b7d3e(0x31a),handleMonthFilterChange),document[_0x1b7d3e(0x2b6)](_0x1b7d3e(0x265))[_0x1b7d3e(0x1d1)](_0x1c6969=>{const _0x57b870=_0x1b7d3e;_0x1c6969['addEventListener'](_0x57b870(0x31a),()=>updateDashboard(getFilteredData()));});}async function handleMonthFilterChange(){updateDashboard(getFilteredData()),await triggerAIAnalysis();}async function clearAllFilters(){const _0x35ff6c=_0x3fd8b0;if(allData[_0x35ff6c(0x212)]===0x0)return;document[_0x35ff6c(0x2b6)]('.filter-select')['forEach'](_0x264889=>{const _0x2cb429=_0x35ff6c;_0x264889[_0x2cb429(0x1f7)]='all';}),updateDashboard(getFilteredData()),await triggerAIAnalysis();}function populateMonthFilter(){const _0x18426d=_0x3fd8b0,_0x5d1475=document[_0x18426d(0x1a8)](_0x18426d(0x2d2));_0x5d1475['innerHTML']='';if(!allData||allData[_0x18426d(0x212)]===0x0){_0x5d1475[_0x18426d(0x22f)]=_0x18426d(0x2b8);return;}const _0x4ea005=new Set(allData['map'](_0x18dffb=>{const _0x5bb2be=_0x18426d;return _0x18dffb[_0x5bb2be(0x1b6)][_0x5bb2be(0x26e)]()+'-'+_0x18dffb[_0x5bb2be(0x1b6)][_0x5bb2be(0x1d8)]();}));_0x5d1475[_0x18426d(0x22f)]=_0x18426d(0x154),Array[_0x18426d(0x2a2)](_0x4ea005)[_0x18426d(0x280)]((_0x3f745e,_0x2f03e3)=>{const _0x2b8d91=_0x18426d,[_0x3357a1,_0x246ce9]=_0x3f745e[_0x2b8d91(0x14e)]('-')[_0x2b8d91(0x1f2)](Number),[_0x53f189,_0x50ce19]=_0x2f03e3['split']('-')[_0x2b8d91(0x1f2)](Number);return _0x53f189-_0x3357a1||_0x50ce19-_0x246ce9;})[_0x18426d(0x1d1)](_0x553fa7=>{const _0x45d70f=_0x18426d,[_0x4bb202,_0xa4bf37]=_0x553fa7[_0x45d70f(0x14e)]('-'),_0x1911e9=document[_0x45d70f(0x23d)]('option');_0x1911e9[_0x45d70f(0x1f7)]=_0x553fa7,_0x1911e9[_0x45d70f(0x282)]=MONTH_NAMES[parseInt(_0xa4bf37)]+'\x20'+_0x4bb202,_0x5d1475[_0x45d70f(0x14c)](_0x1911e9);});}function populateUniqueFilter(_0x27d586,_0x4cdd68,_0x58559f){const _0x15ed06=_0x3fd8b0,_0x5f3f94=document[_0x15ed06(0x1a8)](_0x27d586);if(!_0x5f3f94)return;_0x5f3f94[_0x15ed06(0x22f)]=_0x15ed06(0x2de)+_0x58559f+_0x15ed06(0x2e1);if(!allData||allData[_0x15ed06(0x212)]===0x0)return;const _0x3895a2=new Set(allData['map'](_0x241ebb=>_0x241ebb[_0x4cdd68])[_0x15ed06(0x30a)](_0x5a8572=>_0x5a8572&&_0x5a8572!==_0x15ed06(0x24a)&&_0x5a8572!==_0x15ed06(0x2c0)&&_0x5a8572!==_0x15ed06(0x17a)));Array[_0x15ed06(0x2a2)](_0x3895a2)[_0x15ed06(0x280)]()[_0x15ed06(0x1d1)](_0x346d74=>{const _0x2a7bb0=_0x15ed06,_0x35c25a=document[_0x2a7bb0(0x23d)](_0x2a7bb0(0x202));_0x35c25a[_0x2a7bb0(0x1f7)]=_0x346d74,_0x35c25a[_0x2a7bb0(0x282)]=_0x346d74,_0x5f3f94[_0x2a7bb0(0x14c)](_0x35c25a);});}function getFilteredData(){const _0x303a39=_0x3fd8b0;let _0x125183=allData;const _0x2633e9={'month':document[_0x303a39(0x1a8)]('month-filter')['value'],'assignee':document[_0x303a39(0x1a8)]('assignee-filter')['value'],'client':document[_0x303a39(0x1a8)](_0x303a39(0x312))['value'],'priority':document['getElementById'](_0x303a39(0x180))[_0x303a39(0x1f7)],'status':document[_0x303a39(0x1a8)](_0x303a39(0x1a0))[_0x303a39(0x1f7)],'requestType':document['getElementById']('request-type-filter')['value'],'diagnosis':document[_0x303a39(0x1a8)](_0x303a39(0x135))[_0x303a39(0x1f7)],'problemType':document[_0x303a39(0x1a8)]('problem-type-filter')[_0x303a39(0x1f7)],'clientType':document[_0x303a39(0x1a8)](_0x303a39(0x211))['value']};if(_0x2633e9[_0x303a39(0x15e)]!==_0x303a39(0x163)){const [_0x472d6d,_0x84dcdb]=_0x2633e9[_0x303a39(0x15e)]['split']('-')['map'](Number);_0x125183=_0x125183[_0x303a39(0x30a)](_0x140637=>{const _0x12fe71=_0x303a39;return _0x140637[_0x12fe71(0x1b6)][_0x12fe71(0x26e)]()===_0x472d6d&&_0x140637[_0x12fe71(0x1b6)][_0x12fe71(0x1d8)]()===_0x84dcdb;});}if(_0x2633e9[_0x303a39(0x1ef)]!==_0x303a39(0x163))_0x125183=_0x125183['filter'](_0x4aa29a=>_0x4aa29a['assignee']===_0x2633e9[_0x303a39(0x1ef)]);if(_0x2633e9[_0x303a39(0x311)]!=='all')_0x125183=_0x125183['filter'](_0x96d56d=>_0x96d56d[_0x303a39(0x311)]===_0x2633e9['client']);if(_0x2633e9['priority']!==_0x303a39(0x163))_0x125183=_0x125183[_0x303a39(0x30a)](_0x328614=>_0x328614['priority']===_0x2633e9[_0x303a39(0x2dd)]);if(_0x2633e9[_0x303a39(0x15d)]!==_0x303a39(0x163))_0x125183=_0x125183[_0x303a39(0x30a)](_0x1d4f79=>_0x1d4f79[_0x303a39(0x15d)]===_0x2633e9[_0x303a39(0x15d)]);if(_0x2633e9[_0x303a39(0x20c)]!==_0x303a39(0x163))_0x125183=_0x125183['filter'](_0x34ff55=>_0x34ff55[_0x303a39(0x20c)]===_0x2633e9[_0x303a39(0x20c)]);if(_0x2633e9[_0x303a39(0x1ea)]!=='all')_0x125183=_0x125183[_0x303a39(0x30a)](_0x514db7=>_0x514db7['diagnosis']===_0x2633e9[_0x303a39(0x1ea)]);if(_0x2633e9[_0x303a39(0x19e)]!==_0x303a39(0x163))_0x125183=_0x125183[_0x303a39(0x30a)](_0x5042e6=>_0x5042e6[_0x303a39(0x19e)]===_0x2633e9[_0x303a39(0x19e)]);if(_0x2633e9['clientType']!==_0x303a39(0x163))_0x125183=_0x125183[_0x303a39(0x30a)](_0x2673bf=>_0x2673bf[_0x303a39(0x2b7)]===_0x2633e9[_0x303a39(0x2b7)]);return _0x125183;}async function triggerAIAnalysis(){const _0x191be5=_0x3fd8b0,_0x547193=document[_0x191be5(0x1a8)](_0x191be5(0x1b5)),_0x2ee0c0=document[_0x191be5(0x1a8)](_0x191be5(0x327)),_0x55f753=document['getElementById'](_0x191be5(0x2a4)),_0x39244f=document[_0x191be5(0x1a8)](_0x191be5(0x2d2));_0x547193['classList'][_0x191be5(0x29c)](_0x191be5(0x18d)),_0x2ee0c0[_0x191be5(0x1c2)][_0x191be5(0x1ce)]=_0x191be5(0x25f),_0x55f753[_0x191be5(0x22f)]='';const _0x3e2e76=_0x39244f[_0x191be5(0x1f7)],_0x2cd304=_0x39244f[_0x191be5(0x182)][_0x39244f[_0x191be5(0x1f1)]][_0x191be5(0x31f)];let _0x3f6acb=getFilteredData();const _0x3c2db1=await generateAIAnalysis(_0x3f6acb,_0x2cd304,_0x3e2e76);_0x55f753[_0x191be5(0x22f)]=_0x3c2db1,_0x2ee0c0['style'][_0x191be5(0x1ce)]=_0x191be5(0x140);}async function generateAIAnalysis(_0x4fe6c1,_0x4e43f3,_0x3f65f1){const _0x15eff3=_0x3fd8b0;await new Promise(_0x204d6e=>setTimeout(_0x204d6e,0x320));if(!_0x4fe6c1||_0x4fe6c1[_0x15eff3(0x212)]===0x0)return _0x15eff3(0x15c);const _0xc1a99c=_0x4fe6c1[_0x15eff3(0x212)],_0x429883=_0x4fe6c1[_0x15eff3(0x30a)](_0x19d703=>[_0x15eff3(0x2bc),_0x15eff3(0x1bc),_0x15eff3(0x31b),_0x15eff3(0x187),_0x15eff3(0x210)][_0x15eff3(0x2b9)](_0x19d703['status']))[_0x15eff3(0x212)],_0x69c49c=_0xc1a99c>0x0?(_0x429883/_0xc1a99c*0x64)[_0x15eff3(0x1c7)](0x0):0x0,_0xcc2798=_0x4fe6c1[_0x15eff3(0x30a)](_0x130a12=>_0x130a12[_0x15eff3(0x13c)]>0x0),_0x40878e=_0xcc2798[_0x15eff3(0x212)]>0x0?(_0xcc2798[_0x15eff3(0x2ca)]((_0x5c4df6,_0x3f4b99)=>_0x5c4df6+_0x3f4b99[_0x15eff3(0x13c)],0x0)/_0xcc2798[_0x15eff3(0x212)])[_0x15eff3(0x1c7)](0x1):0x0,_0x43de77=_0x4fe6c1[_0x15eff3(0x2ca)]((_0x23fe25,_0x40108f)=>{const _0xff52c1=_0x15eff3;return _0x23fe25[_0x40108f[_0xff52c1(0x2cb)]]=(_0x23fe25[_0x40108f[_0xff52c1(0x2cb)]]||0x0)+0x1,_0x23fe25;},{}),_0x22ab18=_0x43de77['Positivo']||0x0,_0x55f601=_0x43de77[_0x15eff3(0x1f4)]||0x0,_0x5ab5c0=_0x43de77[_0x15eff3(0x1eb)]||0x0,_0x2e409d=_0x22ab18+_0x55f601+_0x5ab5c0,_0x3f940d=(_0x2014b7,_0x3ed972)=>{const _0x497ab7=_0x15eff3,_0x5d34ce=_0x4fe6c1[_0x497ab7(0x2ca)]((_0x347b97,_0x395790)=>{const _0x59127e=_0x497ab7,_0x2771e2=_0x395790[_0x2014b7]||_0x59127e(0x24a);return _0x2771e2!==_0x59127e(0x24a)&&_0x2771e2!==_0x59127e(0x2c0)&&_0x2771e2!==_0x59127e(0x17a)&&(_0x347b97[_0x2771e2]=(_0x347b97[_0x2771e2]||0x0)+0x1),_0x347b97;},{});return Object[_0x497ab7(0x2e5)](_0x5d34ce)[_0x497ab7(0x280)](([,_0x242e6e],[,_0x3ff5eb])=>_0x3ff5eb-_0x242e6e)[_0x497ab7(0x2fe)](0x0,_0x3ed972);},_0x166029=_0x3f940d('requestType',0x1),_0x851e13={};DAY_NAMES[_0x15eff3(0x1d1)](_0x5dfa6c=>{_0x851e13[_0x5dfa6c]=Array(0x18)['fill'](0x0);}),_0x4fe6c1[_0x15eff3(0x1d1)](_0x40fa1b=>{const _0x5a5006=_0x15eff3,_0x35b111=_0x40fa1b['created'][_0x5a5006(0x196)](),_0x45011a=_0x40fa1b[_0x5a5006(0x1b6)]['getHours']();_0x851e13[DAY_NAMES[_0x35b111]][_0x45011a]++;});let _0x3e1e88='',_0x38fdd1=-0x1,_0xeaa2a0=-0x1;Object[_0x15eff3(0x2e5)](_0x851e13)[_0x15eff3(0x1d1)](([_0x4c3bd9,_0x9ee4e9])=>{const _0x3e8932=_0x15eff3;_0x9ee4e9[_0x3e8932(0x1d1)]((_0x1b1d24,_0x2df283)=>{_0x1b1d24>_0xeaa2a0&&(_0xeaa2a0=_0x1b1d24,_0x3e1e88=_0x4c3bd9,_0x38fdd1=_0x2df283);});});const _0xd8fa95=_0x4fe6c1[_0x15eff3(0x1f2)](_0x60ea71=>_0x60ea71[_0x15eff3(0x245)][_0x15eff3(0x14e)](/\s+/))[_0x15eff3(0x20b)]()[_0x15eff3(0x1f2)](_0x33b00a=>_0x33b00a[_0x15eff3(0x168)]()[_0x15eff3(0x177)](/[^a-záéíóúñü]/g,''))[_0x15eff3(0x30a)](_0x13bd66=>_0x13bd66[_0x15eff3(0x212)]>0x4&&!['para','como','desde',_0x15eff3(0x155),_0x15eff3(0x21a),_0x15eff3(0x298),_0x15eff3(0x260),_0x15eff3(0x287),_0x15eff3(0x18e),_0x15eff3(0x1fd),_0x15eff3(0x1bd),'por',_0x15eff3(0x319),'un','el','la','se','es','en','y','o','a','de','su',_0x15eff3(0x19d),'mi',_0x15eff3(0x169),'tu','tus',_0x15eff3(0x1fb),'más',_0x15eff3(0x193),'ni',_0x15eff3(0x272),'al','lo','le','les','me','te',_0x15eff3(0x2c8),'os','si','no',_0x15eff3(0x233),_0x15eff3(0x325),_0x15eff3(0x23c),_0x15eff3(0x143),_0x15eff3(0x18a),_0x15eff3(0x179),_0x15eff3(0x1c0),_0x15eff3(0x1ec),_0x15eff3(0x304),_0x15eff3(0x222)][_0x15eff3(0x2b9)](_0x13bd66)),_0x59808d=_0xd8fa95[_0x15eff3(0x2ca)]((_0x40e314,_0x47a625)=>{return _0x40e314[_0x47a625]=(_0x40e314[_0x47a625]||0x0)+0x1,_0x40e314;},{}),_0x432d9d=Object['entries'](_0x59808d)['sort'](([,_0x588509],[,_0x440bd1])=>_0x440bd1-_0x588509)[_0x15eff3(0x2fe)](0x0,0x5)[_0x15eff3(0x1f2)](_0x35b0bb=>'<strong>'+_0x35b0bb[0x0]+_0x15eff3(0x1db));let _0x40408b=_0x15eff3(0x183)+_0x4e43f3+_0x15eff3(0x1c3);_0x40408b+='<p>Durante\x20este\x20período,\x20se\x20gestionaron\x20un\x20total\x20de\x20<strong>'+_0xc1a99c+'\x20tickets</strong>.\x20A\x20continuación,\x20un\x20resumen\x20de\x20los\x20hallazgos\x20clave:</p>',_0x40408b+=_0x15eff3(0x224),_0x40408b+=_0x15eff3(0x21c)+_0x69c49c+_0x15eff3(0x1e3)+_0x40878e+_0x15eff3(0x2e3);if(_0x166029[_0x15eff3(0x212)]>0x0){const _0x22c230=_0x166029[0x0],_0x4715d2=(_0x22c230[0x1]/_0xc1a99c*0x64)[_0x15eff3(0x1c7)](0x0);_0x40408b+='<li><strong>Categoría\x20Principal:</strong>\x20La\x20solicitud\x20más\x20frecuente\x20fue\x20\x22<strong>'+_0x22c230[0x0]+_0x15eff3(0x25e)+_0x4715d2+_0x15eff3(0x273);}_0xeaa2a0>0x0&&(_0x40408b+=_0x15eff3(0x16c)+_0x3e1e88+_0x15eff3(0x24c)+_0x38fdd1+':00\x20hs</strong>.</li>');if(_0x3f65f1!=='all'){let _0x437e0f=0x0,_0x28f270=0x0,_0x8690cb=0x0,_0x5797de=0x0;_0x4fe6c1[_0x15eff3(0x1d1)](_0x17ed49=>{const _0x561026=_0x15eff3,_0x1f5a8d=(_0x17ed49[_0x561026(0x2dd)]||'')[_0x561026(0x168)]();if(SLA_MATRIX[_0x1f5a8d]){if(_0x17ed49['firstResponseTime']>0x0){_0x28f270++;if(_0x17ed49[_0x561026(0x1af)]<=SLA_MATRIX[_0x1f5a8d][_0x561026(0x149)])_0x437e0f++;}if(_0x17ed49[_0x561026(0x13c)]>0x0){_0x5797de++;if(_0x17ed49[_0x561026(0x13c)]<=SLA_MATRIX[_0x1f5a8d][_0x561026(0x1a2)])_0x8690cb++;}}});const _0x29806c=_0x28f270>0x0?_0x437e0f/_0x28f270*0x64:NaN,_0x1b90cd=_0x5797de>0x0?_0x8690cb/_0x5797de*0x64:NaN;if(!isNaN(_0x29806c)&&!isNaN(_0x1b90cd)){const _0x270417=_0x29806c>=SLA_COMPLIANCE_THRESHOLD?_0x15eff3(0x2cd):_0x15eff3(0x2ec),_0x39321c=_0x1b90cd>=SLA_COMPLIANCE_THRESHOLD?'Cumplido':_0x15eff3(0x2ec);let _0x5bdf50='<li><strong>Acuerdos\x20de\x20Nivel\x20de\x20Servicio\x20(SLAs):</strong>\x20Durante\x20este\x20período,\x20el\x20cumplimiento\x20para\x20la\x20';_0x5bdf50+=_0x15eff3(0x275)+_0x29806c[_0x15eff3(0x1c7)](0x1)+_0x15eff3(0x1c6)+_0x270417+_0x15eff3(0x2ed),_0x5bdf50+=_0x15eff3(0x230)+_0x1b90cd[_0x15eff3(0x1c7)](0x1)+'%</strong>\x20(resultado:\x20<strong>'+_0x39321c+'</strong>).</li>',_0x40408b+=_0x5bdf50;}}if(_0x2e409d>0x0){let _0x24ac2e=_0x15eff3(0x1eb),_0xf25b10=_0x5ab5c0;_0x22ab18>_0xf25b10&&(_0x24ac2e=_0x15eff3(0x252),_0xf25b10=_0x22ab18);_0x55f601>_0xf25b10&&(_0x24ac2e=_0x15eff3(0x1f4),_0xf25b10=_0x55f601);const _0x118f13=(_0xf25b10/_0x2e409d*0x64)[_0x15eff3(0x1c7)](0x0);_0x40408b+=_0x15eff3(0x2e9)+_0x24ac2e+'</strong>\x20('+_0x118f13+_0x15eff3(0x2ad);}return _0x432d9d[_0x15eff3(0x212)]>0x0&&(_0x40408b+=_0x15eff3(0x22b)+_0x432d9d[_0x15eff3(0x215)](',\x20')+_0x15eff3(0x269)),_0x40408b+=_0x15eff3(0x26c),_0x40408b+='<p\x20class=\x22mt-4\x20text-xs\x20text-gray-500\x20italic\x22><strong>Nota\x20sobre\x20el\x20Sentimiento:</strong>\x20El\x20sentimiento\x20se\x20determina\x20mediante\x20un\x20analisis\x20de\x20palabras\x20utilizas\x20por\x20el\x20cliente\x20en\x20el\x20campo\x20\x22Resumen\x22\x20de\x20cada\x20ticket,\x20clasificándolo\x20como\x20positivo,\x20negativo\x20o\x20neutral.</p>',_0x40408b+=_0x15eff3(0x289),_0x40408b;}function processData(_0x2a6347){const _0x180807=_0x3fd8b0;if(_0x2a6347[_0x180807(0x212)]===0x0)return{};const _0x2642c8=_0x2a6347[_0x180807(0x2ca)]((_0x26eabb,_0x3f15fe)=>{const _0x532e70=_0x180807;return _0x26eabb[_0x3f15fe[_0x532e70(0x15d)]]=(_0x26eabb[_0x3f15fe[_0x532e70(0x15d)]]||0x0)+0x1,_0x26eabb;},{}),_0x489cd2=_0x2a6347['reduce']((_0x51a128,_0x33ed05)=>{const _0x55f92d=_0x180807;return _0x51a128[_0x33ed05['priority']]=(_0x51a128[_0x33ed05[_0x55f92d(0x2dd)]]||0x0)+0x1,_0x51a128;},{}),_0x119564=_0x2a6347['reduce']((_0x2b9608,_0x4ec0df)=>{const _0x5b9ad4=_0x180807;return _0x2b9608[_0x4ec0df['client']]=(_0x2b9608[_0x4ec0df[_0x5b9ad4(0x311)]]||0x0)+0x1,_0x2b9608;},{}),_0x142092=_0x2a6347[_0x180807(0x2ca)]((_0xb62682,_0x3870cf)=>{const _0x40a330=_0x180807;return _0xb62682[_0x3870cf['assignee']]=(_0xb62682[_0x3870cf[_0x40a330(0x1ef)]]||0x0)+0x1,_0xb62682;},{}),_0x9787ff=_0x2a6347[_0x180807(0x2ca)]((_0x533741,_0x22ccd6)=>{const _0x365b63=_0x180807;return _0x533741[_0x22ccd6[_0x365b63(0x20c)]]=(_0x533741[_0x22ccd6[_0x365b63(0x20c)]]||0x0)+0x1,_0x533741;},{}),_0x17d28a=_0x2a6347[_0x180807(0x2ca)]((_0x3823b5,_0x19e073)=>{const _0x45f0ca=_0x180807;return _0x3823b5[_0x19e073[_0x45f0ca(0x1ea)]]=(_0x3823b5[_0x19e073[_0x45f0ca(0x1ea)]]||0x0)+0x1,_0x3823b5;},{}),_0x557ad5=_0x2a6347[_0x180807(0x2ca)]((_0x58e4a0,_0x3e993d)=>{const _0x14ebc8=_0x180807;return _0x58e4a0[_0x3e993d[_0x14ebc8(0x19e)]]=(_0x58e4a0[_0x3e993d[_0x14ebc8(0x19e)]]||0x0)+0x1,_0x58e4a0;},{}),_0x1ab7da=_0x2a6347[_0x180807(0x2ca)]((_0x30c2c3,_0x387c47)=>{const _0x4e292c=_0x180807;return _0x30c2c3[_0x387c47['sentiment']]=(_0x30c2c3[_0x387c47[_0x4e292c(0x2cb)]]||0x0)+0x1,_0x30c2c3;},{}),_0x2059c2=Object['entries'](_0x119564)[_0x180807(0x280)](([,_0x4acdf8],[,_0x2e7f35])=>_0x2e7f35-_0x4acdf8)[_0x180807(0x2fe)](0x0,0xa),_0x2ceb73=Object[_0x180807(0x2e5)](_0x142092)[_0x180807(0x280)](([,_0x108e95],[,_0x256133])=>_0x256133-_0x108e95)['slice'](0x0,0xa),_0x570243=_0x2a6347[_0x180807(0x2ca)]((_0x30a7ae,_0xe792d8)=>{const _0x101cb3=_0x180807,_0x48c7bf=_0xe792d8[_0x101cb3(0x1b6)][_0x101cb3(0x22a)]()[_0x101cb3(0x14e)]('T')[0x0];return _0x30a7ae[_0x48c7bf]=(_0x30a7ae[_0x48c7bf]||0x0)+0x1,_0x30a7ae;},{}),_0x2b1f84=Object[_0x180807(0x2e5)](_0x570243)['sort'](([_0x26b7fd],[_0x575b90])=>new Date(_0x26b7fd)-new Date(_0x575b90)),_0x4d7008=_0x2a6347[_0x180807(0x1f2)](_0x3bd549=>_0x3bd549['summary'][_0x180807(0x14e)](/\s+/))[_0x180807(0x20b)]()['map'](_0xbdac52=>_0xbdac52[_0x180807(0x168)]()[_0x180807(0x177)](/[^a-záéíóúñü]/g,''))[_0x180807(0x30a)](_0x4d5138=>_0x4d5138[_0x180807(0x212)]>0x3&&![_0x180807(0x223),_0x180807(0x1b0),'desde',_0x180807(0x155),_0x180807(0x21a),_0x180807(0x298),'con',_0x180807(0x287),_0x180807(0x18e),_0x180807(0x1fd),_0x180807(0x1bd),_0x180807(0x136),'una','un','el','la','se','es','en','y','o','a','de','su',_0x180807(0x19d),'mi','mis','tu','tus','mas',_0x180807(0x1e5),_0x180807(0x193),'ni',_0x180807(0x272),'al','lo','le',_0x180807(0x15b),'me','te',_0x180807(0x2c8),'os','si','no',_0x180807(0x233),_0x180807(0x325),_0x180807(0x23c),_0x180807(0x143),_0x180807(0x18a)][_0x180807(0x2b9)](_0x4d5138)),_0x5ca31f=_0x4d7008[_0x180807(0x2ca)]((_0xa7b9b9,_0x961e94)=>{return _0xa7b9b9[_0x961e94]=(_0xa7b9b9[_0x961e94]||0x0)+0x1,_0xa7b9b9;},{}),_0x1c3988={};DAY_NAMES['forEach'](_0x5c8d90=>{const _0x450dbc=_0x180807;_0x1c3988[_0x5c8d90]=Array(0x18)[_0x450dbc(0x303)](0x0);}),_0x2a6347[_0x180807(0x1d1)](_0x3245bc=>{const _0x1ae684=_0x180807,_0x45eb93=_0x3245bc['created'][_0x1ae684(0x196)](),_0x2fc77e=_0x3245bc[_0x1ae684(0x1b6)][_0x1ae684(0x1d2)]();_0x1c3988[DAY_NAMES[_0x45eb93]][_0x2fc77e]++;});const _0x2d2fa0=Object[_0x180807(0x2e5)](_0x119564)[_0x180807(0x280)](([,_0x5e74c3],[,_0x271873])=>_0x271873-_0x5e74c3)[_0x180807(0x2fe)](0x0,0xa)[_0x180807(0x1f2)](_0x181750=>_0x181750[0x0]),_0x2eab74=Array['from'](new Set(_0x2a6347[_0x180807(0x1f2)](_0x5f5b6b=>_0x5f5b6b[_0x180807(0x20c)])))[_0x180807(0x280)](),_0x65d666={};_0x2d2fa0[_0x180807(0x1d1)](_0x2550c1=>{const _0x590339=_0x180807;_0x65d666[_0x2550c1]={};const _0x519571=_0x2a6347[_0x590339(0x30a)](_0x230b58=>_0x230b58[_0x590339(0x311)]===_0x2550c1);_0x519571[_0x590339(0x1d1)](_0x394b74=>{const _0x2eec65=_0x590339;_0x65d666[_0x2550c1][_0x394b74[_0x2eec65(0x20c)]]=(_0x65d666[_0x2550c1][_0x394b74[_0x2eec65(0x20c)]]||0x0)+0x1;});});const _0xfc3e9f={'clients':_0x2d2fa0,'requestTypes':_0x2eab74,'data':_0x65d666},_0xa7c24a={},_0x2589f9=new Set();_0x2a6347[_0x180807(0x1d1)](_0x94887c=>{const _0x51e852=_0x180807,_0x117699=_0x94887c[_0x51e852(0x1b6)][_0x51e852(0x26e)]()+'-'+_0x94887c[_0x51e852(0x1b6)][_0x51e852(0x1d8)]();if(!_0xa7c24a[_0x117699])_0xa7c24a[_0x117699]={};_0xa7c24a[_0x117699][_0x94887c[_0x51e852(0x20c)]]=(_0xa7c24a[_0x117699][_0x94887c[_0x51e852(0x20c)]]||0x0)+0x1,_0x2589f9['add'](_0x94887c[_0x51e852(0x20c)]);});const _0x2fd432=Object[_0x180807(0x173)](_0xa7c24a)[_0x180807(0x280)]((_0x504f20,_0x50c3a7)=>{const _0x30e57b=_0x180807,[_0x4a16ad,_0x186071]=_0x504f20[_0x30e57b(0x14e)]('-')[_0x30e57b(0x1f2)](Number),[_0x2c08c6,_0x2e26b3]=_0x50c3a7['split']('-')[_0x30e57b(0x1f2)](Number);return _0x4a16ad-_0x2c08c6||_0x186071-_0x2e26b3;}),_0x15aa30=Array[_0x180807(0x2a2)](_0x2589f9)['sort']();return{'status':{'labels':Object[_0x180807(0x173)](_0x2642c8),'values':Object[_0x180807(0x1f5)](_0x2642c8)},'priority':{'labels':Object[_0x180807(0x173)](_0x489cd2),'values':Object[_0x180807(0x1f5)](_0x489cd2)},'topClients':{'labels':_0x2059c2[_0x180807(0x1f2)](_0x4ff5e5=>_0x4ff5e5[0x0]),'values':_0x2059c2[_0x180807(0x1f2)](_0x467d0c=>_0x467d0c[0x1])},'topAssignees':{'labels':_0x2ceb73[_0x180807(0x1f2)](_0x16f7ed=>_0x16f7ed[0x0]),'values':_0x2ceb73[_0x180807(0x1f2)](_0x3bc373=>_0x3bc373[0x1])},'requestType':{'labels':Object[_0x180807(0x173)](_0x9787ff),'values':Object[_0x180807(0x1f5)](_0x9787ff)},'diagnosis':{'labels':Object[_0x180807(0x173)](_0x17d28a),'values':Object['values'](_0x17d28a)},'problemType':{'labels':Object[_0x180807(0x173)](_0x557ad5),'values':Object['values'](_0x557ad5)},'sentiment':{'labels':Object['keys'](_0x1ab7da),'values':Object['values'](_0x1ab7da)},'trend':{'labels':_0x2b1f84[_0x180807(0x1f2)](_0x4bcd4e=>_0x4bcd4e[0x0]),'values':_0x2b1f84['map'](_0x2ff407=>_0x2ff407[0x1])},'wordCloud':Object[_0x180807(0x2e5)](_0x5ca31f)[_0x180807(0x1f2)](([_0x3d83ae,_0x114265])=>[_0x3d83ae,_0x114265*0x5]),'heatmap':_0x1c3988,'clientRequestType':_0xfc3e9f,'monthlyComparison':{'months':_0x2fd432,'requestTypes':_0x15aa30,'data':_0xa7c24a}};}function renderKPIs(_0x483819){const _0x288a62=_0x3fd8b0,_0x4b34b1=_0x483819[_0x288a62(0x212)],_0x3afc48=_0x483819[_0x288a62(0x30a)](_0x3e44c2=>[_0x288a62(0x2bc),_0x288a62(0x1bc),_0x288a62(0x31b),'Cerrado',_0x288a62(0x210)]['includes'](_0x3e44c2[_0x288a62(0x15d)]))[_0x288a62(0x212)],_0x3aedda=_0x483819[_0x288a62(0x30a)](_0x1b325d=>![_0x288a62(0x2bc),_0x288a62(0x1bc),_0x288a62(0x31b),_0x288a62(0x187),_0x288a62(0x210),_0x288a62(0x248),_0x288a62(0x2d9),'Cancelado'][_0x288a62(0x2b9)](_0x1b325d['status']))[_0x288a62(0x212)],_0x37388c=_0x483819[_0x288a62(0x30a)](_0x51c8ac=>_0x51c8ac[_0x288a62(0x13c)]>0x0),_0x4b9104=_0x37388c[_0x288a62(0x212)]>0x0?(_0x37388c['reduce']((_0x345c86,_0x473ba3)=>_0x345c86+_0x473ba3[_0x288a62(0x13c)],0x0)/_0x37388c['length'])[_0x288a62(0x1c7)](0x1):0x0,_0x5dc26a=_0x483819[_0x288a62(0x30a)](_0x545de5=>_0x545de5[_0x288a62(0x1af)]>0x0),_0x4b3262=_0x5dc26a[_0x288a62(0x212)]>0x0?(_0x5dc26a[_0x288a62(0x2ca)]((_0x119395,_0x52f6b2)=>_0x119395+_0x52f6b2[_0x288a62(0x1af)],0x0)/_0x5dc26a[_0x288a62(0x212)])[_0x288a62(0x1c7)](0x1):0x0,_0x5c4fc4=_0x483819[_0x288a62(0x30a)](_0x562c4e=>!_0x562c4e[_0x288a62(0x1ef)]||_0x562c4e['assignee']['toLowerCase']()==='unassigned'||_0x562c4e[_0x288a62(0x1ef)][_0x288a62(0x168)]()===_0x288a62(0x2c6))['length'],_0x16e513=new Set(_0x483819[_0x288a62(0x1f2)](_0xc99661=>_0xc99661[_0x288a62(0x1b6)][_0x288a62(0x22a)]()[_0x288a62(0x14e)]('T')[0x0])),_0x1cdea7=_0x16e513[_0x288a62(0x2d8)]>0x0?(_0x4b34b1/_0x16e513[_0x288a62(0x2d8)])[_0x288a62(0x1c7)](0x1):_0x288a62(0x1ac),_0x4a9a3d=new Set(_0x483819['map'](_0x44dc49=>_0x44dc49[_0x288a62(0x1b6)]['getFullYear']()+'-'+_0x44dc49[_0x288a62(0x1b6)][_0x288a62(0x1d8)]())),_0x5519c9=_0x4a9a3d[_0x288a62(0x2d8)]>0x0?(_0x4b34b1/_0x4a9a3d[_0x288a62(0x2d8)])['toFixed'](0x1):'0.0';document[_0x288a62(0x1a8)](_0x288a62(0x266))[_0x288a62(0x282)]=_0x4b34b1,document[_0x288a62(0x1a8)](_0x288a62(0x18b))[_0x288a62(0x282)]=_0x4b34b1>0x0?(_0x3afc48/_0x4b34b1*0x64)[_0x288a62(0x1c7)](0x0)+'%':'0%',document[_0x288a62(0x1a8)]('kpi-open-tickets')[_0x288a62(0x282)]=_0x3aedda,document[_0x288a62(0x1a8)](_0x288a62(0x2d5))[_0x288a62(0x282)]=_0x4b9104+_0x288a62(0x2e4),document['getElementById'](_0x288a62(0x25d))[_0x288a62(0x282)]=_0x4b3262+_0x288a62(0x2e4),document[_0x288a62(0x1a8)](_0x288a62(0x296))['textContent']=_0x5c4fc4,document[_0x288a62(0x1a8)](_0x288a62(0x1e7))[_0x288a62(0x282)]=_0x1cdea7,document[_0x288a62(0x1a8)]('kpi-avg-month')[_0x288a62(0x282)]=_0x5519c9;}function renderSLAIndicators(_0x17cae3){const _0x34696c=_0x3fd8b0,_0xfda3a0=document['getElementById'](_0x34696c(0x267)),_0x4dc16f=document[_0x34696c(0x1a8)](_0x34696c(0x28c)),_0x5f1323=_0xfda3a0?_0xfda3a0['closest'](_0x34696c(0x2c1)):null,_0x2d32b0=_0x4dc16f?_0x4dc16f[_0x34696c(0x2fd)](_0x34696c(0x2c1)):null,_0xbb37c=(_0x118c2e,_0x4d3ffa,_0x2c4a12,_0x3fcc7d)=>{const _0x2b1259=_0x34696c;if(!_0x118c2e||!_0x4d3ffa)return;let _0x5f5b2b,_0x3b652b,_0x3611d4,_0x274447;const _0xfb1e6a=_0x3fcc7d===_0x2b1259(0x259)?_0x2b1259(0x27a):_0x2b1259(0x276);if(isNaN(_0x2c4a12))_0x3611d4='-',_0x5f5b2b=_0x2b1259(0x24a),_0x3b652b='text-gray-500',_0x274447='No\x20hay\x20tickets\x20con\x20SLA\x20'+_0xfb1e6a+_0x2b1259(0x1ab);else{const _0x1e9239=_0x2c4a12>=SLA_COMPLIANCE_THRESHOLD;_0x3611d4=_0x2c4a12[_0x2b1259(0x1c7)](0x1)+'%',_0x5f5b2b=_0x1e9239?'Cumplido':_0x2b1259(0x2ec),_0x3b652b=_0x1e9239?'text-green-600':_0x2b1259(0x277),_0x274447=_0x2b1259(0x213)+_0xfb1e6a+_0x2b1259(0x1c1)+_0x2b1259(0x2af)+'Es\x20el\x20porcentaje\x20de\x20tickets\x20que\x20fueron\x20atendidos/resueltos\x20dentro\x20del\x20tiempo\x20límite\x20de\x20su\x20prioridad.\x0a'+_0x2b1259(0x1e1)+_0x2b1259(0x220)+'Se\x20considera\x20\x27Cumplido\x27\x20si\x20el\x20Porcentaje\x20de\x20Cumplimiento\x20es\x20>=\x20'+SLA_COMPLIANCE_THRESHOLD+_0x2b1259(0x134);}_0x118c2e[_0x2b1259(0x22f)]=_0x2b1259(0x318)+_0x3b652b+'\x22>'+_0x3611d4+_0x2b1259(0x283)+'<p\x20class=\x22text-sm\x20font-bold\x20'+_0x3b652b+'\x22>'+_0x5f5b2b+'</p>',_0x4d3ffa['title']=_0x274447;};let _0x1dce43=0x0,_0x11d96a=0x0,_0x15c092=0x0,_0x20f084=0x0;_0x17cae3[_0x34696c(0x1d1)](_0x25a0c8=>{const _0x25a1e6=_0x34696c,_0x10be34=(_0x25a0c8[_0x25a1e6(0x2dd)]||'')[_0x25a1e6(0x168)]();if(SLA_MATRIX[_0x10be34]){if(_0x25a0c8[_0x25a1e6(0x1af)]>0x0){_0x11d96a++;const _0xf39f2b=SLA_MATRIX[_0x10be34]['timeToFirstResponse'];_0x25a0c8[_0x25a1e6(0x1af)]<=_0xf39f2b&&_0x1dce43++;}if(_0x25a0c8[_0x25a1e6(0x13c)]>0x0){_0x20f084++;const _0x2ce86f=SLA_MATRIX[_0x10be34]['timeToResolution'];_0x25a0c8['resolutionTime']<=_0x2ce86f&&_0x15c092++;}}});const _0x3ea55e=_0x11d96a>0x0?_0x1dce43/_0x11d96a*0x64:NaN,_0x34dade=_0x20f084>0x0?_0x15c092/_0x20f084*0x64:NaN;_0xbb37c(_0xfda3a0,_0x5f1323,_0x3ea55e,'frt'),_0xbb37c(_0x4dc16f,_0x2d32b0,_0x34dade,_0x34696c(0x2f8));}const createChart=(_0xc9fb25,_0x5c451f,_0x2329d3,_0x190389)=>{const _0x47ec24=_0x3fd8b0;if(!_0xc9fb25){console[_0x47ec24(0x1c0)](_0x47ec24(0x253)+(_0x190389[_0x47ec24(0x290)]||_0x47ec24(0x270))+'\x27\x20exista.');return;}charts[_0xc9fb25['id']]&&charts[_0xc9fb25['id']][_0x47ec24(0x306)](),charts[_0xc9fb25['id']]=new Chart(_0xc9fb25,{'type':_0x5c451f,'data':_0x2329d3,'options':_0x190389});};function renderCharts(_0x342103){const _0x23f824=_0x3fd8b0;if(_0x342103['length']===0x0){Object['values'](charts)[_0x23f824(0x1d1)](_0x147160=>{const _0x274dd8=_0x23f824;_0x147160&&typeof _0x147160[_0x274dd8(0x306)]===_0x274dd8(0x27b)&&_0x147160[_0x274dd8(0x306)]();}),charts={},document[_0x23f824(0x1a8)](_0x23f824(0x1cf))['innerHTML']='',document[_0x23f824(0x1a8)](_0x23f824(0x2a0))['innerHTML']='',document[_0x23f824(0x1a8)]('requestTypeChart')[_0x23f824(0x22f)]='',document[_0x23f824(0x1a8)](_0x23f824(0x255))[_0x23f824(0x22f)]='',document['getElementById'](_0x23f824(0x165))[_0x23f824(0x22f)]='',document['getElementById'](_0x23f824(0x2f2))[_0x23f824(0x22f)]='',document[_0x23f824(0x1a8)](_0x23f824(0x20d))[_0x23f824(0x22f)]='',document['getElementById'](_0x23f824(0x13e))[_0x23f824(0x22f)]='',document['getElementById']('heatmap-day-labels')[_0x23f824(0x22f)]='',document[_0x23f824(0x1a8)](_0x23f824(0x281))[_0x23f824(0x22f)]=_0x23f824(0x1bf);return;}const _0x411c6c=processData(_0x342103);if(charts[_0x23f824(0x1cf)])charts['statusChart'][_0x23f824(0x306)]();const _0x18cab7={'series':[{'data':_0x411c6c[_0x23f824(0x15d)][_0x23f824(0x1f5)],'name':'Tickets'}],'chart':{'type':_0x23f824(0x26f),'height':0x140,'toolbar':{'show':![]},'events':{'dataPointSelection':function(_0x19f29a,_0x582c8c,_0x205ace){const _0x1e63ce=_0x23f824,_0x10e056=_0x205ace['w'][_0x1e63ce(0x2d4)][_0x1e63ce(0x19f)][_0x205ace['dataPointIndex']];handleChartClick(_0x1e63ce(0x1cf),'status',_0x10e056);}}},'plotOptions':{'bar':{'borderRadius':0x4,'horizontal':!![],'barHeight':_0x23f824(0x161)}},'dataLabels':{'enabled':!![],'offsetX':-0xf,'style':{'colors':[_0x23f824(0x203)]},'formatter':function(_0x3de5d3){return _0x3de5d3;}},'xaxis':{'categories':_0x411c6c[_0x23f824(0x15d)][_0x23f824(0x19f)],'labels':{'style':{'colors':FONT_COLOR}}},'yaxis':{'labels':{'style':{'colors':FONT_COLOR}}},'colors':[PALETTE[_0x23f824(0x2dc)]],'grid':{'borderColor':GRID_COLOR},'tooltip':{'y':{'formatter':function(_0x1fcc1b){const _0x2399a6=_0x23f824;return _0x1fcc1b+_0x2399a6(0x1ee);}}},'fill':{'type':_0x23f824(0x2b4),'gradient':{'shade':_0x23f824(0x1b1),'type':_0x23f824(0x138),'shadeIntensity':0.5,'gradientToColors':[PALETTE['blue']],'inverseColors':!![],'opacityFrom':0x1,'opacityTo':0x1,'stops':[0x0,0x64]}}};charts[_0x23f824(0x1cf)]=new ApexCharts(document['querySelector']('#statusChart'),_0x18cab7),charts[_0x23f824(0x1cf)]['render']();if(charts[_0x23f824(0x2a0)])charts[_0x23f824(0x2a0)][_0x23f824(0x306)]();const _0x1f6367={'series':_0x411c6c[_0x23f824(0x2dd)]['values'],'labels':_0x411c6c[_0x23f824(0x2dd)][_0x23f824(0x19f)],'chart':{'type':_0x23f824(0x1a3),'height':0x140,'events':{'dataPointSelection':function(_0x340aa5,_0x474809,_0xaa6e4c){const _0x2595ae=_0x23f824,_0x50da08=_0xaa6e4c['w'][_0x2595ae(0x2d4)][_0x2595ae(0x19f)][_0xaa6e4c[_0x2595ae(0x2f4)]];handleChartClick(_0x2595ae(0x2a0),'priority',_0x50da08);}}},'plotOptions':{'pie':{'donut':{'labels':{'show':!![],'total':{'show':!![],'label':_0x23f824(0x19c)}}}}},'dataLabels':{'enabled':!![],'formatter':function(_0x58ac72){const _0x10210b=_0x23f824;return _0x58ac72[_0x10210b(0x1c7)](0x1)+'%';}},'legend':{'position':_0x23f824(0x1b4),'labels':{'colors':FONT_COLOR}},'colors':Object[_0x23f824(0x1f5)](PALETTE),'fill':{'colors':Object[_0x23f824(0x1f5)](PALETTE)},'responsive':[{'breakpoint':0x1e0,'options':{'chart':{'width':0xc8},'legend':{'position':'bottom'}}}],'dropShadow':{'enabled':!![],'top':0x5,'left':0x2,'blur':0x4,'color':'#000000','opacity':0.2}};charts[_0x23f824(0x2a0)]=new ApexCharts(document[_0x23f824(0x2be)]('#priorityChart'),_0x1f6367),charts[_0x23f824(0x2a0)]['render']();if(charts[_0x23f824(0x204)])charts[_0x23f824(0x204)][_0x23f824(0x306)]();const _0x58c09f={'series':[{'data':_0x411c6c[_0x23f824(0x20c)][_0x23f824(0x1f5)],'name':_0x23f824(0x244)}],'chart':{'type':_0x23f824(0x26f),'height':0x140,'toolbar':{'show':![]},'events':{'dataPointSelection':function(_0x1ba8d1,_0x3f2d04,_0x834770){const _0xbf8fde=_0x23f824,_0x18837c=_0x834770['w'][_0xbf8fde(0x2d4)][_0xbf8fde(0x19f)][_0x834770[_0xbf8fde(0x2f4)]];handleChartClick(_0xbf8fde(0x204),_0xbf8fde(0x20c),_0x18837c);}}},'plotOptions':{'bar':{'borderRadius':0x4,'horizontal':![],'columnWidth':_0x23f824(0x2d3)}},'dataLabels':{'enabled':![]},'xaxis':{'categories':_0x411c6c[_0x23f824(0x20c)][_0x23f824(0x19f)],'labels':{'rotate':-0x2d,'style':{'colors':FONT_COLOR}}},'yaxis':{'labels':{'style':{'colors':FONT_COLOR}}},'colors':[PALETTE[_0x23f824(0x29d)]],'grid':{'borderColor':GRID_COLOR},'tooltip':{'y':{'formatter':function(_0x2423e0){return _0x2423e0+'\x20tickets';}}}};charts[_0x23f824(0x204)]=new ApexCharts(document[_0x23f824(0x2be)](_0x23f824(0x139)),_0x58c09f),charts[_0x23f824(0x204)][_0x23f824(0x12f)]();if(charts[_0x23f824(0x255)])charts[_0x23f824(0x255)][_0x23f824(0x306)]();const _0x26ece8=_0x411c6c[_0x23f824(0x2cb)][_0x23f824(0x19f)]['map'](function(_0x3c5894){const _0x4f9d35=_0x23f824;if(_0x3c5894===_0x4f9d35(0x252))return PALETTE[_0x4f9d35(0x29d)];if(_0x3c5894===_0x4f9d35(0x1f4))return PALETTE[_0x4f9d35(0x1a7)];return PALETTE[_0x4f9d35(0x235)];}),_0x4d0ed4={'series':_0x411c6c[_0x23f824(0x2cb)][_0x23f824(0x1f5)],'labels':_0x411c6c['sentiment'][_0x23f824(0x19f)],'colors':_0x26ece8,'chart':{'type':_0x23f824(0x2bd),'height':0x140,'events':{'dataPointSelection':function(_0x4214fc,_0x889488,_0x2c7922){const _0x11db2d=_0x23f824,_0x2c22ac=_0x2c7922['w'][_0x11db2d(0x2d4)][_0x11db2d(0x19f)][_0x2c7922[_0x11db2d(0x2f4)]];handleChartClick(_0x11db2d(0x255),_0x11db2d(0x2cb),_0x2c22ac);}}},'legend':{'position':_0x23f824(0x1b4),'labels':{'colors':FONT_COLOR}},'dataLabels':{'enabled':!![],'formatter':function(_0x585ff5){const _0x791c64=_0x23f824;return _0x585ff5[_0x791c64(0x1c7)](0x1)+'%';}},'dropShadow':{'enabled':!![],'top':0x5,'left':0x2,'blur':0x4,'color':_0x23f824(0x1e9),'opacity':0.3}};charts[_0x23f824(0x255)]=new ApexCharts(document[_0x23f824(0x2be)](_0x23f824(0x176)),_0x4d0ed4),charts[_0x23f824(0x255)]['render'](),createChart(document[_0x23f824(0x1a8)](_0x23f824(0x199)),_0x23f824(0x2bd),{'labels':_0x411c6c['diagnosis'][_0x23f824(0x19f)],'datasets':[{'data':_0x411c6c[_0x23f824(0x1ea)][_0x23f824(0x1f5)],'backgroundColor':Object[_0x23f824(0x1f5)](PALETTE)[_0x23f824(0x268)]()}]},{'canvasId':'diagnosisChart','responsive':!![],'maintainAspectRatio':![],'plugins':{'legend':{'position':'bottom','labels':{'color':FONT_COLOR}},'datalabels':{'display':![]}},'onClick':(_0x2091a4,_0x22c7ec)=>_0x22c7ec[_0x23f824(0x212)]>0x0&&handleChartClick(_0x23f824(0x199),_0x23f824(0x1ea),charts['diagnosisChart'][_0x23f824(0x217)][_0x23f824(0x19f)][_0x22c7ec[0x0]['index']])}),createChart(document[_0x23f824(0x1a8)](_0x23f824(0x186)),_0x23f824(0x2bd),{'labels':_0x411c6c[_0x23f824(0x19e)][_0x23f824(0x19f)],'datasets':[{'data':_0x411c6c[_0x23f824(0x19e)]['values'],'backgroundColor':Object[_0x23f824(0x1f5)](PALETTE)}]},{'canvasId':'problemTypeChart','responsive':!![],'maintainAspectRatio':![],'plugins':{'legend':{'position':_0x23f824(0x1b4),'labels':{'color':FONT_COLOR}},'datalabels':{'display':![]}},'onClick':(_0x187087,_0x36f2be)=>_0x36f2be[_0x23f824(0x212)]>0x0&&handleChartClick('problemTypeChart',_0x23f824(0x19e),charts[_0x23f824(0x186)][_0x23f824(0x217)]['labels'][_0x36f2be[0x0][_0x23f824(0x2a3)]])}),createChart(document['getElementById']('topClientsChart'),_0x23f824(0x26f),{'labels':_0x411c6c['topClients']['labels'],'datasets':[{'label':_0x23f824(0x244),'data':_0x411c6c[_0x23f824(0x200)]['values'],'backgroundColor':PALETTE[_0x23f824(0x242)]}]},{'canvasId':'topClientsChart','responsive':!![],'maintainAspectRatio':![],'indexAxis':'y','plugins':{'legend':{'display':![]},'datalabels':{'anchor':_0x23f824(0x2a7),'align':_0x23f824(0x2a7)}},'onClick':(_0x59792f,_0x57528e)=>_0x57528e[_0x23f824(0x212)]>0x0&&handleChartClick('topClientsChart',_0x23f824(0x311),charts[_0x23f824(0x2f6)][_0x23f824(0x217)]['labels'][_0x57528e[0x0][_0x23f824(0x2a3)]])}),createChart(document[_0x23f824(0x1a8)](_0x23f824(0x2ef)),_0x23f824(0x26f),{'labels':_0x411c6c[_0x23f824(0x28b)][_0x23f824(0x19f)],'datasets':[{'label':_0x23f824(0x244),'data':_0x411c6c[_0x23f824(0x28b)][_0x23f824(0x1f5)],'backgroundColor':PALETTE[_0x23f824(0x30e)]}]},{'canvasId':_0x23f824(0x2ef),'responsive':!![],'maintainAspectRatio':![],'indexAxis':'y','plugins':{'legend':{'display':![]},'datalabels':{'anchor':_0x23f824(0x2a7),'align':_0x23f824(0x2a7)}},'onClick':(_0x4a144a,_0x15d992)=>_0x15d992[_0x23f824(0x212)]>0x0&&handleChartClick(_0x23f824(0x2ef),_0x23f824(0x1ef),charts[_0x23f824(0x2ef)]['data'][_0x23f824(0x19f)][_0x15d992[0x0][_0x23f824(0x2a3)]])}),createChart(document[_0x23f824(0x1a8)]('trendChart'),_0x23f824(0x185),{'labels':_0x411c6c[_0x23f824(0x27c)]['labels'],'datasets':[{'label':'Tickets\x20Creados','data':_0x411c6c[_0x23f824(0x27c)]['values'],'borderColor':PALETTE['red'],'backgroundColor':_0x23f824(0x2eb),'fill':_0x23f824(0x299),'tension':0.3,'borderWidth':0x2}]},{'canvasId':_0x23f824(0x141),'responsive':!![],'maintainAspectRatio':![],'scales':{'x':{'type':_0x23f824(0x13f),'time':{'unit':_0x23f824(0x315)}}},'plugins':{'legend':{'display':![]},'datalabels':{'display':!![],'align':_0x23f824(0x2b1),'anchor':'end','offset':0x8,'backgroundColor':_0x23f824(0x23b),'borderRadius':0x4,'color':_0x23f824(0x1da),'font':{'weight':_0x23f824(0x189)},'formatter':function(_0x383c5b,_0x51c1a1){const _0x264505=_0x23f824;return _0x51c1a1[_0x264505(0x1ad)][_0x264505(0x217)][_0x264505(0x212)]>0x1e?'':_0x383c5b;}}},'onClick':(_0x1a0700,_0x145b76)=>{const _0x42ec27=_0x23f824;if(_0x145b76[_0x42ec27(0x212)]>0x0)handleChartClick(_0x42ec27(0x141),_0x42ec27(0x132),charts[_0x42ec27(0x141)]['data']['labels'][_0x145b76[0x0][_0x42ec27(0x2a3)]]);}}),renderHeatmap(_0x411c6c['heatmap']),renderClientRequestTypeChart(_0x411c6c[_0x23f824(0x188)]),renderMonthlyComparisonChart(_0x411c6c[_0x23f824(0x2da)]),renderMonthlySlaChart(_0x342103),renderClientTypeChart(_0x342103),renderSatisfactionChart(_0x342103);const _0x13fb7=document['getElementById']('word-cloud-container');_0x13fb7[_0x23f824(0x22f)]='',_0x411c6c[_0x23f824(0x322)]&&_0x411c6c[_0x23f824(0x322)][_0x23f824(0x212)]>0x0?WordCloud(_0x13fb7,{'list':_0x411c6c[_0x23f824(0x322)],'gridSize':0xa,'weightFactor':0x2,'shrinkToFit':!![],'minSize':0xa,'color':()=>PALETTE[Object[_0x23f824(0x173)](PALETTE)[Math[_0x23f824(0x309)](Math[_0x23f824(0x226)]()*Object[_0x23f824(0x173)](PALETTE)['length'])]],'fontFamily':_0x23f824(0x2d6),'rotateRatio':0.5,'ellipticity':0x1}):_0x13fb7['innerHTML']='<p\x20class=\x22text-gray-500\x22>No\x20hay\x20datos\x20para\x20esta\x20Nube\x20de\x20Palabras.</p>';}function renderHeatmap(_0x55ab3c){const _0x53155b=_0x3fd8b0,_0x109249=document['getElementById']('heatmap-grid'),_0x500518=document[_0x53155b(0x1a8)](_0x53155b(0x29b));_0x109249[_0x53155b(0x22f)]='',_0x500518[_0x53155b(0x22f)]='';let _0x493188=0x0;Object[_0x53155b(0x1f5)](_0x55ab3c)['forEach'](_0x14c8ac=>_0x14c8ac[_0x53155b(0x1d1)](_0x3f3d32=>{if(_0x3f3d32>_0x493188)_0x493188=_0x3f3d32;})),_0x109249[_0x53155b(0x1c2)][_0x53155b(0x261)]='repeat('+DAY_NAMES[_0x53155b(0x212)]+',\x201fr)',_0x500518[_0x53155b(0x1c2)][_0x53155b(0x261)]=_0x53155b(0x25b)+DAY_NAMES[_0x53155b(0x212)]+_0x53155b(0x2db);const _0x5de240=(_0x5c2af4,_0x251e66)=>_0x5c2af4===0x0?_0x53155b(0x27e):'hsl(220,\x2080%,\x20'+(0x5a-_0x5c2af4/_0x251e66*0x3c)+'%)';DAY_NAMES[_0x53155b(0x1d1)]((_0x50316c,_0x1696c5)=>{const _0x74a7c=_0x53155b,_0x2c360b=document[_0x74a7c(0x23d)](_0x74a7c(0x30f));_0x2c360b[_0x74a7c(0x1d0)]=_0x74a7c(0x1b8),_0x2c360b[_0x74a7c(0x282)]=_0x50316c,_0x500518['appendChild'](_0x2c360b);const _0x31884c=_0x55ab3c[_0x50316c]||Array(0x18)[_0x74a7c(0x303)](0x0);for(let _0x1728d9=0x0;_0x1728d9<0x18;_0x1728d9++){const _0x356b1b=_0x31884c[_0x1728d9],_0x8ac235=document[_0x74a7c(0x23d)](_0x74a7c(0x30f));_0x8ac235['className']='heatmap-cell',_0x8ac235['style'][_0x74a7c(0x2e6)]=_0x5de240(_0x356b1b,_0x493188),_0x8ac235[_0x74a7c(0x282)]=_0x356b1b>0x0?_0x356b1b:'',_0x8ac235[_0x74a7c(0x258)]=_0x50316c+',\x20'+_0x1728d9+_0x74a7c(0x137)+(_0x1728d9+0x1)+':00:\x20'+_0x356b1b+_0x74a7c(0x1ee),_0x8ac235['dataset'][_0x74a7c(0x232)]=_0x1696c5,_0x8ac235[_0x74a7c(0x1ad)][_0x74a7c(0x130)]=_0x1728d9,_0x8ac235['addEventListener'](_0x74a7c(0x2a5),handleHeatmapClick),_0x109249[_0x74a7c(0x14c)](_0x8ac235);}});}function handleHeatmapClick(_0x3f1768){const _0x261835=_0x3fd8b0,{dayIndex:_0x40e418,hour:_0x130f6c}=_0x3f1768[_0x261835(0x16d)][_0x261835(0x1ad)],_0x140eb9=DAY_NAMES[parseInt(_0x40e418)],_0x2bed89=getFilteredData()[_0x261835(0x30a)](_0x4e272c=>_0x4e272c[_0x261835(0x1b6)]['getDay']()===parseInt(_0x40e418)&&_0x4e272c[_0x261835(0x1b6)][_0x261835(0x1d2)]()===parseInt(_0x130f6c));if(_0x2bed89[_0x261835(0x212)]===0x0)return alert('No\x20hay\x20tickets\x20para\x20el\x20'+_0x140eb9+_0x261835(0x24d)+_0x130f6c+_0x261835(0x236));showModalWithData('Tickets\x20del\x20'+_0x140eb9+'\x20entre\x20'+_0x130f6c+_0x261835(0x16f)+(parseInt(_0x130f6c)+0x1)+_0x261835(0x1a1),_0x2bed89,COMMON_TABLE_HEADERS);}function renderClientRequestTypeChart(_0x2e1e84){const _0x5a7fcf=_0x3fd8b0,_0x40cd19=document[_0x5a7fcf(0x1a8)](_0x5a7fcf(0x152));if(!_0x40cd19)return;const {clients:_0x535534,requestTypes:_0x1b04a1,data:_0x3fba10}=_0x2e1e84;if(!_0x535534||_0x535534[_0x5a7fcf(0x212)]===0x0){if(charts[_0x40cd19['id']])charts[_0x40cd19['id']][_0x5a7fcf(0x306)]();return;}const _0x37e28a=_0x1b04a1[_0x5a7fcf(0x1f2)]((_0x5c5c8e,_0x48ca61)=>{const _0x8d1dbb=_0x5a7fcf,_0x37b670=Object['keys'](PALETTE),_0x17839e=PALETTE[_0x37b670[_0x48ca61%_0x37b670['length']]]||PALETTE[_0x8d1dbb(0x216)],_0x24fa3e=_0x535534[_0x8d1dbb(0x1f2)](_0x392eaf=>_0x3fba10[_0x392eaf]&&_0x3fba10[_0x392eaf][_0x5c5c8e]||0x0);return{'label':_0x5c5c8e,'data':_0x24fa3e,'backgroundColor':_0x17839e,'stack':_0x8d1dbb(0x225)};});createChart(_0x40cd19,_0x5a7fcf(0x26f),{'labels':_0x535534,'datasets':_0x37e28a},{'canvasId':_0x5a7fcf(0x152),'responsive':!![],'maintainAspectRatio':![],'plugins':{'legend':{'display':!![],'position':_0x5a7fcf(0x323),'labels':{'color':FONT_COLOR}},'datalabels':{'display':![]}},'scales':{'x':{'stacked':!![],'ticks':{'color':FONT_COLOR,'autoSkip':![],'maxRotation':0x2d,'minRotation':0x2d},'grid':{'display':![]}},'y':{'stacked':!![],'ticks':{'color':FONT_COLOR},'grid':{'color':GRID_COLOR}}},'onClick':(_0x3c8c70,_0x4bf6e5,_0x5adb3d)=>{const _0x163253=_0x5a7fcf;if(_0x4bf6e5[_0x163253(0x212)]>0x0){const {index:_0x3d432f,datasetIndex:_0xda6c6d}=_0x4bf6e5[0x0],_0x3873cc=_0x5adb3d[_0x163253(0x217)][_0x163253(0x19f)][_0x3d432f],_0x4fcfae=_0x5adb3d['data'][_0x163253(0x2ff)][_0xda6c6d][_0x163253(0x297)];handleChartClick(_0x163253(0x152),_0x163253(0x21d),{'client':_0x3873cc,'requestType':_0x4fcfae});}}});}function renderMonthlyComparisonChart(_0x27e9aa){const _0x4db9ce=_0x3fd8b0,_0xab37df=document[_0x4db9ce(0x1a8)](_0x4db9ce(0x14a));if(!_0xab37df)return;const {months:_0x5128b7,requestTypes:_0x3065d4,data:_0x546c89}=_0x27e9aa,_0x233818=_0x5128b7[_0x4db9ce(0x1f2)](_0x4215e7=>{const _0x1dffd7=_0x4db9ce,[_0x775086,_0x2e67c8]=_0x4215e7['split']('-')[_0x1dffd7(0x1f2)](Number);return MONTH_NAMES[_0x2e67c8]+'\x20'+_0x775086;}),_0x714444=_0x3065d4['map']((_0x831678,_0x425073)=>{const _0x5bcf69=_0x4db9ce,_0x3257d9=Object[_0x5bcf69(0x173)](PALETTE);return{'label':_0x831678,'data':_0x5128b7['map'](_0x595784=>_0x546c89[_0x595784][_0x831678]||0x0),'backgroundColor':PALETTE[_0x3257d9[_0x425073%_0x3257d9[_0x5bcf69(0x212)]]]||PALETTE['gray']};});createChart(_0xab37df,_0x4db9ce(0x26f),{'labels':_0x233818,'datasets':_0x714444},{'canvasId':_0x4db9ce(0x14a),'responsive':!![],'maintainAspectRatio':![],'plugins':{'legend':{'display':!![],'position':_0x4db9ce(0x323),'labels':{'color':FONT_COLOR}},'datalabels':{'display':![]}},'scales':{'x':{'stacked':!![],'ticks':{'color':FONT_COLOR},'grid':{'display':![]}},'y':{'stacked':!![],'ticks':{'color':FONT_COLOR},'grid':{'color':GRID_COLOR}}},'onClick':(_0x4af3ae,_0x22e1bd,_0x3c8307)=>{const _0x4bcdb5=_0x4db9ce;if(_0x22e1bd[_0x4bcdb5(0x212)]>0x0){const {index:_0x3beea7,datasetIndex:_0x47f043}=_0x22e1bd[0x0],_0x26d833=_0x3c8307['data'][_0x4bcdb5(0x19f)][_0x3beea7],_0x178ddc=_0x3c8307[_0x4bcdb5(0x217)][_0x4bcdb5(0x2ff)][_0x47f043][_0x4bcdb5(0x297)];handleChartClick(_0x4bcdb5(0x14a),_0x4bcdb5(0x26d),{'month':_0x26d833,'requestType':_0x178ddc});}}});}function renderMonthlySlaChart(_0x1d161b){const _0x4f487c=_0x3fd8b0;charts['monthlySlaChart']&&charts[_0x4f487c(0x2f2)]['destroy']();const _0x280092=_0x1d161b[_0x4f487c(0x2ca)]((_0x2dfa67,_0x58f903)=>{const _0x2e4a9d=_0x4f487c,_0x474e17=_0x58f903[_0x2e4a9d(0x1b6)][_0x2e4a9d(0x26e)]()+'-'+_0x58f903[_0x2e4a9d(0x1b6)][_0x2e4a9d(0x1d8)]();!_0x2dfa67[_0x474e17]&&(_0x2dfa67[_0x474e17]={'frtMet':0x0,'frtApplicable':0x0,'trtMet':0x0,'trtApplicable':0x0});const _0x366e24=(_0x58f903['priority']||'')[_0x2e4a9d(0x168)]();return SLA_MATRIX[_0x366e24]&&(_0x58f903[_0x2e4a9d(0x1af)]>0x0&&(_0x2dfa67[_0x474e17][_0x2e4a9d(0x16b)]++,_0x58f903[_0x2e4a9d(0x1af)]<=SLA_MATRIX[_0x366e24]['timeToFirstResponse']&&_0x2dfa67[_0x474e17][_0x2e4a9d(0x194)]++),_0x58f903['resolutionTime']>0x0&&(_0x2dfa67[_0x474e17][_0x2e4a9d(0x1b9)]++,_0x58f903['resolutionTime']<=SLA_MATRIX[_0x366e24][_0x2e4a9d(0x1a2)]&&_0x2dfa67[_0x474e17][_0x2e4a9d(0x150)]++)),_0x2dfa67;},{}),_0x5b999e=Object[_0x4f487c(0x173)](_0x280092)[_0x4f487c(0x280)]((_0x8d82a0,_0x3acd2a)=>{const _0x40b7cc=_0x4f487c,[_0x31d498,_0x535a4e]=_0x8d82a0[_0x40b7cc(0x14e)]('-')[_0x40b7cc(0x1f2)](Number),[_0x200b80,_0x4156b2]=_0x3acd2a['split']('-')[_0x40b7cc(0x1f2)](Number);return _0x31d498-_0x200b80||_0x535a4e-_0x4156b2;}),_0x4cb771=_0x5b999e[_0x4f487c(0x1f2)](_0x3a36dd=>{const _0x515f0c=_0x4f487c,[_0x55eeaa,_0x222cb5]=_0x3a36dd['split']('-')[_0x515f0c(0x1f2)](Number);return MONTH_NAMES[_0x222cb5]+'\x20'+_0x55eeaa;}),_0x1826c3=_0x5b999e[_0x4f487c(0x1f2)](_0x2aa4d5=>{const _0x420b5a=_0x4f487c,_0x3ad72f=_0x280092[_0x2aa4d5],_0xead045=_0x3ad72f[_0x420b5a(0x16b)]>0x0?_0x3ad72f['frtMet']/_0x3ad72f['frtApplicable']*0x64:0x0;return parseFloat(_0xead045['toFixed'](0x1));}),_0x8b672=_0x5b999e[_0x4f487c(0x1f2)](_0x13d48a=>{const _0x54d535=_0x4f487c,_0x4f7863=_0x280092[_0x13d48a],_0x2d9349=_0x4f7863[_0x54d535(0x1b9)]>0x0?_0x4f7863['trtMet']/_0x4f7863[_0x54d535(0x1b9)]*0x64:0x0;return parseFloat(_0x2d9349[_0x54d535(0x1c7)](0x1));}),_0x201d26={'series':[{'name':_0x4f487c(0x19a),'type':_0x4f487c(0x21f),'data':_0x1826c3},{'name':_0x4f487c(0x1fc),'type':'line','data':_0x8b672}],'chart':{'height':0x15e,'type':_0x4f487c(0x185)},'stroke':{'width':[0x0,0x4]},'title':{'text':''},'dataLabels':{'enabled':!![],'enabledOnSeries':[0x0],'formatter':function(_0x4de1b9){return _0x4de1b9+'%';}},'labels':_0x4cb771,'xaxis':{'type':_0x4f487c(0x294),'labels':{'style':{'colors':FONT_COLOR}}},'yaxis':[{'title':{'text':_0x4f487c(0x171),'style':{'color':FONT_COLOR}},'min':0x0,'max':0x64,'labels':{'style':{'colors':FONT_COLOR}}}],'colors':[PALETTE[_0x4f487c(0x242)],PALETTE[_0x4f487c(0x29d)]],'tooltip':{'y':{'formatter':function(_0x11e698){return _0x11e698+'%';}}},'grid':{'borderColor':GRID_COLOR},'legend':{'labels':{'colors':FONT_COLOR}}};charts[_0x4f487c(0x2f2)]=new ApexCharts(document[_0x4f487c(0x2be)]('#monthlySlaChart'),_0x201d26),charts[_0x4f487c(0x2f2)][_0x4f487c(0x12f)]();}function renderClientTypeChart(_0x9b3141){const _0x2c9bee=_0x3fd8b0;charts[_0x2c9bee(0x165)]&&charts['clientTypeChart'][_0x2c9bee(0x306)]();const _0x5159a9=CLIENT_TYPE_CONFIG[_0x2c9bee(0x18f)][_0x2c9bee(0x168)](),_0x4fea0b=CLIENT_TYPE_CONFIG[_0x2c9bee(0x198)][_0x2c9bee(0x168)]();let _0x3d31a8=0x0,_0x2255c8=0x0;_0x9b3141[_0x2c9bee(0x1d1)](_0x5a39e2=>{const _0x2ff523=_0x2c9bee,_0x56957b=(_0x5a39e2[CLIENT_TYPE_FIELD]||'')[_0x2ff523(0x168)]();if(_0x56957b===_0x5159a9)_0x3d31a8++;else _0x56957b===_0x4fea0b&&_0x2255c8++;});const _0x5f4eb4=_0x9b3141[_0x2c9bee(0x212)]-_0x3d31a8-_0x2255c8,_0x1dcdf3={'series':[_0x3d31a8,_0x2255c8,_0x5f4eb4],'labels':[CLIENT_TYPE_CONFIG['preferencial'],CLIENT_TYPE_CONFIG[_0x2c9bee(0x198)],CLIENT_TYPE_CONFIG['unassigned']],'colors':[PALETTE[_0x2c9bee(0x1d7)],PALETTE[_0x2c9bee(0x235)],PALETTE[_0x2c9bee(0x216)]],'chart':{'type':_0x2c9bee(0x1a3),'height':0x140,'events':{'dataPointSelection':function(_0x171a44,_0x5c2e8e,_0x17f05d){const _0x1efc39=_0x2c9bee,_0x5ca288=_0x17f05d['w'][_0x1efc39(0x2d4)][_0x1efc39(0x19f)][_0x17f05d[_0x1efc39(0x2f4)]];handleChartClick(_0x1efc39(0x165),'clientType',_0x5ca288);}}},'plotOptions':{'pie':{'donut':{'labels':{'show':!![],'total':{'show':!![],'label':_0x2c9bee(0x2d1)}}}}},'dataLabels':{'enabled':!![],'formatter':function(_0x5326a1){const _0x43cbcf=_0x2c9bee;return _0x5326a1[_0x43cbcf(0x1c7)](0x1)+'%';}},'legend':{'position':_0x2c9bee(0x1b4),'labels':{'colors':FONT_COLOR}},'dropShadow':{'enabled':!![],'top':0x5,'left':0x2,'blur':0x4,'color':_0x2c9bee(0x1e9),'opacity':0.2}};charts[_0x2c9bee(0x165)]=new ApexCharts(document[_0x2c9bee(0x2be)]('#clientTypeChart'),_0x1dcdf3),charts[_0x2c9bee(0x165)]['render']();}function renderSatisfactionChart(_0x56d6c8){const _0xbe316b=_0x3fd8b0;charts['satisfactionChart']&&charts[_0xbe316b(0x20d)][_0xbe316b(0x306)]();const _0x1f483f={0x1:0x0,0x2:0x0,0x3:0x0,0x4:0x0,0x5:0x0};let _0x34108f=0x0,_0x10f38e=0x0;_0x56d6c8[_0xbe316b(0x1d1)](_0x227f6e=>{const _0x19c774=_0x227f6e['satisfaction'];_0x19c774>=0x1&&_0x19c774<=0x5&&(_0x1f483f[_0x19c774]++,_0x34108f++,_0x10f38e+=_0x19c774);});const _0x6d392c=_0x34108f>0x0?_0x10f38e/_0x34108f:0x0,_0x349832={'series':[{'name':_0xbe316b(0x22c),'data':Object[_0xbe316b(0x1f5)](_0x1f483f)}],'chart':{'type':_0xbe316b(0x26f),'height':0x15e,'toolbar':{'show':![]},'events':{'dataPointSelection':function(_0x1ef951,_0x16a5ac,_0xba7870){const _0x24b382=_0xbe316b,_0xcd2c1=parseInt(_0xba7870['w'][_0x24b382(0x2d4)][_0x24b382(0x19f)][_0xba7870['dataPointIndex']]);handleChartClick('satisfactionChart',_0x24b382(0x1de),_0xcd2c1);}}},'plotOptions':{'bar':{'distributed':!![],'borderRadius':0x4,'horizontal':![]}},'colors':[PALETTE[_0xbe316b(0x1a7)],PALETTE[_0xbe316b(0x162)],PALETTE[_0xbe316b(0x13a)],PALETTE['lime'],PALETTE[_0xbe316b(0x29d)]],'dataLabels':{'enabled':!![]},'legend':{'show':![]},'title':{'text':_0xbe316b(0x1ca),'align':_0xbe316b(0x27f)},'subtitle':{'text':_0xbe316b(0x1b3)+_0x6d392c[_0xbe316b(0x1c7)](0x2)+_0xbe316b(0x2bf),'align':'center','style':{'fontSize':_0xbe316b(0x30c),'color':FONT_COLOR}},'xaxis':{'categories':[_0xbe316b(0x2cf),_0xbe316b(0x295),_0xbe316b(0x1e0),'4\x20Estrellas',_0xbe316b(0x326)],'labels':{'style':{'colors':FONT_COLOR}}},'yaxis':{'title':{'text':_0xbe316b(0x17f)}}};charts['satisfactionChart']=new ApexCharts(document[_0xbe316b(0x2be)](_0xbe316b(0x279)),_0x349832),charts[_0xbe316b(0x20d)][_0xbe316b(0x12f)]();}const modal=document[_0x3fd8b0(0x1a8)]('data-modal'),closeModalBtn=document['getElementById'](_0x3fd8b0(0x320));function showModalWithData(_0x2b2ba5,_0x3f02ac,_0x4cd3cd){const _0x282393=_0x3fd8b0,_0x100b8e=document[_0x282393(0x1a8)](_0x282393(0x1c9));_0x100b8e[_0x282393(0x14d)]=_0x2b2ba5;const _0x43ec2f=document['getElementById']('modal-body-container');if(typeof _0x3f02ac===_0x282393(0x170))_0x43ec2f[_0x282393(0x22f)]=_0x3f02ac;else{const _0x558d1f=_0x3f02ac;let _0xee6527='<div\x20class=\x22overflow-x-auto\x22><table\x20id=\x22modal-table\x22\x20class=\x22min-w-full\x20divide-y\x20divide-gray-200\x22><thead\x20class=\x22bg-gray-50\x22><tr>';_0x4cd3cd[_0x282393(0x1d1)](_0x18cc06=>{const _0x13f22b=_0x282393;_0xee6527+=_0x13f22b(0x291)+_0x18cc06[_0x13f22b(0x274)]+_0x13f22b(0x13b);}),_0xee6527+='</tr></thead><tbody\x20class=\x22bg-white\x20divide-y\x20divide-gray-200\x22>',_0x558d1f[_0x282393(0x212)]===0x0?_0xee6527+=_0x282393(0x158)+_0x4cd3cd[_0x282393(0x212)]+_0x282393(0x1ff):_0x558d1f[_0x282393(0x1d1)](_0x40c521=>{const _0x38c0d3=_0x282393;_0xee6527+=_0x38c0d3(0x2e7),_0x4cd3cd[_0x38c0d3(0x1d1)](_0x49a35c=>{const _0x37d67=_0x38c0d3;let _0x50275b=_0x40c521[_0x49a35c['key']]||'';const _0x4af9cc=document[_0x37d67(0x23d)]('p');if(_0x49a35c[_0x37d67(0x181)]===_0x37d67(0x316)&&_0x50275b!=='N/A'){const _0x51104f=_0x37d67(0x271)+_0x50275b;_0x4af9cc[_0x37d67(0x22f)]=_0x37d67(0x30d)+_0x51104f+'\x22\x20target=\x22_blank\x22\x20class=\x22text-indigo-600\x20hover:text-indigo-800\x20hover:underline\x22>'+_0x50275b+'</a>';}else{if(_0x49a35c['key'][_0x37d67(0x168)]()[_0x37d67(0x2b9)](_0x37d67(0x13f))&&typeof _0x50275b===_0x37d67(0x1dc))_0x50275b=_0x50275b['toFixed'](0x2);else _0x50275b instanceof Date&&(_0x50275b=_0x50275b[_0x37d67(0x247)]('es-ES',{'dateStyle':'medium','timeStyle':_0x37d67(0x20f)}));_0x4af9cc[_0x37d67(0x282)]=_0x50275b;}_0xee6527+=_0x37d67(0x324)+_0x4af9cc[_0x37d67(0x22f)]+_0x37d67(0x314);}),_0xee6527+=_0x38c0d3(0x21b);}),_0xee6527+=_0x282393(0x2f1),_0x43ec2f['innerHTML']=_0xee6527;}modal[_0x282393(0x1c2)][_0x282393(0x1ce)]=_0x282393(0x25f);}closeModalBtn[_0x3fd8b0(0x2c9)]=()=>{const _0x3e60f6=_0x3fd8b0;modal[_0x3e60f6(0x1c2)]['display']=_0x3e60f6(0x140);};function makeModalDraggable(){const _0x39b86d=_0x3fd8b0,_0x4326a7=document[_0x39b86d(0x2be)](_0x39b86d(0x24e)),_0x21e475=document[_0x39b86d(0x1a8)]('modal-header');let _0x5d6d99=0x0,_0x254ebe=0x0,_0x136e61=0x0,_0x356f94=0x0;const _0x17ba54=_0x553449=>{const _0x541dde=_0x39b86d;_0x553449=_0x553449||window[_0x541dde(0x13d)],_0x553449['preventDefault'](),_0x136e61=_0x553449[_0x541dde(0x28a)],_0x356f94=_0x553449[_0x541dde(0x20a)],document[_0x541dde(0x2f3)]=_0xbdf853,document['onmousemove']=_0x4003fa;},_0x4003fa=_0x359c4d=>{const _0x2e3a8e=_0x39b86d;_0x359c4d=_0x359c4d||window[_0x2e3a8e(0x13d)],_0x359c4d['preventDefault'](),_0x5d6d99=_0x136e61-_0x359c4d[_0x2e3a8e(0x28a)],_0x254ebe=_0x356f94-_0x359c4d['clientY'],_0x136e61=_0x359c4d['clientX'],_0x356f94=_0x359c4d[_0x2e3a8e(0x20a)],_0x4326a7[_0x2e3a8e(0x1c2)][_0x2e3a8e(0x2b1)]=_0x4326a7[_0x2e3a8e(0x1b7)]-_0x254ebe+'px',_0x4326a7['style'][_0x2e3a8e(0x2c5)]=_0x4326a7[_0x2e3a8e(0x22e)]-_0x5d6d99+'px';},_0xbdf853=()=>{const _0x235a34=_0x39b86d;document[_0x235a34(0x2f3)]=null,document[_0x235a34(0x1cb)]=null;};_0x21e475&&(_0x21e475[_0x39b86d(0x239)]=_0x17ba54);}function setupDrilldown(){}function setupKpiCardClickHandlers(){const _0x101ab2=_0x3fd8b0,_0x4f0c3c=document[_0x101ab2(0x1a8)]('kpi-grid');if(!_0x4f0c3c)return;_0x4f0c3c[_0x101ab2(0x133)]('click',_0x14f875=>{const _0x1c3e8d=_0x101ab2,_0x4578dc=_0x14f875[_0x1c3e8d(0x25a)][_0x1c3e8d(0x2fd)](_0x1c3e8d(0x2c1));if(!_0x4578dc)return;const _0x35596e=_0x4578dc[_0x1c3e8d(0x1ad)][_0x1c3e8d(0x197)];if(!_0x35596e)return;const _0x4a8db8=getFilteredData();let _0x28fd35=[],_0x340249=_0x1c3e8d(0x237),_0x413502=COMMON_TABLE_HEADERS;switch(_0x35596e){case _0x1c3e8d(0x23e):_0x340249=_0x1c3e8d(0x234),_0x28fd35=_0x4a8db8,showModalWithData(_0x340249,_0x28fd35[_0x1c3e8d(0x2fe)](0x0,0x1f4),_0x413502);break;case'resolved-tickets':_0x340249=_0x1c3e8d(0x241),_0x28fd35=_0x4a8db8[_0x1c3e8d(0x30a)](_0x4b4698=>[_0x1c3e8d(0x2bc),_0x1c3e8d(0x1bc),'Done','Cerrado',_0x1c3e8d(0x210)]['includes'](_0x4b4698['status'])),showModalWithData(_0x340249,_0x28fd35[_0x1c3e8d(0x2fe)](0x0,0x1f4),_0x413502);break;case'open-tickets':_0x340249=_0x1c3e8d(0x1f3),_0x28fd35=_0x4a8db8[_0x1c3e8d(0x30a)](_0x7f0648=>![_0x1c3e8d(0x2bc),'Resolved',_0x1c3e8d(0x31b),_0x1c3e8d(0x187),'Resuelto','Canceled','Cancelled','Cancelado'][_0x1c3e8d(0x2b9)](_0x7f0648[_0x1c3e8d(0x15d)])),showModalWithData(_0x340249,_0x28fd35[_0x1c3e8d(0x2fe)](0x0,0x1f4),_0x413502);break;case _0x1c3e8d(0x1ae):_0x340249=_0x1c3e8d(0x175),_0x28fd35=_0x4a8db8['filter'](_0x566e17=>!_0x566e17[_0x1c3e8d(0x1ef)]||_0x566e17[_0x1c3e8d(0x1ef)]['toLowerCase']()==='unassigned'||_0x566e17[_0x1c3e8d(0x1ef)]['toLowerCase']()==='sin\x20asignar'),showModalWithData(_0x340249,_0x28fd35[_0x1c3e8d(0x2fe)](0x0,0x1f4),_0x413502);break;case'sla-first-response':{_0x340249=_0x1c3e8d(0x310);const _0x20bf5f=_0x4a8db8[_0x1c3e8d(0x30a)](_0x50fe4d=>SLA_MATRIX[_0x50fe4d[_0x1c3e8d(0x2dd)][_0x1c3e8d(0x168)]()]&&_0x50fe4d[_0x1c3e8d(0x1af)]>0x0),_0x50d640=_0x20bf5f[_0x1c3e8d(0x1f2)](_0x120bed=>{const _0x2f1110=_0x1c3e8d,_0x5cae42=_0x120bed[_0x2f1110(0x2dd)][_0x2f1110(0x168)](),_0x11c526=SLA_MATRIX[_0x5cae42]['timeToFirstResponse'],_0x2f1520=_0x120bed['firstResponseTime'];return{'issue':_0x120bed['issue'],'summary':_0x120bed['summary'],'priority':_0x120bed[_0x2f1110(0x2dd)],'actualTime':_0x2f1520,'slaLimit':_0x11c526,'slaStatus':_0x2f1520<=_0x11c526?_0x2f1110(0x2cd):_0x2f1110(0x2ec)};})['sort']((_0xe9b132,_0xac9c52)=>_0xac9c52[_0x1c3e8d(0x17b)]-_0xe9b132['actualTime']);showModalWithData(_0x340249,_0x50d640,SLA_TABLE_HEADERS);break;}case _0x1c3e8d(0x208):{_0x340249=_0x1c3e8d(0x28f);const _0x2c7151=_0x4a8db8[_0x1c3e8d(0x30a)](_0x59113e=>SLA_MATRIX[_0x59113e[_0x1c3e8d(0x2dd)]['toLowerCase']()]&&_0x59113e[_0x1c3e8d(0x13c)]>0x0),_0x199559=_0x2c7151[_0x1c3e8d(0x1f2)](_0x198ca8=>{const _0x121e74=_0x1c3e8d,_0x20f9d8=_0x198ca8[_0x121e74(0x2dd)][_0x121e74(0x168)](),_0x310cdd=SLA_MATRIX[_0x20f9d8][_0x121e74(0x1a2)],_0x181e9a=_0x198ca8[_0x121e74(0x13c)];return{'issue':_0x198ca8[_0x121e74(0x316)],'summary':_0x198ca8['summary'],'priority':_0x198ca8[_0x121e74(0x2dd)],'actualTime':_0x181e9a,'slaLimit':_0x310cdd,'slaStatus':_0x181e9a<=_0x310cdd?_0x121e74(0x2cd):_0x121e74(0x2ec)};})[_0x1c3e8d(0x280)]((_0xc822c2,_0x2d2056)=>_0x2d2056[_0x1c3e8d(0x17b)]-_0xc822c2[_0x1c3e8d(0x17b)]);showModalWithData(_0x340249,_0x199559,SLA_TABLE_HEADERS);break;}}});}function handleChartClick(_0x3c74f7,_0x4e77e1,_0x10b716){const _0x162735=_0x3fd8b0,_0x269172=getFilteredData();let _0x1a727d=[],_0x4de5b7=_0x162735(0x1fa),_0x19a9c5=COMMON_TABLE_HEADERS;switch(_0x4e77e1){case _0x162735(0x15d):_0x1a727d=_0x269172[_0x162735(0x30a)](_0x30528f=>_0x30528f[_0x162735(0x15d)]===_0x10b716),_0x4de5b7=_0x162735(0x321)+_0x10b716+'\x22';break;case'priority':_0x1a727d=_0x269172['filter'](_0x45e070=>_0x45e070[_0x162735(0x2dd)]===_0x10b716),_0x4de5b7=_0x162735(0x29a)+_0x10b716+'\x22';break;case _0x162735(0x20c):_0x1a727d=_0x269172[_0x162735(0x30a)](_0x59b779=>_0x59b779[_0x162735(0x20c)]===_0x10b716),_0x4de5b7='Tickets\x20con\x20Tipo\x20de\x20Solicitud:\x20\x22'+_0x10b716+'\x22';break;case'sentiment':_0x1a727d=_0x269172[_0x162735(0x30a)](_0x1f7b0e=>_0x1f7b0e['sentiment']===_0x10b716),_0x4de5b7=_0x162735(0x147)+_0x10b716+'\x22';break;case _0x162735(0x1ea):_0x1a727d=_0x269172[_0x162735(0x30a)](_0x2e1f9c=>_0x2e1f9c[_0x162735(0x1ea)]===_0x10b716),_0x4de5b7='Tickets\x20con\x20Diagnóstico:\x20\x22'+_0x10b716+'\x22';break;case _0x162735(0x19e):_0x1a727d=_0x269172[_0x162735(0x30a)](_0x347c25=>_0x347c25['problemType']===_0x10b716),_0x4de5b7=_0x162735(0x292)+_0x10b716+'\x22';break;case _0x162735(0x311):_0x1a727d=_0x269172[_0x162735(0x30a)](_0x991eea=>_0x991eea[_0x162735(0x311)]===_0x10b716),_0x4de5b7='Tickets\x20del\x20Cliente:\x20\x22'+_0x10b716+'\x22';break;case'assignee':_0x1a727d=_0x269172[_0x162735(0x30a)](_0x209777=>_0x209777[_0x162735(0x1ef)]===_0x10b716),_0x4de5b7=_0x162735(0x164)+_0x10b716+'\x22';break;case _0x162735(0x132):const _0x196cc0=new Date(_0x10b716);_0x1a727d=_0x269172['filter'](_0x1ab590=>_0x1ab590[_0x162735(0x1b6)][_0x162735(0x22a)]()['startsWith'](_0x196cc0['toISOString']()[_0x162735(0x2ea)](0x0,0xa))),_0x4de5b7=_0x162735(0x2f7)+_0x196cc0[_0x162735(0x18c)](_0x162735(0x131),{'weekday':'long','year':_0x162735(0x1d3),'month':_0x162735(0x1c8),'day':_0x162735(0x1d3)});break;case _0x162735(0x21d):_0x1a727d=_0x269172['filter'](_0x585436=>_0x585436[_0x162735(0x311)]===_0x10b716['client']&&_0x585436[_0x162735(0x20c)]===_0x10b716[_0x162735(0x20c)]),_0x4de5b7=_0x162735(0x2df)+_0x10b716[_0x162735(0x311)]+_0x162735(0x2f9)+_0x10b716[_0x162735(0x20c)]+'\x22';break;case'monthAndRequestType':const [_0x138976,_0x44104e]=_0x10b716['month']['split']('\x20'),_0x59e53c=MONTH_NAMES[_0x162735(0x156)](_0x138976);_0x1a727d=_0x269172[_0x162735(0x30a)](_0x45ed81=>_0x45ed81[_0x162735(0x1b6)][_0x162735(0x26e)]()==_0x44104e&&_0x45ed81[_0x162735(0x1b6)][_0x162735(0x1d8)]()==_0x59e53c&&_0x45ed81[_0x162735(0x20c)]===_0x10b716[_0x162735(0x20c)]),_0x4de5b7=_0x162735(0x201)+_0x10b716[_0x162735(0x15e)]+_0x162735(0x29e)+_0x10b716[_0x162735(0x20c)]+'\x22';break;case'clientType':_0x4de5b7=_0x162735(0x1c5)+_0x10b716;const _0x2addbd=CLIENT_TYPE_CONFIG[_0x162735(0x18f)][_0x162735(0x168)](),_0x3f01f7=CLIENT_TYPE_CONFIG[_0x162735(0x198)]['toLowerCase']();if(_0x10b716===CLIENT_TYPE_CONFIG[_0x162735(0x18f)])_0x1a727d=_0x269172['filter'](_0x46413f=>(_0x46413f[CLIENT_TYPE_FIELD]||'')[_0x162735(0x168)]()===_0x2addbd);else{if(_0x10b716===CLIENT_TYPE_CONFIG[_0x162735(0x198)])_0x1a727d=_0x269172[_0x162735(0x30a)](_0x1c6465=>(_0x1c6465[CLIENT_TYPE_FIELD]||'')[_0x162735(0x168)]()===_0x3f01f7);else _0x10b716===CLIENT_TYPE_CONFIG[_0x162735(0x25c)]&&(_0x1a727d=_0x269172[_0x162735(0x30a)](_0x333f9e=>{const _0x4e71fa=_0x162735,_0x40464c=(_0x333f9e[CLIENT_TYPE_FIELD]||'')[_0x4e71fa(0x168)]();return _0x40464c!==_0x2addbd&&_0x40464c!==_0x3f01f7;}));}break;case _0x162735(0x1de):_0x4de5b7=_0x162735(0x17d)+_0x10b716+_0x162735(0x302),_0x1a727d=_0x269172[_0x162735(0x30a)](_0x4225ed=>_0x4225ed[_0x162735(0x1de)]===_0x10b716);break;default:console[_0x162735(0x1be)]('Click\x20no\x20manejado:',_0x3c74f7,_0x4e77e1);return;}showModalWithData(_0x4de5b7,_0x1a727d[_0x162735(0x2fe)](0x0,0x1f4),_0x19a9c5);}function setupChartZoom(){const _0x57a032=_0x3fd8b0,_0x2970cd=document[_0x57a032(0x1a8)](_0x57a032(0x2a9)),_0x1dd402=document[_0x57a032(0x1a8)]('zoom-overlay');if(!_0x2970cd||!_0x1dd402)return;const _0x563a03=()=>{const _0x1785b0=_0x57a032,_0x1ad63d=document['querySelector']('.chart-card.is-zoomed');_0x1ad63d&&_0x1ad63d[_0x1785b0(0x1cc)][_0x1785b0(0x29c)](_0x1785b0(0x207)),_0x1dd402['classList']['add']('hidden');};_0x2970cd[_0x57a032(0x133)]('click',function(_0x9062cd){const _0x3c4130=_0x57a032,_0x240351=_0x9062cd[_0x3c4130(0x25a)][_0x3c4130(0x2fd)](_0x3c4130(0x221));if(!_0x240351)return;const _0x1bb5e9=_0x240351['closest'](_0x3c4130(0x1d4));if(_0x1bb5e9&&document['getElementById']('data-modal')[_0x3c4130(0x1c2)][_0x3c4130(0x1ce)]!==_0x3c4130(0x25f)){if(_0x1bb5e9[_0x3c4130(0x1cc)][_0x3c4130(0x262)]('sortable-ghost')||_0x1bb5e9[_0x3c4130(0x1cc)][_0x3c4130(0x262)](_0x3c4130(0x167)))return;if(_0x1bb5e9[_0x3c4130(0x1cc)][_0x3c4130(0x262)](_0x3c4130(0x207)))_0x563a03();else{const _0x3c2a5c=document[_0x3c4130(0x2be)]('.chart-card.is-zoomed');_0x3c2a5c&&_0x3c2a5c[_0x3c4130(0x1cc)][_0x3c4130(0x29c)](_0x3c4130(0x207)),_0x1bb5e9[_0x3c4130(0x1cc)]['add'](_0x3c4130(0x207)),_0x1dd402[_0x3c4130(0x1cc)][_0x3c4130(0x29c)]('hidden');}}}),_0x1dd402[_0x57a032(0x133)](_0x57a032(0x2a5),_0x563a03);}new Sortable(document[_0x3fd8b0(0x1a8)](_0x3fd8b0(0x2a9)),{'animation':0x96,'ghostClass':_0x3fd8b0(0x2b2)});
-    </script>
+    <script src="main.js" defer></script>
+
 </body>
+
 </html>
