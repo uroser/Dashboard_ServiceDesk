@@ -920,3 +920,101 @@ label[for="month-filter"] {
         font-size: 0.8rem;
     }
 }
+
+/* --- INICIO: ESTILOS PARA CUSTOM MULTI-SELECT DROPDOWN --- */
+
+.custom-multiselect {
+    position: relative;
+}
+
+.select-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 0.5rem;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.select-box:hover, .select-box.active {
+    border-color: #4F46E5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.select-box .select-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.select-box .arrow-icon {
+    transition: transform 0.3s ease;
+}
+
+.select-box.active .arrow-icon {
+    transform: rotate(180deg);
+}
+
+.options-container {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #D1D5DB;
+    border-top: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 50;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.options-container.hidden {
+    display: none;
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.option:hover {
+    background-color: #F3F4F6;
+}
+
+.option input[type="checkbox"] {
+    margin-right: 0.5rem;
+    accent-color: #4F46E5;
+}
+
+/* --- MODO OSCURO PARA CUSTOM MULTI-SELECT --- */
+.dark .select-box {
+    background-color: #334155;
+    border-color: #475569;
+    color: #F1F5F9;
+}
+
+.dark .select-box:hover, .dark .select-box.active {
+    border-color: #818CF8;
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.25);
+}
+
+.dark .options-container {
+    background-color: #334155;
+    border-color: #475569;
+}
+
+.dark .option:hover {
+    background-color: #475569;
+}
+
+/* --- FIN: ESTILOS PARA CUSTOM MULTI-SELECT --- */
