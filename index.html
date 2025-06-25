@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard: Análisis de Tickets Service Desk (Corregido)</title>
+    <title>Service Desk BI</title>
 
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -79,44 +79,60 @@
                     </svg>
                 </div>
 
-                <div id="filter-grid-content" class="filter-grid collapsible-content mt-4">
-                    <div>
-                        <label for="month-filter" class="filter-label">Mes</label>
-                        <select id="month-filter" class="filter-select" multiple></select>
-                    </div>
-                    <div>
-                        <label for="assignee-filter" class="filter-label">Asignado</label>
-                        <select id="assignee-filter" class="filter-select" multiple></select>
-                    </div>
-                    <div>
-                        <label for="client-filter" class="filter-label">Cliente</label>
-                        <select id="client-filter" class="filter-select" multiple></select>
-                    </div>
-                    <div>
-                        <label for="priority-filter" class="filter-label">Prioridad</label>
-                        <select id="priority-filter" class="filter-select" multiple></select>
-                    </div>
-                    <div>
-                        <label for="status-filter" class="filter-label">Estado</label>
-                        <select id="status-filter" class="filter-select" multiple></select>
-                    </div>
-                    <div>
-                        <label for="request-type-filter" class="filter-label">Tipo de Solicitud</label>
-                        <select id="request-type-filter" class="filter-select" multiple></select>
-                    </div>
-                    <div>
-                        <label for="client-type-filter" class="filter-label">Tipo de Cliente</label>
-                        <select id="client-type-filter" class="filter-select" multiple></select>
-                    </div>
-                    <div>
-                        <label for="diagnosis-filter" class="filter-label">Diagnóstico</label>
-                        <select id="diagnosis-filter" class="filter-select" multiple></select>
-                    </div>
-                    <div>
-                        <label for="problem-type-filter" class="filter-label">Tipo de Problema</label>
-                        <select id="problem-type-filter" class="filter-select" multiple></select>
-                    </div>
-                </div>
+<div id="filter-grid-content" class="collapsible-content mt-6" style="max-height: 0px;">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-5">
+
+        <div>
+            <label for="month-filter" class="filter-label">Mes</label>
+            <div class="custom-multiselect" id="month-filter-container"></div>
+        </div>
+        <div>
+            <label for="sla-status-filter" class="filter-label">Estado SLA (Resolución)</label>
+            <select id="sla-status-filter" class="filter-select">
+                <option value="">Todos</option>
+                <option value="Cumplido">Cumplido</option>
+                <option value="Vencido">Vencido</option>
+                <option value="Dato Anómalo">Dato Anómalo</option>
+                <option value="Sin SLA">Sin SLA</option>
+            </select>
+        </div>
+        <div>
+            <label for="priority-filter" class="filter-label">Prioridad</label>
+            <div class="custom-multiselect" id="priority-filter-container"></div>
+        </div>
+        <div>
+            <label for="status-filter" class="filter-label">Estado</label>
+            <div class="custom-multiselect" id="status-filter-container"></div>
+        </div>
+        <div>
+            <label for="assignee-filter" class="filter-label">Asignado</label>
+            <div class="custom-multiselect" id="assignee-filter-container"></div>
+        </div>
+
+        <div>
+            <label for="client-filter" class="filter-label">Cliente</label>
+            <div class="custom-multiselect" id="client-filter-container"></div>
+        </div>
+        <div>
+            <label for="client-type-filter" class="filter-label">Tipo de Cliente</label>
+            <select id="client-type-filter" class="filter-select"></select>
+        </div>
+        <div>
+            <label for="request-type-filter" class="filter-label">Tipo de Solicitud</label>
+            <select id="request-type-filter" class="filter-select"></select>
+        </div>
+        <div>
+            <label for="diagnosis-filter" class="filter-label">Diagnóstico</label>
+            <div class="custom-multiselect" id="diagnosis-filter-container"></div>
+        </div>
+        <div>
+            <label for="problem-type-filter" class="filter-label">Tipo de Problema</label>
+            <div class="custom-multiselect" id="problem-type-filter-container"></div>
+        </div>
+
+    </div>
+</div>
+
             </div>
         </header>
 
@@ -127,7 +143,6 @@
                 </svg>
                 <h2 class="mt-4 text-2xl font-bold text-gray-900">Bienvenido al Dashboard Interactivo de Service Desk</h2>
                 <p class="mt-2 text-md text-gray-600">Por favor, carga un archivo CSV para comenzar el análisis.</p>
-
                 <div id="loading-message" class="hidden mt-6 w-full max-w-md mx-auto">
                     <div class="flex items-center justify-center gap-3 text-blue-600 dark:text-blue-400">
                         <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -143,9 +158,7 @@
             </div>
 
             <div id="dashboard-content" class="hidden">
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-
                     <section id="ai-analysis-section">
                         <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500 h-full">
                             <h2 class="text-xl font-bold text-gray-800 mb-3 flex items-center justify-between font-montserrat cursor-pointer" onclick="toggleCollapse('ai-content', 'ai-arrow')">
@@ -226,20 +239,20 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <p class="mt-3 text-xs text-gray-500 italic">
-                                    <span class="text-base leading-relaxed">
-                                        🛠️ <strong>Los tiempos de respuesta</strong> en esta matriz son valores estándar y pueden adaptarse según los <em>acuerdos de nivel de servicio (SLA)</em> vigentes. <br><br>
-                                        ❗ <strong>Problemas técnicos:</strong> Los tickets con la opción <em>"I need help with a problem"</em> utilizan toda la matriz de prioridades (de HIGHEST a LOWEST). <br>
-                                        📦 <strong>Pedidos o cambios:</strong> Los tickets con la opción <em>"I want to place an order or a change"</em> solo aplican los tiempos definidos para la prioridad <strong>LOWEST</strong>. <br><br>
-                                        📄 Estos tiempos están definidos en los
-                                        <strong>
-                                            <a href="https://cardinalsystems.sharepoint.com/:w:/s/Legal/Ecy7PNHC2y9NqlHbiMnVZg8BsolZO4YcFbjdVd2b-ef8ig?e=EUfeGr" target="_blank" class="text-blue-600 hover:text-blue-800 underline">
-                                                Términos y Condiciones Particulares
-                                            </a>
-                                        </strong>
-                                        de Cardinal Systems.
-                                    </span>
-                                </p>
+									<p class="mt-3 text-xs text-gray-500 italic">
+										<span class="text-base leading-relaxed">
+											🛠️ <strong>Los tiempos de respuesta</strong> en esta matriz representan los <strong>plazos máximos (deadlines)</strong> y pueden adaptarse según los <em>acuerdos de nivel de servicio (SLA)</em> vigentes. <br><br>
+											❗ <strong>Problemas técnicos:</strong> Los tickets con la opción <em>"I need help with a problem"</em> utilizan toda la matriz de prioridades (de HIGHEST a LOWEST). <br>
+											📦 <strong>Pedidos o cambios:</strong> Los tickets con la opción <em>"I want to place an order or a change"</em> solo aplican los tiempos definidos para la prioridad <strong>LOWEST</strong>. <br><br>
+											📄 Estos tiempos están definidos en los
+											<strong>
+												<a href="https://cardinalsystems.sharepoint.com/:w:/s/Legal/Ecy7PNHC2y9NqlHbiMnVZg8BsolZO4YcFbjdVd2b-ef8ig?e=EUfeGr" target="_blank" class="text-blue-600 hover:text-blue-800 underline">
+													Términos y Condiciones Particulares
+												</a>
+											</strong>
+											de Cardinal Systems.
+										</span>
+									</p>
                             </div>
                         </div>
                     </section>
@@ -250,11 +263,9 @@
                         const content = document.getElementById(contentId);
                         const arrow = document.getElementById(arrowId);
                         if (content.style.maxHeight && content.style.maxHeight !== '0px') {
-                            // Colapsar
                             content.style.maxHeight = '0px';
                             arrow.style.transform = 'rotate(0deg)';
                         } else {
-                            // Expandir
                             content.style.maxHeight = content.scrollHeight + 'px';
                             arrow.style.transform = 'rotate(180deg)';
                         }
@@ -519,30 +530,7 @@
                             <div id="heatmap-wrapper" class="h-full">
                                 <div id="heatmap-corner"></div>
                                 <div id="heatmap-hour-labels">
-                                    <div class="heatmap-hour-label">0</div>
-                                    <div class="heatmap-hour-label">1</div>
-                                    <div class="heatmap-hour-label">2</div>
-                                    <div class="heatmap-hour-label">3</div>
-                                    <div class="heatmap-hour-label">4</div>
-                                    <div class="heatmap-hour-label">5</div>
-                                    <div class="heatmap-hour-label">6</div>
-                                    <div class="heatmap-hour-label">7</div>
-                                    <div class="heatmap-hour-label">8</div>
-                                    <div class="heatmap-hour-label">9</div>
-                                    <div class="heatmap-hour-label">10</div>
-                                    <div class="heatmap-hour-label">11</div>
-                                    <div class="heatmap-hour-label">12</div>
-                                    <div class="heatmap-hour-label">13</div>
-                                    <div class="heatmap-hour-label">14</div>
-                                    <div class="heatmap-hour-label">15</div>
-                                    <div class="heatmap-hour-label">16</div>
-                                    <div class="heatmap-hour-label">17</div>
-                                    <div class="heatmap-hour-label">18</div>
-                                    <div class="heatmap-hour-label">19</div>
-                                    <div class="heatmap-hour-label">20</div>
-                                    <div class="heatmap-hour-label">21</div>
-                                    <div class="heatmap-hour-label">22</div>
-                                    <div class="heatmap-hour-label">23</div>
+                                    <div class="heatmap-hour-label">0</div><div class="heatmap-hour-label">1</div><div class="heatmap-hour-label">2</div><div class="heatmap-hour-label">3</div><div class="heatmap-hour-label">4</div><div class="heatmap-hour-label">5</div><div class="heatmap-hour-label">6</div><div class="heatmap-hour-label">7</div><div class="heatmap-hour-label">8</div><div class="heatmap-hour-label">9</div><div class="heatmap-hour-label">10</div><div class="heatmap-hour-label">11</div><div class="heatmap-hour-label">12</div><div class="heatmap-hour-label">13</div><div class="heatmap-hour-label">14</div><div class="heatmap-hour-label">15</div><div class="heatmap-hour-label">16</div><div class="heatmap-hour-label">17</div><div class="heatmap-hour-label">18</div><div class="heatmap-hour-label">19</div><div class="heatmap-hour-label">20</div><div class="heatmap-hour-label">21</div><div class="heatmap-hour-label">22</div><div class="heatmap-hour-label">23</div>
                                 </div>
                                 <div id="heatmap-day-labels"></div>
                                 <div id="heatmap-grid"></div>
@@ -620,30 +608,44 @@
                 </section>
             </div>
         </main>
-    </div>
-
-    <div id="data-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header" id="modal-header">
-                <h2 id="modal-title" class="modal-title">Datos de Origen</h2>
-                <span id="close-modal-button" class="close-button">&times;</span>
-            </div>
-            <div id="modal-body-container" class="modal-body-container">
-                <div class="overflow-x-auto">
-                    <table id="modal-table" class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50" id="modal-table-head">
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200" id="modal-table-body">
-                        </tbody>
-                    </table>
+		
+		<footer class="mt-12 py-8 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-500 dark:text-gray-400">
+            <p>
+                <strong>Service Desk BI v2.0</strong> &copy; <span id="footer-year"></span> Todos los derechos reservados.
+            </p>
+            <p class="mt-2">
+                Desarrollado con ♥ por Ulises Roser
+            </p>
+            <p class="text-xs mt-4">
+                Potenciado por ApexCharts & Chart.js
+            </p>
+        </footer>
+        
+        <div id="data-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header" id="modal-header">
+                    <h2 id="modal-title" class="modal-title">Datos de Origen</h2>
+                    <span id="close-modal-button" class="close-button">&times;</span>
                 </div>
+                <div id="modal-body-container" class="modal-body-container">
+                    </div>
             </div>
         </div>
+
     </div>
 
     <div id="zoom-overlay" class="hidden"></div>
 
     <script src="main.js" defer></script>
+	
+	<script>
+        document.addEventListener('DOMContentLoaded', () => {
+			const yearSpan = document.getElementById('footer-year');
+			if(yearSpan) {
+				yearSpan.textContent = new Date().getFullYear();
+			}
+		});
+    </script>
 
 </body>
 
