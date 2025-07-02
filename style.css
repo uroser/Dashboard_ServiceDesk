@@ -500,6 +500,39 @@ label[for="month-filter"] {
 }
 
 /* --- Estilos de Modal --- */
+
+/* --- INICIO: ESTILOS PARA BOTÓN DE EXPORTACIÓN --- */
+
+.btn-export {
+    display: flex;
+    align-items: center;
+    background-color: #16A34A; /* Verde para la exportación */
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-right: 1.5rem; /* Espacio entre el botón de exportar y el de cerrar */
+}
+
+.btn-export:hover {
+    background-color: #15803D; /* Verde más oscuro al pasar el ratón */
+}
+
+.dark .btn-export {
+    background-color: #22C55E;
+}
+
+.dark .btn-export:hover {
+    background-color: #16A34A;
+}
+
+/* --- FIN: ESTILOS PARA BOTÓN DE EXPORTACIÓN --- */
+
+
 .modal {
     display: none;
     position: fixed;
@@ -921,7 +954,218 @@ label[for="month-filter"] {
     }
 }
 
-/* --- INICIO: ESTILOS PARA CUSTOM MULTI-SELECT DROPDOWN --- */
+/* --- INICIO: ESTILOS PARA BÚSQUEDA EN DROPDOWN --- */
+.options-container .search-container {
+    padding: 0.5rem;
+    border-bottom: 1px solid #E5E7EB;
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 10;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input:focus {
+    border-color: #4F46E5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.options-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* --- MODO OSCURO PARA LA BÚSQUEDA --- */
+.dark .options-container .search-container {
+    background-color: #334155;
+    border-bottom-color: #475569;
+}
+
+.dark .search-input {
+    background-color: #1E293B;
+    border-color: #475569;
+    color: #F1F5F9;
+}
+
+.dark .search-input::placeholder {
+    color: #94A3B8;
+}
+
+.dark .search-input:focus {
+    border-color: #818CF8;
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.25);
+}
+/* --- FIN: ESTILOS PARA BÚSQUEDA EN DROPDOWN --- */
+
+/* --- INICIO: ESTILOS PARA CUSTOM MULTI-SELECT  --- */
+
+.custom-multiselect {
+    position: relative;
+}
+
+.select-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 0.5rem;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.select-box:hover, .select-box.active {
+    border-color: #4F46E5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.select-box .select-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.select-box .arrow-icon {
+    transition: transform 0.3s ease;
+}
+
+.select-box.active .arrow-icon {
+    transform: rotate(180deg);
+}
+
+.options-container {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #D1D5DB;
+    border-top: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+    z-index: 50;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    display: flex; /* Añadido para mejor estructura */
+    flex-direction: column; /* Añadido para mejor estructura */
+    /* Se quita max-height y overflow-y de aquí */
+}
+
+.options-container.hidden {
+    display: none;
+}
+
+.options-container .search-container {
+    padding: 0.5rem;
+    border-bottom: 1px solid #E5E7EB;
+    /* No necesita ser 'sticky' si el contenedor no tiene scroll */
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input:focus {
+    border-color: #4F46E5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+/* Esta es la clase que AHORA controla el scroll */
+.options-list {
+    max-height: 200px; /* Altura máxima de la lista */
+    overflow-y: auto;  /* Scroll solo para la lista */
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.option:hover {
+    background-color: #F3F4F6;
+}
+
+.option input[type="checkbox"] {
+    margin-right: 0.5rem;
+    accent-color: #4F46E5;
+}
+
+/* --- MODO OSCURO PARA CUSTOM MULTI-SELECT --- */
+.dark .select-box {
+    background-color: #334155;
+    border-color: #475569;
+    color: #F1F5F9;
+}
+
+.dark .select-box:hover, .dark .select-box.active {
+    border-color: #818CF8;
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.25);
+}
+
+.dark .options-container {
+    background-color: #334155;
+    border-color: #475569;
+}
+
+.dark .options-container .search-container {
+    background-color: #334155;
+    border-bottom-color: #475569;
+}
+
+.dark .search-input {
+    background-color: #1E293B;
+    border-color: #475569;
+    color: #F1F5F9;
+}
+
+.dark .search-input::placeholder {
+    color: #94A3B8;
+}
+
+.dark .search-input:focus {
+    border-color: #818CF8;
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.25);
+}
+
+.dark .option:hover {
+    background-color: #475569;
+}
+
+/* --- FIN: ESTILOS PARA CUSTOM MULTI-SELECT --- */
+
+/* --- MODIFICACIÓN A ESTILO EXISTENTE --- */
+.options-container {
+    /* Quitamos el overflow y max-height de aquí para pasarlo al .options-list */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #D1D5DB;
+    border-top: none;
+    border-radius: 0 0 0.5rem 0.5rem;
+    z-index: 50;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
 
 .custom-multiselect {
     position: relative;
@@ -1018,3 +1262,73 @@ label[for="month-filter"] {
 }
 
 /* --- FIN: ESTILOS PARA CUSTOM MULTI-SELECT --- */
+
+
+/* --- INICIO: NUEVOS ESTILOS PARA ACCIONES DE GRÁFICOS --- */
+
+/* Contenedor para los iconos de acción (zoom, cambio de tipo) */
+.chart-actions {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    z-index: 20; /* Asegura que esté sobre el contenido del gráfico */
+}
+
+/* Estilo base para cada icono de acción */
+.action-icon {
+    padding: 0.5rem;
+    cursor: pointer;
+    color: #9CA3AF;
+    border-radius: 9999px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    line-height: 0; /* Asegura que el SVG se alinee bien */
+}
+
+.action-icon:hover {
+    background-color: #F3F4F6;
+    color: #4F46E5;
+}
+
+/* Ajustes para modo oscuro */
+.dark .action-icon {
+    color: #6B7280; /* Un poco más visible en fondo oscuro */
+}
+
+.dark .action-icon:hover {
+    background-color: #374151;
+    color: #818CF8;
+}
+
+/* --- FIN: NUEVOS ESTILOS PARA ACCIONES DE GRÁFICOS --- */
+
+
+/* --- MODIFICACIÓN A ESTILO EXISTENTE --- */
+.chart-card h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1E293B;
+    margin-bottom: 1rem;
+    /* Se ajusta el padding para dejar espacio a AMBOS iconos a la derecha */
+    padding-right: 5rem; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* --- MODIFICACIÓN A ESTILO EXISTENTE --- */
+/* Renombramos .zoom-icon-container a .action-icon para unificar y eliminamos su posicionamiento */
+.zoom-icon-container {
+    /* Las propiedades de posicionamiento se mueven a .chart-actions */
+    /* position: absolute; top: 1rem; right: 1rem; */
+    padding: 0.5rem;
+    cursor: zoom-in;
+    color: #9CA3AF;
+    border-radius: 9999px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
