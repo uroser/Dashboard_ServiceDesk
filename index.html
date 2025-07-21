@@ -63,14 +63,25 @@
                     </label>
                     <input type="file" id="csv-file-input" class="hidden" accept=".csv">
 
-                    <p class="text-xs text-gray-500 mt-2 flex items-center">
-                        <svg class="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z" />
-                        </svg>
-                        <a href="https://cardinalecm.atlassian.net/issues/?filter=10305&atlOrigin=eyJpIjoiYmU3MGM0NDM0NWI0NDdkOTgyODRkMDQwN2Y0NDI1OWMiLCJwIjoiaiJ9" class="text-blue-600 hover:text-blue-800 ml-1 underline" target="_blank">
-                            Hacé clic acá para obtenerlo
-                        </a>
-                    </p>
+					<div class="mt-3 text-xs text-gray-600 space-y-1">
+					  <div class="flex items-center space-x-1">
+						<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M13 16h-1v-4h-1m1-4h.01M12 20a8 8 0 100-16 8 8 0 000 16z"/>
+						</svg>
+						<a href="https://cardinalecm.atlassian.net/issues/?filter=10305&atlOrigin=eyJpIjoiYmU3MGM0NDM0NWI0NDdkOTgyODRkMDQwN2Y0NDI1OWMiLCJwIjoiaiJ9"
+						   target="_blank"
+						   class="text-blue-600 hover:text-blue-800 underline">
+						  Hacé clic acá para obtenerlo
+						</a>
+					  </div>
+
+					  <a href="https://www.magichow.co/embed/c91449ac-635b-4b87-927c-55dcd7315202?showTitle=true"
+						 target="_blank" rel="noopener noreferrer"
+						 class="flex items-center space-x-2 text-blue-600 hover:text-blue-800 underline">
+						<span>❓Ayuda</span>
+					  </a>
+					</div>
                 </div>
             </div>
 
@@ -138,25 +149,23 @@
         </header>
 
         <main id="dashboard-container">
-            <div id="initial-message" class="text-center">
-                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" />
-                </svg>
-                <h2 class="mt-4 text-2xl font-bold text-gray-900">Bienvenido al Dashboard Interactivo de Service Desk</h2>
-                <p class="mt-2 text-md text-gray-600">Por favor, carga un archivo CSV para comenzar el análisis.</p>
-                <div id="loading-message" class="hidden mt-6 w-full max-w-md mx-auto">
-                    <div class="flex items-center justify-center gap-3 text-blue-600 dark:text-blue-400">
-                        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <p id="loading-text" class="font-semibold">Iniciando proceso...</p>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-3">
-                        <div id="progress-bar" class="h-2.5 rounded-full" style="width: 0%"></div>
-                    </div>
-                </div>
-            </div>
+			<div id="initial-message" class="text-center">
+				<h2 class="mt-4 text-2xl font-bold text-gray-900">Bienvenido al Dashboard Interactivo de Service Desk</h2>
+				<p class="mt-2 text-md text-gray-600">Por favor, carga un archivo CSV para comenzar el análisis.</p>
+				
+				<div id="loading-container" class="hidden mt-6 w-full max-w-md mx-auto">
+					<div class="flex items-center justify-center gap-3 text-blue-600 dark:text-blue-400">
+						<svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+							<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+							<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+						</svg>
+						<p id="loading-text" class="font-semibold">Iniciando proceso...</p>
+					</div>
+					<div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mt-3">
+						<div id="progress-bar" class="h-2.5 rounded-full" style="width: 0%"></div>
+					</div>
+				</div>
+			</div>
 
             <div id="dashboard-content" class="hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -577,7 +586,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 mr-2 text-amber-500">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9m1.5 1.5L7.5 7.5M4.5 19.5v-4.5m0 4.5h4.5m-4.5 0L9 15m1.5 1.5L7.5 18M19.5 4.5v4.5m0-4.5h-4.5m4.5 0L15 9m1.5 1.5L19.5 7.5M19.5 19.5v-4.5m0 4.5h-4.5m4.5 0L15 15m1.5 1.5L19.5 18" />
                             </svg>
-                            Tendencia de Creación de Tickets
+                            Comparativa Mensual de Creación de Tickets
                         </h3>
                         <div class="chart-actions">
                             <div class="action-icon zoom-icon-container" title="Ampliar gráfico">
